@@ -1,17 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { supabase } from '@/lib/supabase'
 import { sendTaskNotification } from '@/lib/telegram'
 import { NextRequest, NextResponse } from 'next/server'
 
-export async function POST(
-  _req: NextRequest,
-  context: { params: Promise<{ id: string }> | { id: string } }
-) {
-  const params = await context.params
-  const id = typeof params === 'object' && 'id' in params ? params.id : ''
-
-  if (!id) {
-    return NextResponse.json({ error: 'Keine ID' }, { status: 400 })
-  }
+export async function POST(_req: NextRequest, context: any) {
+  const { id } = await context.params
 
   const { data: task, error } = await supabase
     .from('tasks')
