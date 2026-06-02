@@ -1,12 +1,13 @@
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
+import { RefreshButton, SendButton } from './components/TaskActions'
 
 const statusConfig: Record<string, { label: string; className: string }> = {
-  pending:  { label: 'Ausstehend',   className: 'bg-gray-100 text-gray-600' },
-  sent:     { label: 'Gesendet',     className: 'bg-blue-100 text-blue-700' },
-  accepted: { label: 'Angenommen',   className: 'bg-green-100 text-green-700' },
-  declined: { label: 'Abgelehnt',    className: 'bg-red-100 text-red-700' },
-  done:     { label: 'Erledigt',     className: 'bg-emerald-100 text-emerald-700' },
+  pending:  { label: 'Ausstehend',  className: 'bg-gray-100 text-gray-600' },
+  sent:     { label: 'Gesendet',    className: 'bg-blue-100 text-blue-700' },
+  accepted: { label: 'Angenommen',  className: 'bg-green-100 text-green-700' },
+  declined: { label: 'Abgelehnt',   className: 'bg-red-100 text-red-700' },
+  done:     { label: 'Erledigt',    className: 'bg-emerald-100 text-emerald-700' },
 }
 
 function fmt(dt: string) {
@@ -23,10 +24,10 @@ export default async function Home() {
     .order('created_at', { ascending: false })
 
   const counts = {
-    total:    tasks?.length ?? 0,
-    pending:  tasks?.filter(t => t.status === 'pending').length ?? 0,
-    active:   tasks?.filter(t => ['sent','accepted'].includes(t.status)).length ?? 0,
-    done:     tasks?.filter(t => t.status === 'done').length ?? 0,
+    total:   tasks?.length ?? 0,
+    pending: tasks?.filter(t => t.status === 'pending').length ?? 0,
+    active:  tasks?.filter(t => ['sent', 'accepted'].includes(t.status)).length ?? 0,
+    done:    tasks?.filter(t => t.status === 'done').length ?? 0,
   }
 
   return (
@@ -65,12 +66,7 @@ export default async function Home() {
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
             <h2 className="font-semibold text-gray-900">Aufträge</h2>
-            <button
-              onClick={() => window.location.reload()}
-              className="text-sm text-gray-400 hover:text-gray-600"
-            >
-              🔄 Aktualisieren
-            </button>
+            <RefreshButton />
           </div>
 
           {!tasks || tasks.length === 0 ? (
@@ -101,7 +97,9 @@ export default async function Home() {
                       <tr key={task.id} className="hover:bg-gray-50 transition-colors">
                         <td className="px-6 py-4">
                           <p className="font-medium text-gray-900">{task.properties?.name}</p>
-                          <p className="text-xs text-gray-400 truncate max-w-[180px]">{task.properties?.address}</p>
+                          <p className="text-xs text-gray-400 truncate max-w-[180px]">
+                            {task.properties?.address}
+                          </p>
                         </td>
                         <td className="px-6 py-4 text-gray-700">{task.cleaners?.name}</td>
                         <td className="px-6 py-4 text-gray-700">{fmt(task.checkout_time)}</td>
@@ -124,27 +122,5 @@ export default async function Home() {
         </div>
       </main>
     </div>
-  )
-}
-
-// Inline client component для кнопки
-function SendButton({ taskId, status }: { taskId: string; status: string }) {
-  if (status === 'done' || status === 'cancelled') return null
-
-  const label = status === 'pending' ? '📤 Senden'
-    : status === 'declined' ? '🔄 Erneut senden'
-    : null
-
-  if (!label) return <span className="text-xs text-gray-400">—</span>
-
-  return (
-    <form action={`/api/tasks/${taskId}/send`} method="POST">
-      <button
-        type="submit"
-        className="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium px-3 py-1.5 rounded-lg transition-colors"
-      >
-        {label}
-      </button>
-    </form>
   )
 }
