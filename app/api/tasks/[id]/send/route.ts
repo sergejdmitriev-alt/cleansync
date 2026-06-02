@@ -4,11 +4,15 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(
   _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> | { id: string } }
 ) {
-  const { id } = await params
+  const params = await context.params
+  const id = typeof params === 'object' && 'id' in params ? params.id : ''
 
-  // Получаем задачу с данными объекта и уборщика
+  if (!id) {
+    return NextResponse.json({ error: 'Keine ID' }, { status: 400 })
+  }
+
   const { data: task, error } = await supabase
     .from('tasks')
     .select('*, properties(*), cleaners(*)')
@@ -20,10 +24,8 @@ export async function POST(
   }
 
   try {
-    // Отправляем сообщение в Telegram
     const messageId = await sendTaskNotification(task)
 
-    // Обновляем статус и сохраняем ID сообщения
     await supabase
       .from('tasks')
       .update({
