@@ -4,9 +4,9 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = params
+  const { id } = await params
 
   // Получаем задачу с данными объекта и уборщика
   const { data: task, error } = await supabase
