@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase'
 import { removeKeyboard, sendMessage } from '@/lib/telegram'
 import { NextRequest, NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
 export async function POST(req: NextRequest) {
   const supabase = createClient()
   // Верификация secret token

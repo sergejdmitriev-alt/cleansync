@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase'
 import { NextRequest, NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
 // GET /api/tasks — список задач с JOIN
 export async function GET() {
   const supabase = createClient()
