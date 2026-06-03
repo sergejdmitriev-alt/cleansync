@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase'
 
 type Property = { id: string; name: string }
 type Cleaner  = { id: string; name: string }
@@ -30,6 +30,7 @@ export default function NewTaskPage() {
   }
 
   useEffect(() => {
+    const supabase = createClient()
     supabase.from('properties').select('id, name').order('name')
       .then(({ data }) => setProperties(data ?? []))
     supabase.from('cleaners').select('id, name').order('name')

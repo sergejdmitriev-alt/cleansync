@@ -1,8 +1,9 @@
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase'
 import { removeKeyboard, sendMessage } from '@/lib/telegram'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(req: NextRequest) {
+  const supabase = createClient()
   // Верификация secret token
   const secret = req.headers.get('x-telegram-bot-api-secret-token')
   if (secret !== process.env.TELEGRAM_WEBHOOK_SECRET) {

@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase'
 import Link from 'next/link'
 import { RefreshButton, SendButton } from './components/TaskActions'
 
@@ -18,6 +18,7 @@ function fmt(dt: string) {
 }
 
 export default async function Home() {
+  const supabase = createClient()
   const { data: tasks } = await supabase
     .from('tasks')
     .select('*, properties(*), cleaners(*)')
