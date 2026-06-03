@@ -1,11 +1,11 @@
-import { createClient } from '@/lib/supabase'
+import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 
 // GET /api/tasks — список задач с JOIN
 export async function GET() {
-  const supabase = createClient()
+  const supabase = await createServerSupabaseClient()
   const { data, error } = await supabase
     .from('tasks')
     .select('*, properties(*), cleaners(*)')
@@ -17,7 +17,7 @@ export async function GET() {
 
 // POST /api/tasks — создать задачу
 export async function POST(req: NextRequest) {
-  const supabase = createClient()
+  const supabase = await createServerSupabaseClient()
   const body = await req.json()
   const { property_id, cleaner_id, checkout_time, checkin_time, notes } = body
 

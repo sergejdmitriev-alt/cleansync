@@ -1,6 +1,6 @@
-import { createClient } from '@/lib/supabase'
+import { createServerSupabaseClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { RefreshButton, SendButton } from './components/TaskActions'
+import { RefreshButton, SendButton, LogoutButton } from './components/TaskActions'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,7 +22,7 @@ function fmt(dt: string) {
 export default async function Home() {
   let tasks: any[] = []
   try {
-    const supabase = createClient()
+    const supabase = await createServerSupabaseClient()
     const { data, error } = await supabase
       .from('tasks')
       .select('*, properties(*), cleaners(*)')
@@ -48,12 +48,15 @@ export default async function Home() {
           <span className="text-2xl">🧹</span>
           <span className="text-xl font-bold text-gray-900">CleanSync</span>
         </div>
-        <Link
-          href="/tasks/new"
-          className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
-        >
-          + Neuer Auftrag
-        </Link>
+        <div className="flex items-center gap-3">
+          <LogoutButton />
+          <Link
+            href="/tasks/new"
+            className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+          >
+            + Neuer Auftrag
+          </Link>
+        </div>
       </header>
 
       <main className="max-w-6xl mx-auto px-6 py-8">
