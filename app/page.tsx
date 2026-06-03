@@ -20,11 +20,18 @@ function fmt(dt: string) {
 }
 
 export default async function Home() {
-  const supabase = createClient()
-  const { data: tasks } = await supabase
-    .from('tasks')
-    .select('*, properties(*), cleaners(*)')
-    .order('created_at', { ascending: false })
+  let tasks: any[] = []
+  try {
+    const supabase = createClient()
+    const { data, error } = await supabase
+      .from('tasks')
+      .select('*, properties(*), cleaners(*)')
+      .order('created_at', { ascending: false })
+    if (error) console.error('Supabase error:', error)
+    tasks = data ?? []
+  } catch (e) {
+    console.error('createClient failed:', e)
+  }
 
   const counts = {
     total:   tasks?.length ?? 0,
