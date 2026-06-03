@@ -1,30 +1,35 @@
-// @ts-nocheck
-import { supabase } from '@/lib/supabase'
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase'
 import { sendTaskNotification } from '@/lib/telegram'
-import { NextResponse } from 'next/server'
 
-export async function POST(_req, context) {
-  const { id } = await context.params
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params
+
+  const supabase = createClient()
 
   const { data: task, error } = await supabase
     .from('tasks')
-    .select('*, properties(*), cleaners(*)')
+    .select('*, cleaners(*), properties(*)')
     .eq('id', id)
     .single()
 
   if (error || !task) {
-    return NextResponse.json({ error: 'Auftrag nicht gefunden' }, { status: 404 })
+    return NextResponse.json({ error: 'Task not found' }, { status: 404 })
   }
 
-  try {
-    const messageId = await sendTaskNotification(task)
-    await supabase
-      .from('tasks')
-      .update({ status: 'sent', telegram_message_id: messageId, sent_at: new Date().toISOString() })
-      .eq('id', id)
-    return NextResponse.json({ success: true, messageId })
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Fehler'
-    return NextResponse.json({ error: message }, { status: 500 })
+  await sendTaskNotification(task)
+
+  const { error: updateError } = await supabase
+    .from('tasks')
+    .update({ sent_at: new Date().toISOString() })
+    .eq('id', id)
+
+  if (updateError) {
+    return NextResponse.json({ error: 'Failed to update task' }, { status: 500 })
   }
+
+  return NextResponse.json({ success: true })
 }
