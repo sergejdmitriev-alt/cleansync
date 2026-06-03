@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { createServiceSupabaseClient } from '@/lib/supabase/service'
 import { sendTaskNotification } from '@/lib/telegram'
 
 export const dynamic = 'force-dynamic'
@@ -10,7 +10,7 @@ export async function POST(
 ) {
   const { id } = await params
 
-  const supabase = await createServerSupabaseClient()
+  const supabase = createServiceSupabaseClient()
 
   const { data: task, error } = await supabase
     .from('tasks')
