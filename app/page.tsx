@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase'
 import Link from 'next/link'
 import { RefreshButton, SendButton } from './components/TaskActions'
 
+export const dynamic = 'force-dynamic'
+
 const statusConfig: Record<string, { label: string; className: string }> = {
   pending:  { label: 'Ausstehend',  className: 'bg-gray-100 text-gray-600' },
   sent:     { label: 'Gesendet',    className: 'bg-blue-100 text-blue-700' },
