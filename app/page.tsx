@@ -1,3 +1,4 @@
+import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { createServiceSupabaseClient } from '@/lib/supabase/service'
 import Link from 'next/link'
 import { RefreshButton, SendButton, LogoutButton } from './components/TaskActions'
@@ -22,13 +23,19 @@ function fmt(dt: string) {
 export default async function Home() {
   let tasks: any[] = []
   try {
-    const supabase = createServiceSupabaseClient()
-    const { data, error } = await supabase
-      .from('tasks')
-      .select('*, properties(*), cleaners(*)')
-      .order('created_at', { ascending: false })
-    if (error) console.error('Supabase error:', error)
-    tasks = data ?? []
+    const serverSupabase = await createServerSupabaseClient()
+    const { data: { user } } = await serverSupabase.auth.getUser()
+
+    if (user) {
+      const supabase = createServiceSupabaseClient()
+      const { data, error } = await supabase
+        .from('tasks')
+        .select('*, properties(*), cleaners(*)')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+      if (error) console.error('Supabase error:', error)
+      tasks = data ?? []
+    }
   } catch (e) {
     console.error('createClient failed:', e)
   }

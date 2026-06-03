@@ -72,4 +72,14 @@ export async function sendMessage(chatId: string, text: string): Promise<void> {
   await bot.sendMessage(chatId, text)
 }
 
+export async function sendErledigtButton(chatId: string, taskId: string): Promise<void> {
+  await bot.sendMessage(chatId, '🧹 Reinigung gestartet. Bitte bestätige wenn fertig:', {
+    reply_markup: {
+      inline_keyboard: [[
+        { text: '✅ Erledigt', callback_data: `done_${taskId}` },
+      ]],
+    },
+  })
+}
+
 export { bot }
