@@ -1,4 +1,4 @@
-import { SendButton } from './TaskActions'
+import { SendButton, DeleteButton } from './TaskActions'
 
 const statusConfig: Record<string, { label: string; className: string }> = {
   pending:  { label: 'Ausstehend',  className: 'bg-gray-100 text-gray-600' },
@@ -15,11 +15,7 @@ function fmt(dt: string) {
   })
 }
 
-interface Props {
-  task: any
-}
-
-export default function TaskCard({ task }: Props) {
+export default function TaskCard({ task }: { task: any }) {
   const s = statusConfig[task.status] ?? statusConfig.pending
 
   return (
@@ -47,7 +43,10 @@ export default function TaskCard({ task }: Props) {
           <p className="font-medium mt-0.5">{fmt(task.checkin_time)}</p>
         </div>
       </div>
-      <SendButton taskId={task.id} status={task.status} />
+      <div className="flex items-center gap-2">
+        <SendButton taskId={task.id} status={task.status} />
+        <DeleteButton taskId={task.id} />
+      </div>
     </div>
   )
 }

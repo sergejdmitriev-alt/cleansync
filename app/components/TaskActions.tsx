@@ -15,7 +15,7 @@ export function SendButton({ taskId, status }: { taskId: string; status: string 
   if (status === 'done' || status === 'cancelled') return null
 
   const label =
-    status === 'pending' ? '📤 Senden' :
+    status === 'pending'  ? '📤 Senden' :
     status === 'declined' ? '🔄 Erneut senden' : null
 
   if (!label) return <span className="text-xs text-gray-400">—</span>
@@ -35,19 +35,35 @@ export function SendButton({ taskId, status }: { taskId: string; status: string 
   )
 }
 
+export function DeleteButton({ taskId }: { taskId: string }) {
+  const handleDelete = async () => {
+    if (!confirm('Auftrag wirklich löschen?')) return
+    await fetch(`/api/tasks/${taskId}`, { method: 'DELETE' })
+    window.location.reload()
+  }
+
+  return (
+    <button
+      onClick={handleDelete}
+      className="text-xs text-red-400 hover:text-red-600 transition-colors px-2 py-1.5"
+      title="Löschen"
+    >
+      🗑
+    </button>
+  )
+}
+
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
 export function LogoutButton() {
   const router = useRouter()
-
   async function handleLogout() {
     const supabase = createClient()
     await supabase.auth.signOut()
     router.push('/login')
     router.refresh()
   }
-
   return (
     <button
       onClick={handleLogout}
