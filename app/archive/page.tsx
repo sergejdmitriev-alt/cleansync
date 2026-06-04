@@ -41,8 +41,8 @@ export default async function ArchivePage() {
         ) : (
           <div className="space-y-4">
             {tasks.map((task) => {
-              const property = task.properties as { name: string; address: string } | null
-              const cleaner  = task.cleaners  as { name: string } | null
+              const property = (Array.isArray(task.properties) ? task.properties[0] : task.properties) as { name: string; address: string } | null
+              const cleaner  = (Array.isArray(task.cleaners)   ? task.cleaners[0]   : task.cleaners)   as { name: string } | null
 
               return (
                 <div
