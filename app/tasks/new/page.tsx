@@ -10,18 +10,15 @@ type Cleaner  = { id: string; name: string }
 export default function NewTaskPage() {
   const router = useRouter()
 
-  const [properties, setProperties]   = useState<Property[]>([])
-  const [cleaners, setCleaners]       = useState<Cleaner[]>([])
-  const [loading, setLoading]         = useState(false)
-  const [error, setError]             = useState('')
+  const [properties, setProperties]     = useState<Property[]>([])
+  const [cleaners, setCleaners]         = useState<Cleaner[]>([])
+  const [loading, setLoading]           = useState(false)
+  const [error, setError]               = useState('')
   const [sendToAgency, setSendToAgency] = useState(false)
 
   const [form, setForm] = useState({
-    property_id:   '',
-    cleaner_id:    '',
-    checkout_time: '',
-    checkin_time:  '',
-    notes:         '',
+    property_id: '', cleaner_id: '',
+    checkout_time: '', checkin_time: '', notes: '',
   })
 
   function set(field: string, value: string) {
@@ -36,7 +33,6 @@ export default function NewTaskPage() {
 
   async function handleSubmit(e: React.MouseEvent, sendNow: boolean) {
     e.preventDefault()
-
     if (!form.property_id || !form.checkout_time || !form.checkin_time) {
       setError('Bitte alle Pflichtfelder ausfüllen.')
       return
@@ -49,181 +45,200 @@ export default function NewTaskPage() {
       setError('Anreise muss nach der Abreise liegen.')
       return
     }
-
     setLoading(true)
-
     const res = await fetch('/api/tasks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         ...form,
-        cleaner_id:      sendToAgency ? null : form.cleaner_id,
-        send_to_agency:  sendToAgency,
+        cleaner_id:     sendToAgency ? null : form.cleaner_id,
+        send_to_agency: sendToAgency,
       }),
     })
-
     const task = await res.json()
     if (!res.ok) { setError(task.error); setLoading(false); return }
-
     if (sendNow) {
       await fetch(`/api/tasks/${task.id}/send`, { method: 'POST' })
     }
-
     router.push('/')
     router.refresh()
   }
 
+  const labelStyle: React.CSSProperties = {
+    display: 'block', fontSize: '13px',
+    fontWeight: '500', color: 'var(--cs-text-2)',
+    marginBottom: '6px',
+  }
+  const req = <span style={{ color: 'var(--cs-danger)' }}>*</span>
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4 flex items-center gap-4">
-        <Link href="/" className="text-gray-400 hover:text-gray-600 text-sm">
+    <div style={{ minHeight: '100vh', background: 'var(--cs-bg)' }}>
+
+      {/* Header */}
+      <header style={{
+        background: 'var(--cs-surface)',
+        borderBottom: '1px solid var(--cs-border)',
+        padding: '0 20px', height: '56px',
+        display: 'flex', alignItems: 'center', gap: '16px',
+        position: 'sticky', top: 0, zIndex: 50,
+      }}>
+        <Link href="/" style={{ fontSize: '13px', color: 'var(--cs-text-3)', textDecoration: 'none' }}>
           ← Zurück
         </Link>
-        <div className="flex items-center gap-2">
-          <span className="text-2xl">🧹</span>
-          <span className="text-xl font-bold text-gray-900">CleanSync</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span>🧹</span>
+          <span style={{ fontWeight: '600', fontSize: '15px', letterSpacing: '-0.01em' }}>CleanSync</span>
         </div>
       </header>
 
-      <main className="max-w-xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
-        <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">Neuer Auftrag</h1>
+      <main style={{ maxWidth: '560px', margin: '0 auto', padding: '32px 20px' }}>
+        <h1 style={{ fontSize: '22px', fontWeight: '600', color: 'var(--cs-text-1)', margin: '0 0 24px', letterSpacing: '-0.02em' }}>
+          Neuer Auftrag
+        </h1>
 
-        <form className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6 space-y-4">
+        <div className="cs-card" style={{ padding: '24px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Objekt <span className="text-red-500">*</span>
-            </label>
-            <select
-              value={form.property_id}
-              onChange={e => {
-                const id = e.target.value
-                set('property_id', id)
-                const selected = properties.find(p => p.id === id)
-                if (selected?.default_notes) {
-                  set('notes', selected.default_notes)
-                }
-              }}
-              className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-            >
-              <option value="">— Objekt auswählen —</option>
-              {properties.map(p => (
-                <option key={p.id} value={p.id}>{p.name}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Переключатель режима */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Reinigungskraft <span className="text-red-500">*</span>
-            </label>
-            <div className="flex rounded-lg border border-gray-300 overflow-hidden mb-3">
-              <button
-                type="button"
-                onClick={() => { setSendToAgency(false); setError('') }}
-                className={`flex-1 py-2.5 text-sm font-medium transition-colors ${
-                  !sendToAgency
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white text-gray-600 hover:bg-gray-50'
-                }`}
+            {/* Objekt */}
+            <div>
+              <label style={labelStyle}>Objekt {req}</label>
+              <select
+                value={form.property_id}
+                onChange={e => {
+                  const id = e.target.value
+                  set('property_id', id)
+                  const selected = properties.find(p => p.id === id)
+                  if (selected?.default_notes) set('notes', selected.default_notes)
+                }}
+                className="cs-input"
+                style={{ appearance: 'auto' }}
               >
-                Eigene Reinigungskraft
-              </button>
-              <button
-                type="button"
-                onClick={() => { setSendToAgency(true); setError('') }}
-                className={`flex-1 py-2.5 text-sm font-medium transition-colors ${
-                  sendToAgency
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white text-gray-600 hover:bg-gray-50'
-                }`}
-              >
-                🧹 Reinraum
-              </button>
+                <option value="">— Objekt auswählen —</option>
+                {properties.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+              </select>
             </div>
 
-            {!sendToAgency ? (
-              <select
-                value={form.cleaner_id}
-                onChange={e => set('cleaner_id', e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-              >
-                <option value="">— Reinigungskraft auswählen —</option>
-                {cleaners.map(c => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
+            {/* Reinigungskraft */}
+            <div>
+              <label style={labelStyle}>Reinigungskraft {req}</label>
+              <div style={{
+                display: 'flex', borderRadius: 'var(--cs-radius-md)',
+                border: '1px solid var(--cs-border)', overflow: 'hidden', marginBottom: '10px',
+              }}>
+                {[
+                  { val: false, label: 'Eigene Reinigungskraft' },
+                  { val: true,  label: '🧹 Reinraum' },
+                ].map(({ val, label }) => (
+                  <button
+                    key={String(val)}
+                    type="button"
+                    onClick={() => { setSendToAgency(val); setError('') }}
+                    style={{
+                      flex: 1, padding: '9px 12px', border: 'none',
+                      fontSize: '13px', fontWeight: '500', cursor: 'pointer',
+                      transition: 'all 0.12s',
+                      background: sendToAgency === val ? 'var(--cs-text-1)' : 'var(--cs-surface)',
+                      color:      sendToAgency === val ? 'var(--cs-surface)' : 'var(--cs-text-2)',
+                    }}
+                  >
+                    {label}
+                  </button>
                 ))}
-              </select>
-            ) : (
-              <div className="border border-blue-200 bg-blue-50 rounded-lg px-4 py-3 text-sm text-blue-700">
-                📋 Auftrag wird direkt an <strong>Reinraum</strong> weitergeleitet.
+              </div>
+
+              {!sendToAgency ? (
+                <select
+                  value={form.cleaner_id}
+                  onChange={e => set('cleaner_id', e.target.value)}
+                  className="cs-input"
+                  style={{ appearance: 'auto' }}
+                >
+                  <option value="">— Reinigungskraft auswählen —</option>
+                  {cleaners.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+              ) : (
+                <div style={{
+                  background: 'var(--cs-blue-bg)', border: '1px solid #BFDBFE',
+                  borderRadius: 'var(--cs-radius-md)', padding: '10px 14px',
+                  fontSize: '13px', color: 'var(--cs-blue-text)',
+                }}>
+                  📋 Auftrag wird direkt an <strong>Reinraum</strong> weitergeleitet.
+                </div>
+              )}
+            </div>
+
+            {/* Abreise */}
+            <div>
+              <label style={labelStyle}>Abreise der Gäste {req}</label>
+              <input
+                type="datetime-local"
+                value={form.checkout_time}
+                onChange={e => set('checkout_time', e.target.value)}
+                className="cs-input"
+              />
+            </div>
+
+            {/* Anreise */}
+            <div>
+              <label style={labelStyle}>Anreise der nächsten Gäste {req}</label>
+              <input
+                type="datetime-local"
+                value={form.checkin_time}
+                onChange={e => set('checkin_time', e.target.value)}
+                className="cs-input"
+              />
+            </div>
+
+            {/* Notizen */}
+            <div>
+              <label style={labelStyle}>
+                Notizen <span style={{ color: 'var(--cs-text-3)', fontWeight: '400' }}>(optional)</span>
+              </label>
+              <textarea
+                value={form.notes}
+                onChange={e => set('notes', e.target.value)}
+                rows={3}
+                placeholder="z. B. Handtücher wechseln, Kühlschrank reinigen…"
+                className="cs-input"
+                style={{ resize: 'none' }}
+              />
+            </div>
+
+            {/* Error */}
+            {error && (
+              <div style={{
+                background: 'var(--cs-danger-bg)', border: '1px solid var(--cs-danger-border)',
+                borderRadius: 'var(--cs-radius-md)', padding: '10px 14px',
+                fontSize: '13px', color: 'var(--cs-danger-text)',
+              }}>
+                {error}
               </div>
             )}
-          </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Abreise der Gäste <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="datetime-local"
-              value={form.checkout_time}
-              onChange={e => set('checkout_time', e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Anreise der nächsten Gäste <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="datetime-local"
-              value={form.checkin_time}
-              onChange={e => set('checkin_time', e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Notizen <span className="text-gray-400 font-normal">(optional)</span>
-            </label>
-            <textarea
-              value={form.notes}
-              onChange={e => set('notes', e.target.value)}
-              rows={3}
-              placeholder="z. B. Handtücher wechseln, Kühlschrank reinigen..."
-              className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-            />
-          </div>
-
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg">
-              {error}
+            {/* Buttons */}
+            <div style={{ display: 'flex', gap: '10px', paddingTop: '4px' }}>
+              <button
+                type="button"
+                disabled={loading}
+                onClick={e => handleSubmit(e, false)}
+                className="cs-btn-secondary"
+                style={{ flex: 1, justifyContent: 'center', padding: '11px' }}
+              >
+                {loading ? 'Wird gespeichert…' : 'Speichern'}
+              </button>
+              <button
+                type="button"
+                disabled={loading}
+                onClick={e => handleSubmit(e, true)}
+                className="cs-btn-primary"
+                style={{ flex: 1, justifyContent: 'center', padding: '11px', fontSize: '14px' }}
+              >
+                {loading ? 'Wird gesendet…' : '📤 Speichern & Senden'}
+              </button>
             </div>
-          )}
 
-          <div className="flex flex-col sm:flex-row gap-3 pt-2">
-            <button
-              type="submit"
-              disabled={loading}
-              onClick={(e) => handleSubmit(e, false)}
-              className="w-full sm:flex-1 border border-gray-300 hover:bg-gray-50 text-gray-700 text-sm font-medium py-3 rounded-lg transition-colors disabled:opacity-50"
-            >
-              {loading ? 'Wird gespeichert...' : 'Speichern'}
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              onClick={(e) => handleSubmit(e, true)}
-              className="w-full sm:flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-3 rounded-lg transition-colors disabled:opacity-50"
-            >
-              {loading ? 'Wird gesendet...' : '📤 Speichern & Senden'}
-            </button>
           </div>
-
-        </form>
+        </div>
       </main>
     </div>
   )

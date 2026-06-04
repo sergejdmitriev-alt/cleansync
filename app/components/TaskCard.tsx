@@ -1,12 +1,20 @@
 import Link from 'next/link'
 import { SendButton, DeleteButton, ArchiveButton } from './TaskActions'
 
-const statusConfig: Record<string, { label: string; className: string }> = {
-  pending:  { label: 'Ausstehend',  className: 'bg-gray-100 text-gray-600' },
-  sent:     { label: 'Gesendet',    className: 'bg-blue-100 text-blue-700' },
-  accepted: { label: 'Angenommen',  className: 'bg-green-100 text-green-700' },
-  declined: { label: 'Abgelehnt',   className: 'bg-red-100 text-red-700' },
-  done:     { label: 'Erledigt',    className: 'bg-emerald-100 text-emerald-700' },
+const STATUS_LABEL: Record<string, string> = {
+  pending:  'Ausstehend',
+  sent:     'Gesendet',
+  accepted: 'Angenommen',
+  declined: 'Abgelehnt',
+  done:     'Erledigt',
+}
+
+const STATUS_BADGE: Record<string, string> = {
+  pending:  'cs-badge cs-badge-pending',
+  sent:     'cs-badge cs-badge-sent',
+  accepted: 'cs-badge cs-badge-accepted',
+  declined: 'cs-badge cs-badge-declined',
+  done:     'cs-badge cs-badge-done',
 }
 
 function fmt(dt: string) {
@@ -17,79 +25,103 @@ function fmt(dt: string) {
 }
 
 export default function TaskCard({ task }: { task: any }) {
-  const s       = statusConfig[task.status] ?? statusConfig.pending
   const photos  = task._photos ?? { completion: 0, problem: 0 }
   const hasProb = photos.problem > 0
 
   return (
-    <div className={`p-4 space-y-3 ${hasProb ? 'border-l-4 border-red-400' : ''}`}>
+    <div style={{
+      borderBottom: '1px solid var(--cs-border)',
+      borderLeft:   hasProb ? '3px solid var(--cs-danger)' : '3px solid transparent',
+      padding:      '14px 16px',
+    }}>
 
-      {/* Проблема — баннер */}
+      {/* Проблема */}
       {hasProb && (
-        <div className="flex items-center gap-2 bg-red-50 text-red-600 text-xs font-medium px-3 py-1.5 rounded-lg">
-          <span>⚠️</span>
-          <span>Problem gemeldet</span>
+        <div style={{
+          display:      'inline-flex',
+          alignItems:   'center',
+          gap:          '4px',
+          background:   'var(--cs-danger-bg)',
+          color:        'var(--cs-danger-text)',
+          fontSize:     '11px',
+          fontWeight:   '500',
+          padding:      '3px 8px',
+          borderRadius: 'var(--cs-radius-full)',
+          marginBottom: '8px',
+        }}>
+          ⚠️ Problem gemeldet
         </div>
       )}
 
-      <div className="flex items-start justify-between gap-2">
-        <div>
-          <Link
-            href={`/tasks/${task.id}`}
-            className="font-semibold text-gray-900 text-sm hover:text-blue-600 transition-colors underline decoration-gray-300 underline-offset-2"
-          >
+      {/* Заголовок */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px', marginBottom: '10px' }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <Link href={`/tasks/${task.id}`} style={{
+            fontWeight: '600', fontSize: '14px',
+            color: 'var(--cs-text-1)', textDecoration: 'none',
+            display: 'block',
+          }}>
             {task.properties?.name}
           </Link>
-          <p className="text-xs text-gray-400 mt-0.5">{task.properties?.address}</p>
+          <p style={{ fontSize: '11px', color: 'var(--cs-text-3)', margin: '2px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {task.properties?.address}
+          </p>
         </div>
-        <span className={`shrink-0 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${s.className}`}>
-          {s.label}
+        <span className={STATUS_BADGE[task.status] ?? 'cs-badge cs-badge-pending'}>
+          {STATUS_LABEL[task.status] ?? task.status}
         </span>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
+      {/* Детали */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '12px' }}>
         <div>
-          <p className="text-gray-400 uppercase tracking-wide text-[10px]">Reinigungskraft</p>
-          <p className="font-medium mt-0.5">
+          <p style={{ fontSize: '10px', color: 'var(--cs-text-3)', textTransform: 'uppercase', letterSpacing: '0.04em', margin: '0 0 2px', fontWeight: '500' }}>
+            Reinigungskraft
+          </p>
+          <p style={{ fontSize: '13px', color: 'var(--cs-text-1)', margin: 0, fontWeight: '500' }}>
             {task.send_to_agency ? '🧹 Reinraum' : task.cleaners?.name}
           </p>
         </div>
         <div>
-          <p className="text-gray-400 uppercase tracking-wide text-[10px]">Abreise</p>
-          <p className="font-medium mt-0.5">{fmt(task.checkout_time)}</p>
+          <p style={{ fontSize: '10px', color: 'var(--cs-text-3)', textTransform: 'uppercase', letterSpacing: '0.04em', margin: '0 0 2px', fontWeight: '500' }}>
+            Abreise
+          </p>
+          <p style={{ fontSize: '13px', color: 'var(--cs-text-2)', margin: 0 }}>
+            {fmt(task.checkout_time)}
+          </p>
         </div>
         <div>
-          <p className="text-gray-400 uppercase tracking-wide text-[10px]">Anreise</p>
-          <p className="font-medium mt-0.5">{fmt(task.checkin_time)}</p>
+          <p style={{ fontSize: '10px', color: 'var(--cs-text-3)', textTransform: 'uppercase', letterSpacing: '0.04em', margin: '0 0 2px', fontWeight: '500' }}>
+            Anreise
+          </p>
+          <p style={{ fontSize: '13px', color: 'var(--cs-text-2)', margin: 0 }}>
+            {fmt(task.checkin_time)}
+          </p>
         </div>
-
-        {/* Фото индикатор */}
-        {(photos.completion > 0 || photos.problem > 0) && (
+        {(photos.completion > 0 || hasProb) && (
           <div>
-            <p className="text-gray-400 uppercase tracking-wide text-[10px]">Fotos</p>
-            <div className="flex items-center gap-2 mt-0.5">
-              {photos.completion > 0 && (
-                <span className="text-gray-500">📷 {photos.completion}</span>
-              )}
-              {photos.problem > 0 && (
-                <span className="text-red-500">⚠️ {photos.problem}</span>
-              )}
-            </div>
+            <p style={{ fontSize: '10px', color: 'var(--cs-text-3)', textTransform: 'uppercase', letterSpacing: '0.04em', margin: '0 0 2px', fontWeight: '500' }}>
+              Fotos
+            </p>
+            <p style={{ fontSize: '13px', color: 'var(--cs-text-2)', margin: 0 }}>
+              {photos.completion > 0 && `📷 ${photos.completion}`}
+              {hasProb && ` ⚠️ ${photos.problem}`}
+            </p>
           </div>
         )}
       </div>
 
-      {/* Кнопка деталей */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
+      {/* Кнопки */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '6px' }}>
           <SendButton taskId={task.id} status={task.status} />
           {task.status === 'done' && <ArchiveButton taskId={task.id} />}
           <DeleteButton taskId={task.id} />
         </div>
-        <Link
-          href={`/tasks/${task.id}`}
-          className="text-xs text-blue-500 hover:text-blue-700 font-medium"
-        >
+        <Link href={`/tasks/${task.id}`} style={{
+          fontSize: '12px', color: 'var(--cs-blue)',
+          textDecoration: 'none', fontWeight: '500',
+        }}>
           Details →
         </Link>
       </div>

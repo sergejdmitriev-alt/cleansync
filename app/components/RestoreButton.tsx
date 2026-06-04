@@ -22,9 +22,10 @@ export default function RestoreButton({ taskId }: { taskId: string }) {
     <button
       onClick={handleRestore}
       disabled={loading}
-      className="text-sm px-3 py-1 rounded bg-green-100 text-green-700 hover:bg-green-200 disabled:opacity-50"
+      className="cs-btn-secondary"
+      style={{ fontSize: '12px', padding: '6px 12px', whiteSpace: 'nowrap' }}
     >
-      {loading ? '...' : '♻️ Wiederherstellen'}
+      {loading ? '…' : '♻️ Wiederherstellen'}
     </button>
   )
 }
