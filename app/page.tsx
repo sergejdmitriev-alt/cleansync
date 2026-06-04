@@ -1,7 +1,9 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { createServiceSupabaseClient } from '@/lib/supabase/service'
 import Link from 'next/link'
-import { RefreshButton, SendButton, LogoutButton } from './components/TaskActions'
+import { RefreshButton, SendButton } from './components/TaskActions'
+import Header from './components/Header'
+import TaskCard from './components/TaskCard'
 
 export const dynamic = 'force-dynamic'
 
@@ -47,42 +49,17 @@ export default async function Home() {
   }
 
   const counts = {
-    total:   tasks?.length ?? 0,
-    pending: tasks?.filter(t => t.status === 'pending').length ?? 0,
-    active:  tasks?.filter(t => ['sent', 'accepted'].includes(t.status)).length ?? 0,
-    done:    tasks?.filter(t => t.status === 'done').length ?? 0,
+    total:   tasks.length,
+    pending: tasks.filter(t => t.status === 'pending').length,
+    active:  tasks.filter(t => ['sent', 'accepted'].includes(t.status)).length,
+    done:    tasks.filter(t => t.status === 'done').length,
   }
 
   return (
     <div className="min-h-screen bg-gray-50 overflow-x-hidden">
-
-      {/* HEADER */}
-      <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-2 shrink-0">
-          <span className="text-xl">🧹</span>
-          <span className="text-lg font-bold text-gray-900">CleanSync</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Link
-            href="/settings"
-            className="text-gray-500 hover:text-gray-700 p-2 rounded-lg transition-colors"
-            title="Einstellungen"
-          >
-            <span className="text-lg">⚙️</span>
-          </Link>
-          <LogoutButton />
-          <Link
-            href="/tasks/new"
-            className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-3 py-2 rounded-lg transition-colors whitespace-nowrap"
-          >
-            + Auftrag
-          </Link>
-        </div>
-      </header>
+      <Header />
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
-
-        {/* STATS */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
           {[
             { label: 'Gesamt',         value: counts.total,   color: 'text-gray-700' },
@@ -97,7 +74,6 @@ export default async function Home() {
           ))}
         </div>
 
-        {/* TASK LIST */}
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
           <div className="px-4 sm:px-6 py-4 border-b border-gray-100 flex items-center justify-between">
             <h2 className="font-semibold text-gray-900">Aufträge</h2>
@@ -114,7 +90,7 @@ export default async function Home() {
             </div>
           ) : (
             <>
-              {/* DESKTOP: таблица */}
+              {/* DESKTOP */}
               <div className="hidden sm:block overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
@@ -156,41 +132,11 @@ export default async function Home() {
                 </table>
               </div>
 
-              {/* MOBILE: карточки */}
+              {/* MOBILE */}
               <div className="sm:hidden divide-y divide-gray-100">
-                {tasks.map((task) => {
-                  const s = statusConfig[task.status] ?? statusConfig.pending
-                  return (
-                    <div key={task.id} className="p-4 space-y-3">
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <p className="font-semibold text-gray-900 text-sm">{task.properties?.name}</p>
-                          <p className="text-xs text-gray-400 mt-0.5">{task.properties?.address}</p>
-                        </div>
-                        <span className={`shrink-0 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${s.className}`}>
-                          {s.label}
-                        </span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
-                        <div>
-                          <p className="text-gray-400 uppercase tracking-wide text-[10px]">Reinigungskraft</p>
-                          <p className="font-medium mt-0.5">{task.cleaners?.name}</p>
-                        </div>
-                        <div>
-                          <p className="text-gray-400 uppercase tracking-wide text-[10px]">Abreise</p>
-                          <p className="font-medium mt-0.5">{fmt(task.checkout_time)}</p>
-                        </div>
-                        <div>
-                          <p className="text-gray-400 uppercase tracking-wide text-[10px]">Anreise</p>
-                          <p className="font-medium mt-0.5">{fmt(task.checkin_time)}</p>
-                        </div>
-                      </div>
-                      <div>
-                        <SendButton taskId={task.id} status={task.status} />
-                      </div>
-                    </div>
-                  )
-                })}
+                {tasks.map((task) => (
+                  <TaskCard key={task.id} task={task} />
+                ))}
               </div>
             </>
           )}
