@@ -1,5 +1,5 @@
 import { createServiceSupabaseClient } from '@/lib/supabase/service'
-import { removeKeyboard, sendMessage, sendErledigtButton } from '@/lib/telegram'
+import { removeKeyboard, sendMessage, sendErledigtButton, getResponseMessages } from '@/lib/telegram'
 import { NextRequest, NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
 
   const { data: task } = await supabase
     .from('tasks')
-    .select('id, status, cleaners(telegram_chat_id)')
+    .select('id, status, cleaners(telegram_chat_id, language)')
     .eq('id', taskId)
     .single()
 
@@ -88,28 +88,31 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true })
   }
 
+  const lang = (task.cleaners as any)?.language ?? 'de'
+  const resp = getResponseMessages(lang)
+
   if (action === 'accept') {
     await supabase
       .from('tasks')
       .update({ status: 'accepted', accepted_at: new Date().toISOString() })
       .eq('id', taskId)
     await removeKeyboard(chatId, msgId)
-    await sendMessage(chatId, '✅ Auftrag angenommen! Viel Erfolg bei der Reinigung! 🧹')
-    await sendErledigtButton(chatId, taskId)
+    await sendMessage(chatId, resp.accepted)
+    await sendErledigtButton(chatId, taskId, lang)
   } else if (action === 'decline') {
     await supabase
       .from('tasks')
       .update({ status: 'declined' })
       .eq('id', taskId)
     await removeKeyboard(chatId, msgId)
-    await sendMessage(chatId, '👌 Verstanden. Der Auftraggeber wurde benachrichtigt.')
+    await sendMessage(chatId, resp.declined)
   } else if (action === 'done') {
     await supabase
       .from('tasks')
       .update({ status: 'done', done_at: new Date().toISOString() })
       .eq('id', taskId)
     await removeKeyboard(chatId, msgId)
-    await sendMessage(chatId, '🎉 Super! Reinigung abgeschlossen. Danke!')
+    await sendMessage(chatId, resp.done)
   }
 
   return NextResponse.json({ ok: true })
