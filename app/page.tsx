@@ -34,7 +34,11 @@ export default async function Home() {
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
       if (error) console.error('Supabase error:', error)
-      tasks = data ?? []
+      const raw = data ?? []
+      tasks = [
+        ...raw.filter(t => t.status !== 'done'),
+        ...raw.filter(t => t.status === 'done'),
+      ]
     }
   } catch (e) {
     console.error('createClient failed:', e)
