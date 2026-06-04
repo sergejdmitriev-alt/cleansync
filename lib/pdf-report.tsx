@@ -4,11 +4,11 @@ Font.register({
   family: 'Roboto',
   fonts: [
     {
-      src: 'https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Me5WQ.ttf',
+      src: 'https://raw.githubusercontent.com/google/fonts/main/apache/roboto/static/Roboto-Regular.ttf',
       fontWeight: 400,
     },
     {
-      src: 'https://fonts.gstatic.com/s/roboto/v30/KFOlCnqEu92Fr1MmWUlfBBc-.ttf',
+      src: 'https://raw.githubusercontent.com/google/fonts/main/apache/roboto/static/Roboto-Bold.ttf',
       fontWeight: 700,
     },
   ],

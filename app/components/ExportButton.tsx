@@ -10,16 +10,24 @@ export default function ExportButton() {
 
   async function handleExport() {
     setLoading(true)
-    const res = await fetch(`/api/export/pdf?month=${month}`)
-    if (!res.ok) { setLoading(false); return }
-
-    const blob = await res.blob()
-    const url  = URL.createObjectURL(blob)
-    const a    = document.createElement('a')
-    a.href     = url
-    a.download = `CleanSync_${month}.pdf`
-    a.click()
-    URL.revokeObjectURL(url)
+    try {
+      const res = await fetch(`/api/export/pdf?month=${month}`)
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: 'Unbekannter Fehler' }))
+        alert(`PDF-Fehler: ${err.error}`)
+        setLoading(false)
+        return
+      }
+      const blob = await res.blob()
+      const url  = URL.createObjectURL(blob)
+      const a    = document.createElement('a')
+      a.href     = url
+      a.download = `CleanSync_${month}.pdf`
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch (e) {
+      alert('Exportfehler – bitte erneut versuchen')
+    }
     setLoading(false)
   }
 
