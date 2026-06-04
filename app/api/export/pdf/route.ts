@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { createServiceSupabaseClient } from '@/lib/supabase/service'
 import { renderToBuffer } from '@react-pdf/renderer'
-import { createElement } from 'react'
+import type { DocumentProps } from '@react-pdf/renderer'
+import { createElement, type ReactElement } from 'react'
 import { MonthlyReport } from '@/lib/pdf-report'
 
 export const dynamic = 'force-dynamic'
@@ -34,7 +35,7 @@ export async function GET(req: NextRequest) {
   const monthLabel = new Date(from).toLocaleString('de-AT', { month: 'long', year: 'numeric' })
 
   const buffer = await renderToBuffer(
-    createElement(MonthlyReport, { tasks: tasks ?? [], monthLabel })
+    createElement(MonthlyReport, { tasks: tasks ?? [], monthLabel }) as ReactElement<DocumentProps>
   )
 
   return new NextResponse(buffer, {
