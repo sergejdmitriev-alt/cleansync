@@ -1,1 +1,183 @@
 @import "tailwindcss";
+
+/* ─── Design Tokens ─────────────────────────────── */
+:root {
+  /* Surfaces */
+  --cs-bg:        #F7F6F3;
+  --cs-surface:   #FFFFFF;
+  --cs-surface-2: #F3F2EF;
+
+  /* Text */
+  --cs-text-1: #1C1917;
+  --cs-text-2: #57534E;
+  --cs-text-3: #A8A29E;
+
+  /* Borders */
+  --cs-border:       #E7E5E1;
+  --cs-border-hover: #D4D2CE;
+
+  /* Status — pending */
+  --cs-pending-bg:   #F5F4F1;
+  --cs-pending-text: #57534E;
+
+  /* Status — sent */
+  --cs-sent-bg:   #EFF6FF;
+  --cs-sent-text: #1D4ED8;
+
+  /* Status — accepted */
+  --cs-accepted-bg:   #F0FDF4;
+  --cs-accepted-text: #15803D;
+
+  /* Status — declined */
+  --cs-declined-bg:   #FEF2F2;
+  --cs-declined-text: #B91C1C;
+
+  /* Status — done */
+  --cs-done-bg:   #ECFDF5;
+  --cs-done-text: #047857;
+
+  /* Brand blue */
+  --cs-blue:      #2563EB;
+  --cs-blue-bg:   #EFF6FF;
+  --cs-blue-text: #1D4ED8;
+
+  /* Danger/problem red */
+  --cs-danger:        #DC2626;
+  --cs-danger-bg:     #FEF2F2;
+  --cs-danger-text:   #B91C1C;
+  --cs-danger-border: #FECACA;
+
+  /* Radius */
+  --cs-radius-sm:   8px;
+  --cs-radius-md:   12px;
+  --cs-radius-lg:   16px;
+  --cs-radius-full: 9999px;
+
+  /* Shadows */
+  --cs-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --cs-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.08);
+}
+
+/* ─── Base ───────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--cs-bg);
+  color: var(--cs-text-1);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Utility classes ────────────────────────────── */
+
+/* Status badges */
+.cs-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: var(--cs-radius-full);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.cs-badge-pending  { background: var(--cs-pending-bg);  color: var(--cs-pending-text); }
+.cs-badge-sent     { background: var(--cs-sent-bg);     color: var(--cs-sent-text); }
+.cs-badge-accepted { background: var(--cs-accepted-bg); color: var(--cs-accepted-text); }
+.cs-badge-declined { background: var(--cs-declined-bg); color: var(--cs-declined-text); }
+.cs-badge-done     { background: var(--cs-done-bg);     color: var(--cs-done-text); }
+
+/* Card */
+.cs-card {
+  background: var(--cs-surface);
+  border: 1px solid var(--cs-border);
+  border-radius: var(--cs-radius-lg);
+}
+
+/* Button — primary */
+.cs-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: var(--cs-text-1);
+  color: var(--cs-surface);
+  border: none;
+  border-radius: var(--cs-radius-md);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.cs-btn-primary:hover { opacity: 0.85; }
+.cs-btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Button — secondary */
+.cs-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background: transparent;
+  color: var(--cs-text-2);
+  border: 1px solid var(--cs-border);
+  border-radius: var(--cs-radius-md);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.cs-btn-secondary:hover {
+  background: var(--cs-surface-2);
+  border-color: var(--cs-border-hover);
+}
+
+/* Filter pill */
+.cs-pill {
+  padding: 5px 14px;
+  border-radius: var(--cs-radius-full);
+  border: 1px solid var(--cs-border);
+  background: var(--cs-surface);
+  color: var(--cs-text-2);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.cs-pill:hover { border-color: var(--cs-border-hover); }
+.cs-pill-active {
+  background: var(--cs-text-1);
+  color: var(--cs-surface);
+  border-color: var(--cs-text-1);
+}
+
+/* Input / Select */
+.cs-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--cs-border);
+  border-radius: var(--cs-radius-md);
+  font-size: 14px;
+  color: var(--cs-text-1);
+  background: var(--cs-surface);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  outline: none;
+}
+.cs-input:focus {
+  border-color: var(--cs-blue);
+  box-shadow: 0 0 0 3px var(--cs-blue-bg);
+}
+.cs-input::placeholder { color: var(--cs-text-3); }
+
+/* Problem border accent */
+.cs-problem-row {
+  border-left: 3px solid var(--cs-danger);
+}

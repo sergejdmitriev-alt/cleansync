@@ -1,18 +1,26 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Plus_Jakarta_Sans } from 'next/font/google'
 import './globals.css'
 
-const inter = Inter({ subsets: ['latin'] })
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  display: 'swap',
+  weight: ['400', '500', '600'],
+})
 
 export const metadata: Metadata = {
   title: 'CleanSync',
-  description: 'Управление уборками для Airbnb',
+  description: 'Reinigungsmanagement für Airbnb',
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   return (
-    <html lang="ru">
-      <body className={inter.className}>{children}</body>
+    <html lang="de">
+      <body className={jakarta.className}>{children}</body>
     </html>
   )
 }
