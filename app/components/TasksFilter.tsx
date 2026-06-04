@@ -106,12 +106,20 @@ export default function TasksFilter({ tasks }: { tasks: any[] }) {
                   return (
                     <tr key={task.id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4">
-                        <Link href={`/tasks/${task.id}`} className="font-medium text-gray-900 hover:text-blue-600 transition-colors">
+                        <Link href={`/tasks/${task.id}`} className="font-medium text-gray-900 hover:text-blue-600 transition-colors underline decoration-gray-300 underline-offset-2">
                           {task.properties?.name}
                         </Link>
                         <p className="text-xs text-gray-400 truncate max-w-[180px]">
                           {task.properties?.address}
                         </p>
+                        <div className="flex items-center gap-2 mt-1">
+                          {task._photos?.completion > 0 && (
+                            <span className="text-xs text-gray-400">📷 {task._photos.completion}</span>
+                          )}
+                          {task._photos?.problem > 0 && (
+                            <span className="text-xs text-red-500 font-medium">⚠️ Problem gemeldet</span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-4 text-gray-700">{task.send_to_agency ? '🧹 Reinraum' : task.cleaners?.name}</td>
                       <td className="px-6 py-4 text-gray-700">{fmt(task.checkout_time)}</td>

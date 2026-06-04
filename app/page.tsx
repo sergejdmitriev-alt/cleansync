@@ -28,6 +28,26 @@ export default async function Home() {
         ...raw.filter(t => !t.archived && t.status !== 'done').sort(sortByDate),
         ...raw.filter(t => !t.archived && t.status === 'done').sort(sortByDate),
       ]
+
+      let photoMap: Record<string, { completion: number; problem: number }> = {}
+
+      if (tasks.length > 0) {
+        const { data: photoRows } = await supabase
+          .from('task_photos')
+          .select('task_id, photo_type')
+          .in('task_id', tasks.map((t: any) => t.id))
+
+        for (const row of photoRows ?? []) {
+          if (!photoMap[row.task_id]) photoMap[row.task_id] = { completion: 0, problem: 0 }
+          if (row.photo_type === 'completion') photoMap[row.task_id].completion++
+          if (row.photo_type === 'problem')    photoMap[row.task_id].problem++
+        }
+      }
+
+      tasks = tasks.map((t: any) => ({
+        ...t,
+        _photos: photoMap[t.id] ?? { completion: 0, problem: 0 },
+      }))
     }
   } catch (e) {
     console.error('createClient failed:', e)

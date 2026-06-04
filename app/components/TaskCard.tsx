@@ -17,14 +17,26 @@ function fmt(dt: string) {
 }
 
 export default function TaskCard({ task }: { task: any }) {
-  const s = statusConfig[task.status] ?? statusConfig.pending
+  const s       = statusConfig[task.status] ?? statusConfig.pending
+  const photos  = task._photos ?? { completion: 0, problem: 0 }
+  const hasProb = photos.problem > 0
+
   return (
-    <div className="p-4 space-y-3">
+    <div className={`p-4 space-y-3 ${hasProb ? 'border-l-4 border-red-400' : ''}`}>
+
+      {/* Проблема — баннер */}
+      {hasProb && (
+        <div className="flex items-center gap-2 bg-red-50 text-red-600 text-xs font-medium px-3 py-1.5 rounded-lg">
+          <span>⚠️</span>
+          <span>Problem gemeldet</span>
+        </div>
+      )}
+
       <div className="flex items-start justify-between gap-2">
         <div>
           <Link
             href={`/tasks/${task.id}`}
-            className="font-semibold text-gray-900 text-sm hover:text-blue-600 transition-colors"
+            className="font-semibold text-gray-900 text-sm hover:text-blue-600 transition-colors underline decoration-gray-300 underline-offset-2"
           >
             {task.properties?.name}
           </Link>
@@ -34,10 +46,13 @@ export default function TaskCard({ task }: { task: any }) {
           {s.label}
         </span>
       </div>
+
       <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
         <div>
           <p className="text-gray-400 uppercase tracking-wide text-[10px]">Reinigungskraft</p>
-          <p className="font-medium mt-0.5">{task.send_to_agency ? '🧹 Reinraum' : task.cleaners?.name}</p>
+          <p className="font-medium mt-0.5">
+            {task.send_to_agency ? '🧹 Reinraum' : task.cleaners?.name}
+          </p>
         </div>
         <div>
           <p className="text-gray-400 uppercase tracking-wide text-[10px]">Abreise</p>
@@ -47,11 +62,36 @@ export default function TaskCard({ task }: { task: any }) {
           <p className="text-gray-400 uppercase tracking-wide text-[10px]">Anreise</p>
           <p className="font-medium mt-0.5">{fmt(task.checkin_time)}</p>
         </div>
+
+        {/* Фото индикатор */}
+        {(photos.completion > 0 || photos.problem > 0) && (
+          <div>
+            <p className="text-gray-400 uppercase tracking-wide text-[10px]">Fotos</p>
+            <div className="flex items-center gap-2 mt-0.5">
+              {photos.completion > 0 && (
+                <span className="text-gray-500">📷 {photos.completion}</span>
+              )}
+              {photos.problem > 0 && (
+                <span className="text-red-500">⚠️ {photos.problem}</span>
+              )}
+            </div>
+          </div>
+        )}
       </div>
-      <div className="flex items-center gap-2">
-        <SendButton taskId={task.id} status={task.status} />
-        {task.status === 'done' && <ArchiveButton taskId={task.id} />}
-        <DeleteButton taskId={task.id} />
+
+      {/* Кнопка деталей */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <SendButton taskId={task.id} status={task.status} />
+          {task.status === 'done' && <ArchiveButton taskId={task.id} />}
+          <DeleteButton taskId={task.id} />
+        </div>
+        <Link
+          href={`/tasks/${task.id}`}
+          className="text-xs text-blue-500 hover:text-blue-700 font-medium"
+        >
+          Details →
+        </Link>
       </div>
     </div>
   )
