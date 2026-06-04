@@ -1,7 +1,7 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { createServiceSupabaseClient } from '@/lib/supabase/service'
 import Link from 'next/link'
-import { RefreshButton, SendButton, DeleteButton } from './components/TaskActions'
+import { RefreshButton, SendButton, DeleteButton, ArchiveButton } from './components/TaskActions'
 import Header from './components/Header'
 import TaskCard from './components/TaskCard'
 
@@ -37,14 +37,12 @@ export default async function Home() {
         .order('created_at', { ascending: false })
       if (error) console.error('Supabase error:', error)
       const raw = data ?? []
-      const now = new Date()
-      const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
       const sortByDate = (a: any, b: any) =>
         new Date(a.checkout_time).getTime() - new Date(b.checkout_time).getTime()
 
       tasks = [
-        ...raw.filter(t => t.status !== 'done').sort(sortByDate),
-        ...raw.filter(t => t.status === 'done' && new Date(t.done_at) > thirtyDaysAgo).sort(sortByDate),
+        ...raw.filter(t => !t.archived && t.status !== 'done').sort(sortByDate),
+        ...raw.filter(t => !t.archived && t.status === 'done').sort(sortByDate),
       ]
     }
   } catch (e) {
@@ -126,8 +124,9 @@ export default async function Home() {
                             </span>
                           </td>
                           <td className="px-6 py-4">
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1">
                               <SendButton taskId={task.id} status={task.status} />
+                              {task.status === 'done' && <ArchiveButton taskId={task.id} />}
                               <DeleteButton taskId={task.id} />
                             </div>
                           </td>

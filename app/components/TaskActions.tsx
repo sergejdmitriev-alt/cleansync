@@ -53,6 +53,28 @@ export function DeleteButton({ taskId }: { taskId: string }) {
   )
 }
 
+export function ArchiveButton({ taskId }: { taskId: string }) {
+  const handleArchive = async () => {
+    if (!confirm('Auftrag archivieren?')) return
+    await fetch(`/api/tasks/${taskId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ archived: true }),
+    })
+    window.location.reload()
+  }
+
+  return (
+    <button
+      onClick={handleArchive}
+      className="text-xs text-gray-400 hover:text-gray-600 transition-colors px-2 py-1.5"
+      title="Archivieren"
+    >
+      📦 Archiv
+    </button>
+  )
+}
+
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 

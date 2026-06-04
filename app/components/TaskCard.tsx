@@ -1,4 +1,4 @@
-import { SendButton, DeleteButton } from './TaskActions'
+import { SendButton, DeleteButton, ArchiveButton } from './TaskActions'
 
 const statusConfig: Record<string, { label: string; className: string }> = {
   pending:  { label: 'Ausstehend',  className: 'bg-gray-100 text-gray-600' },
@@ -45,6 +45,7 @@ export default function TaskCard({ task }: { task: any }) {
       </div>
       <div className="flex items-center gap-2">
         <SendButton taskId={task.id} status={task.status} />
+        {task.status === 'done' && <ArchiveButton taskId={task.id} />}
         <DeleteButton taskId={task.id} />
       </div>
     </div>
