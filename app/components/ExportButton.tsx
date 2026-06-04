@@ -3,9 +3,9 @@
 import { useState } from 'react'
 
 export default function ExportButton() {
-  const now    = new Date()
-  const def    = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
-  const [month, setMonth] = useState(def)
+  const now   = new Date()
+  const def   = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+  const [month, setMonth]     = useState(def)
   const [loading, setLoading] = useState(false)
 
   async function handleExport() {
@@ -13,7 +13,7 @@ export default function ExportButton() {
     try {
       const res = await fetch(`/api/export/pdf?month=${month}`)
       if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: 'Unbekannter Fehler' }))
+        const err = await res.json().catch(() => ({ error: 'Fehler' }))
         alert(`PDF-Fehler: ${err.error}`)
         setLoading(false)
         return
@@ -25,26 +25,28 @@ export default function ExportButton() {
       a.download = `CleanSync_${month}.pdf`
       a.click()
       URL.revokeObjectURL(url)
-    } catch (e) {
+    } catch {
       alert('Exportfehler – bitte erneut versuchen')
     }
     setLoading(false)
   }
 
   return (
-    <div className="flex items-center gap-2">
+    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
       <input
         type="month"
         value={month}
         onChange={e => setMonth(e.target.value)}
-        className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="cs-input"
+        style={{ width: '140px', padding: '6px 10px', fontSize: '13px' }}
       />
       <button
         onClick={handleExport}
         disabled={loading}
-        className="flex items-center gap-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-sm font-medium px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
+        className="cs-btn-secondary"
+        style={{ whiteSpace: 'nowrap', padding: '6px 12px' }}
       >
-        {loading ? 'Wird erstellt...' : '📄 PDF exportieren'}
+        {loading ? 'Wird erstellt…' : '📄 PDF'}
       </button>
     </div>
   )

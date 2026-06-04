@@ -4,22 +4,31 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { RefreshButton, SendButton, DeleteButton, ArchiveButton } from './TaskActions'
 import TaskCard from './TaskCard'
+import ExportButton from './ExportButton'
 
-const statusConfig: Record<string, { label: string; className: string }> = {
-  pending:  { label: 'Ausstehend',  className: 'bg-gray-100 text-gray-600' },
-  sent:     { label: 'Gesendet',    className: 'bg-blue-100 text-blue-700' },
-  accepted: { label: 'Angenommen',  className: 'bg-green-100 text-green-700' },
-  declined: { label: 'Abgelehnt',   className: 'bg-red-100 text-red-700' },
-  done:     { label: 'Erledigt',    className: 'bg-emerald-100 text-emerald-700' },
+const STATUS_LABEL: Record<string, string> = {
+  pending:  'Ausstehend',
+  sent:     'Gesendet',
+  accepted: 'Angenommen',
+  declined: 'Abgelehnt',
+  done:     'Erledigt',
+}
+
+const STATUS_BADGE: Record<string, string> = {
+  pending:  'cs-badge cs-badge-pending',
+  sent:     'cs-badge cs-badge-sent',
+  accepted: 'cs-badge cs-badge-accepted',
+  declined: 'cs-badge cs-badge-declined',
+  done:     'cs-badge cs-badge-done',
 }
 
 const FILTERS = [
-  { key: 'all',      label: 'Alle' },
-  { key: 'pending',  label: 'Ausstehend' },
-  { key: 'sent',     label: 'Gesendet' },
-  { key: 'accepted', label: 'Angenommen' },
+  { key: 'all',      label: 'Alle'      },
+  { key: 'pending',  label: 'Ausstehend'},
+  { key: 'sent',     label: 'Gesendet'  },
+  { key: 'accepted', label: 'Angenommen'},
   { key: 'declined', label: 'Abgelehnt' },
-  { key: 'done',     label: 'Erledigt' },
+  { key: 'done',     label: 'Erledigt'  },
 ]
 
 function fmt(dt: string) {
@@ -37,100 +46,151 @@ export default function TasksFilter({ tasks }: { tasks: any[] }) {
     : tasks.filter(t => t.status === filter)
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <div className="cs-card" style={{ overflow: 'hidden' }}>
 
-      {/* Заголовок */}
-      <div className="px-4 sm:px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-        <h2 className="font-semibold text-gray-900">Aufträge</h2>
-        <RefreshButton />
+      {/* Toolbar */}
+      <div style={{
+        padding:       '14px 20px',
+        borderBottom:  '1px solid var(--cs-border)',
+        display:       'flex',
+        alignItems:    'center',
+        justifyContent:'space-between',
+        gap:           '12px',
+        flexWrap:      'wrap',
+      }}>
+        <h2 style={{ margin: 0, fontSize: '15px', fontWeight: '600', color: 'var(--cs-text-1)' }}>
+          Aufträge
+        </h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <ExportButton />
+          <RefreshButton />
+        </div>
       </div>
 
-      {/* Фильтр-кнопки */}
-      <div className="px-4 sm:px-6 py-3 border-b border-gray-100 flex gap-2 flex-wrap">
+      {/* Filter pills */}
+      <div style={{
+        padding:      '12px 20px',
+        borderBottom: '1px solid var(--cs-border)',
+        display:      'flex',
+        gap:          '6px',
+        flexWrap:     'wrap',
+      }}>
         {FILTERS.map(f => {
           const count = f.key === 'all'
             ? tasks.length
             : tasks.filter(t => t.status === f.key).length
+          if (count === 0 && f.key !== 'all' && filter !== f.key) return null
           return (
             <button
               key={f.key}
               onClick={() => setFilter(f.key)}
-              className={`px-3 py-1 rounded-full text-xs font-medium transition-colors
-                ${filter === f.key
-                  ? 'bg-gray-900 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+              className={filter === f.key ? 'cs-pill cs-pill-active' : 'cs-pill'}
             >
-              {f.label} {count > 0 && <span className="opacity-60">({count})</span>}
+              {f.label}{count > 0 ? ` (${count})` : ''}
             </button>
           )
         })}
       </div>
 
-      {/* Пустое состояние — нет задач вообще */}
+      {/* Пусто — нет задач вообще */}
       {tasks.length === 0 && (
-        <div className="text-center py-16 text-gray-400">
-          <p className="text-4xl mb-3">📋</p>
-          <p className="text-lg font-medium">Noch keine Aufträge</p>
-          <Link href="/tasks/new" className="text-blue-500 text-sm mt-2 inline-block">
+        <div style={{ textAlign: 'center', padding: '64px 20px' }}>
+          <p style={{ fontSize: '36px', margin: '0 0 12px' }}>📋</p>
+          <p style={{ fontSize: '15px', fontWeight: '500', color: 'var(--cs-text-2)', margin: '0 0 8px' }}>
+            Noch keine Aufträge
+          </p>
+          <Link href="/tasks/new" style={{ fontSize: '13px', color: 'var(--cs-blue)', textDecoration: 'none' }}>
             Ersten Auftrag erstellen →
           </Link>
         </div>
       )}
 
-      {/* Пустое состояние — нет задач по фильтру */}
+      {/* Пусто — фильтр не дал результатов */}
       {tasks.length > 0 && filtered.length === 0 && (
-        <div className="text-center py-12 text-gray-400">
-          <p className="text-sm">Keine Aufträge mit diesem Status</p>
+        <div style={{ textAlign: 'center', padding: '48px 20px', color: 'var(--cs-text-3)' }}>
+          <p style={{ fontSize: '13px', margin: 0 }}>Keine Aufträge mit diesem Status</p>
         </div>
       )}
 
-      {/* Контент */}
       {filtered.length > 0 && (
         <>
-          {/* DESKTOP */}
-          <div className="hidden sm:block overflow-x-auto">
-            <table className="w-full text-sm">
+          {/* Desktop таблица */}
+          <div className="hidden sm:block" style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50 text-left text-gray-500 text-xs uppercase tracking-wide">
-                  <th className="px-6 py-3">Objekt</th>
-                  <th className="px-6 py-3">Reinigungskraft</th>
-                  <th className="px-6 py-3">Abreise</th>
-                  <th className="px-6 py-3">Anreise</th>
-                  <th className="px-6 py-3">Status</th>
-                  <th className="px-6 py-3">Aktion</th>
+                <tr style={{ background: 'var(--cs-surface-2)', borderBottom: '1px solid var(--cs-border)' }}>
+                  {['Objekt', 'Reinigungskraft', 'Abreise', 'Anreise', 'Status', 'Aktion'].map(h => (
+                    <th key={h} style={{
+                      padding:       '10px 20px',
+                      textAlign:     'left',
+                      fontSize:      '11px',
+                      fontWeight:    '500',
+                      color:         'var(--cs-text-3)',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      whiteSpace:    'nowrap',
+                    }}>{h}</th>
+                  ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
-                {filtered.map((task) => {
-                  const s = statusConfig[task.status] ?? statusConfig.pending
+              <tbody>
+                {filtered.map(task => {
+                  const hasProb = (task._photos?.problem ?? 0) > 0
                   return (
-                    <tr key={task.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-6 py-4">
-                        <Link href={`/tasks/${task.id}`} className="font-medium text-gray-900 hover:text-blue-600 transition-colors underline decoration-gray-300 underline-offset-2">
+                    <tr
+                      key={task.id}
+                      style={{
+                        borderBottom: '1px solid var(--cs-border)',
+                        borderLeft:   hasProb
+                          ? '3px solid var(--cs-danger)'
+                          : '3px solid transparent',
+                      }}
+                      onMouseEnter={e => (e.currentTarget.style.background = 'var(--cs-surface-2)')}
+                      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                    >
+                      <td style={{ padding: '14px 20px' }}>
+                        <Link
+                          href={`/tasks/${task.id}`}
+                          style={{ fontWeight: '500', color: 'var(--cs-text-1)', textDecoration: 'none' }}
+                          onMouseEnter={e => (e.currentTarget.style.color = 'var(--cs-blue)')}
+                          onMouseLeave={e => (e.currentTarget.style.color = 'var(--cs-text-1)')}
+                        >
                           {task.properties?.name}
                         </Link>
-                        <p className="text-xs text-gray-400 truncate max-w-[180px]">
+                        <p style={{ fontSize: '11px', color: 'var(--cs-text-3)', margin: '2px 0 0', maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {task.properties?.address}
                         </p>
-                        <div className="flex items-center gap-2 mt-1">
-                          {task._photos?.completion > 0 && (
-                            <span className="text-xs text-gray-400">📷 {task._photos.completion}</span>
-                          )}
-                          {task._photos?.problem > 0 && (
-                            <span className="text-xs text-red-500 font-medium">⚠️ Problem gemeldet</span>
-                          )}
-                        </div>
+                        {(hasProb || task._photos?.completion > 0) && (
+                          <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+                            {task._photos?.completion > 0 && (
+                              <span style={{ fontSize: '11px', color: 'var(--cs-text-3)' }}>
+                                📷 {task._photos.completion}
+                              </span>
+                            )}
+                            {hasProb && (
+                              <span style={{ fontSize: '11px', color: 'var(--cs-danger)', fontWeight: '500' }}>
+                                ⚠️ Problem gemeldet
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </td>
-                      <td className="px-6 py-4 text-gray-700">{task.send_to_agency ? '🧹 Reinraum' : task.cleaners?.name}</td>
-                      <td className="px-6 py-4 text-gray-700">{fmt(task.checkout_time)}</td>
-                      <td className="px-6 py-4 text-gray-700">{fmt(task.checkin_time)}</td>
-                      <td className="px-6 py-4">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${s.className}`}>
-                          {s.label}
+                      <td style={{ padding: '14px 20px', color: 'var(--cs-text-2)' }}>
+                        {task.send_to_agency ? '🧹 Reinraum' : task.cleaners?.name}
+                      </td>
+                      <td style={{ padding: '14px 20px', color: 'var(--cs-text-2)', whiteSpace: 'nowrap' }}>
+                        {fmt(task.checkout_time)}
+                      </td>
+                      <td style={{ padding: '14px 20px', color: 'var(--cs-text-2)', whiteSpace: 'nowrap' }}>
+                        {fmt(task.checkin_time)}
+                      </td>
+                      <td style={{ padding: '14px 20px' }}>
+                        <span className={STATUS_BADGE[task.status] ?? 'cs-badge cs-badge-pending'}>
+                          {STATUS_LABEL[task.status] ?? task.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-1">
+                      <td style={{ padding: '14px 20px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                           <SendButton taskId={task.id} status={task.status} />
                           {task.status === 'done' && <ArchiveButton taskId={task.id} />}
                           <DeleteButton taskId={task.id} />
@@ -143,9 +203,9 @@ export default function TasksFilter({ tasks }: { tasks: any[] }) {
             </table>
           </div>
 
-          {/* MOBILE */}
-          <div className="sm:hidden divide-y divide-gray-100">
-            {filtered.map((task) => (
+          {/* Mobile карточки */}
+          <div className="sm:hidden">
+            {filtered.map(task => (
               <TaskCard key={task.id} task={task} />
             ))}
           </div>
