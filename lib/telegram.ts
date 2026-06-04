@@ -186,4 +186,22 @@ export async function sendHostNotification(text: string): Promise<void> {
   await bot.sendMessage(HOST_CHAT_ID, text)
 }
 
+export async function sendAgencyNotification(task: TaskForTelegram): Promise<void> {
+  const address  = task.properties?.address ?? '—'
+  const checkout = formatDate(task.checkout_time)
+  const checkin  = formatDate(task.checkin_time)
+  const notes    = task.notes ? `\n📝 *Notizen:* ${task.notes}` : ''
+
+  const text = [
+    '🏢 *Neuer Auftrag für CleanSync Cleaning!*',
+    '',
+    `📍 *Adresse:* ${address}`,
+    `🟥 *Abreise:* ${checkout}`,
+    `🔑 *Anreise:* ${checkin}`,
+    notes,
+  ].filter(s => s !== undefined).join('\n')
+
+  await bot.sendMessage(HOST_CHAT_ID, text, { parse_mode: 'Markdown' })
+}
+
 export { bot }

@@ -10,10 +10,11 @@ type Cleaner  = { id: string; name: string }
 export default function NewTaskPage() {
   const router = useRouter()
 
-  const [properties, setProperties] = useState<Property[]>([])
-  const [cleaners, setCleaners]     = useState<Cleaner[]>([])
-  const [loading, setLoading]       = useState(false)
-  const [error, setError]           = useState('')
+  const [properties, setProperties]   = useState<Property[]>([])
+  const [cleaners, setCleaners]       = useState<Cleaner[]>([])
+  const [loading, setLoading]         = useState(false)
+  const [error, setError]             = useState('')
+  const [sendToAgency, setSendToAgency] = useState(false)
 
   const [form, setForm] = useState({
     property_id:   '',
@@ -36,8 +37,12 @@ export default function NewTaskPage() {
   async function handleSubmit(e: React.MouseEvent, sendNow: boolean) {
     e.preventDefault()
 
-    if (!form.property_id || !form.cleaner_id || !form.checkout_time || !form.checkin_time) {
+    if (!form.property_id || !form.checkout_time || !form.checkin_time) {
       setError('Bitte alle Pflichtfelder ausfüllen.')
+      return
+    }
+    if (!sendToAgency && !form.cleaner_id) {
+      setError('Bitte eine Reinigungskraft auswählen.')
       return
     }
     if (new Date(form.checkin_time) <= new Date(form.checkout_time)) {
@@ -50,7 +55,11 @@ export default function NewTaskPage() {
     const res = await fetch('/api/tasks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
+      body: JSON.stringify({
+        ...form,
+        cleaner_id:      sendToAgency ? null : form.cleaner_id,
+        send_to_agency:  sendToAgency,
+      }),
     })
 
     const task = await res.json()
@@ -97,20 +106,52 @@ export default function NewTaskPage() {
             </select>
           </div>
 
+          {/* Переключатель режима */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Reinigungskraft <span className="text-red-500">*</span>
             </label>
-            <select
-              value={form.cleaner_id}
-              onChange={e => set('cleaner_id', e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-            >
-              <option value="">— Reinigungskraft auswählen —</option>
-              {cleaners.map(c => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
+            <div className="flex rounded-lg border border-gray-300 overflow-hidden mb-3">
+              <button
+                type="button"
+                onClick={() => { setSendToAgency(false); setError('') }}
+                className={`flex-1 py-2.5 text-sm font-medium transition-colors ${
+                  !sendToAgency
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                Eigene Reinigungskraft
+              </button>
+              <button
+                type="button"
+                onClick={() => { setSendToAgency(true); setError('') }}
+                className={`flex-1 py-2.5 text-sm font-medium transition-colors ${
+                  sendToAgency
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                🏢 CleanSync Cleaning
+              </button>
+            </div>
+
+            {!sendToAgency ? (
+              <select
+                value={form.cleaner_id}
+                onChange={e => set('cleaner_id', e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              >
+                <option value="">— Reinigungskraft auswählen —</option>
+                {cleaners.map(c => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            ) : (
+              <div className="border border-blue-200 bg-blue-50 rounded-lg px-4 py-3 text-sm text-blue-700">
+                📋 Auftrag wird direkt an <strong>CleanSync Cleaning</strong> weitergeleitet.
+              </div>
+            )}
           </div>
 
           <div>

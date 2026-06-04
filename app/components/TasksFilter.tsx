@@ -111,7 +111,7 @@ export default function TasksFilter({ tasks }: { tasks: any[] }) {
                           {task.properties?.address}
                         </p>
                       </td>
-                      <td className="px-6 py-4 text-gray-700">{task.cleaners?.name}</td>
+                      <td className="px-6 py-4 text-gray-700">{task.send_to_agency ? '🏢 CleanSync Cleaning' : task.cleaners?.name}</td>
                       <td className="px-6 py-4 text-gray-700">{fmt(task.checkout_time)}</td>
                       <td className="px-6 py-4 text-gray-700">{fmt(task.checkin_time)}</td>
                       <td className="px-6 py-4">

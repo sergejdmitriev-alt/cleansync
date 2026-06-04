@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceSupabaseClient } from '@/lib/supabase/service'
-import { sendTaskNotification } from '@/lib/telegram'
+import { sendTaskNotification, sendAgencyNotification } from '@/lib/telegram'
 
 export const dynamic = 'force-dynamic'
 
@@ -9,7 +9,6 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
-
   const supabase = createServiceSupabaseClient()
 
   const { data: task, error } = await supabase
@@ -22,11 +21,15 @@ export async function POST(
     return NextResponse.json({ error: 'Task not found' }, { status: 404 })
   }
 
-  await sendTaskNotification(task)
+  if (task.send_to_agency) {
+    await sendAgencyNotification(task)
+  } else {
+    await sendTaskNotification(task)
+  }
 
   const { error: updateError } = await supabase
     .from('tasks')
-    .update({ sent_at: new Date().toISOString() })
+    .update({ status: 'sent', sent_at: new Date().toISOString() })
     .eq('id', id)
 
   if (updateError) {
