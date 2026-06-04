@@ -84,7 +84,10 @@ export async function POST(req: NextRequest) {
 
   if (!task) return NextResponse.json({ ok: true })
 
-  if (task.status === 'accepted' || task.status === 'done') {
+  if (action === 'done' && task.status === 'done') {
+    return NextResponse.json({ ok: true })
+  }
+  if (action !== 'done' && (task.status === 'accepted' || task.status === 'done')) {
     return NextResponse.json({ ok: true })
   }
 
