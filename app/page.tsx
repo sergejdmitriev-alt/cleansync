@@ -37,7 +37,6 @@ export default async function Home() {
       const raw = data ?? []
       const sortByDate = (a: any, b: any) =>
         new Date(a.checkout_time).getTime() - new Date(b.checkout_time).getTime()
-
       tasks = [
         ...raw.filter(t => t.status !== 'done').sort(sortByDate),
         ...raw.filter(t => t.status === 'done').sort(sortByDate),
@@ -55,54 +54,57 @@ export default async function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-2xl">🧹</span>
-          <span className="text-xl font-bold text-gray-900">CleanSync</span>
+    <div className="min-h-screen bg-gray-50 overflow-x-hidden">
+
+      {/* HEADER */}
+      <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="text-xl">🧹</span>
+          <span className="text-lg font-bold text-gray-900">CleanSync</span>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <Link
             href="/settings"
-            className="text-gray-500 hover:text-gray-700 text-sm font-medium px-3 py-2 rounded-lg transition-colors"
+            className="text-gray-500 hover:text-gray-700 p-2 rounded-lg transition-colors"
+            title="Einstellungen"
           >
-            ⚙️ Einstellungen
+            <span className="text-lg">⚙️</span>
           </Link>
           <LogoutButton />
           <Link
             href="/tasks/new"
-            className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+            className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-3 py-2 rounded-lg transition-colors whitespace-nowrap"
           >
-            + Neuer Auftrag
+            + Auftrag
           </Link>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-6 py-8">
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
+
+        {/* STATS */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
           {[
-            { label: 'Aufträge gesamt', value: counts.total,   color: 'text-gray-700' },
-            { label: 'Ausstehend',      value: counts.pending, color: 'text-gray-500' },
-            { label: 'In Bearbeitung',  value: counts.active,  color: 'text-blue-600' },
-            { label: 'Erledigt',        value: counts.done,    color: 'text-green-600' },
+            { label: 'Gesamt',         value: counts.total,   color: 'text-gray-700' },
+            { label: 'Ausstehend',     value: counts.pending, color: 'text-gray-500' },
+            { label: 'In Bearbeitung', value: counts.active,  color: 'text-blue-600' },
+            { label: 'Erledigt',       value: counts.done,    color: 'text-green-600' },
           ].map(s => (
-            <div key={s.label} className="bg-white rounded-xl border border-gray-200 p-5">
-              <p className="text-sm text-gray-500">{s.label}</p>
+            <div key={s.label} className="bg-white rounded-xl border border-gray-200 p-4">
+              <p className="text-xs text-gray-500">{s.label}</p>
               <p className={`text-3xl font-bold mt-1 ${s.color}`}>{s.value}</p>
             </div>
           ))}
         </div>
 
-        {/* Table */}
+        {/* TASK LIST */}
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+          <div className="px-4 sm:px-6 py-4 border-b border-gray-100 flex items-center justify-between">
             <h2 className="font-semibold text-gray-900">Aufträge</h2>
             <RefreshButton />
           </div>
 
-          {!tasks || tasks.length === 0 ? (
+          {tasks.length === 0 ? (
             <div className="text-center py-16 text-gray-400">
               <p className="text-4xl mb-3">📋</p>
               <p className="text-lg font-medium">Noch keine Aufträge</p>
@@ -111,46 +113,86 @@ export default async function Home() {
               </Link>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-gray-100 bg-gray-50 text-left text-gray-500 text-xs uppercase tracking-wide">
-                    <th className="px-6 py-3">Objekt</th>
-                    <th className="px-6 py-3">Reinigungskraft</th>
-                    <th className="px-6 py-3">Abreise</th>
-                    <th className="px-6 py-3">Anreise</th>
-                    <th className="px-6 py-3">Status</th>
-                    <th className="px-6 py-3">Aktion</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {tasks.map((task) => {
-                    const s = statusConfig[task.status] ?? statusConfig.pending
-                    return (
-                      <tr key={task.id} className="hover:bg-gray-50 transition-colors">
-                        <td className="px-6 py-4">
-                          <p className="font-medium text-gray-900">{task.properties?.name}</p>
-                          <p className="text-xs text-gray-400 truncate max-w-[180px]">
-                            {task.properties?.address}
-                          </p>
-                        </td>
-                        <td className="px-6 py-4 text-gray-700">{task.cleaners?.name}</td>
-                        <td className="px-6 py-4 text-gray-700">{fmt(task.checkout_time)}</td>
-                        <td className="px-6 py-4 text-gray-700">{fmt(task.checkin_time)}</td>
-                        <td className="px-6 py-4">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${s.className}`}>
-                            {s.label}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <SendButton taskId={task.id} status={task.status} />
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </div>
+            <>
+              {/* DESKTOP: таблица */}
+              <div className="hidden sm:block overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-gray-100 bg-gray-50 text-left text-gray-500 text-xs uppercase tracking-wide">
+                      <th className="px-6 py-3">Objekt</th>
+                      <th className="px-6 py-3">Reinigungskraft</th>
+                      <th className="px-6 py-3">Abreise</th>
+                      <th className="px-6 py-3">Anreise</th>
+                      <th className="px-6 py-3">Status</th>
+                      <th className="px-6 py-3">Aktion</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {tasks.map((task) => {
+                      const s = statusConfig[task.status] ?? statusConfig.pending
+                      return (
+                        <tr key={task.id} className="hover:bg-gray-50 transition-colors">
+                          <td className="px-6 py-4">
+                            <p className="font-medium text-gray-900">{task.properties?.name}</p>
+                            <p className="text-xs text-gray-400 truncate max-w-[180px]">
+                              {task.properties?.address}
+                            </p>
+                          </td>
+                          <td className="px-6 py-4 text-gray-700">{task.cleaners?.name}</td>
+                          <td className="px-6 py-4 text-gray-700">{fmt(task.checkout_time)}</td>
+                          <td className="px-6 py-4 text-gray-700">{fmt(task.checkin_time)}</td>
+                          <td className="px-6 py-4">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${s.className}`}>
+                              {s.label}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <SendButton taskId={task.id} status={task.status} />
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* MOBILE: карточки */}
+              <div className="sm:hidden divide-y divide-gray-100">
+                {tasks.map((task) => {
+                  const s = statusConfig[task.status] ?? statusConfig.pending
+                  return (
+                    <div key={task.id} className="p-4 space-y-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <p className="font-semibold text-gray-900 text-sm">{task.properties?.name}</p>
+                          <p className="text-xs text-gray-400 mt-0.5">{task.properties?.address}</p>
+                        </div>
+                        <span className={`shrink-0 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${s.className}`}>
+                          {s.label}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
+                        <div>
+                          <p className="text-gray-400 uppercase tracking-wide text-[10px]">Reinigungskraft</p>
+                          <p className="font-medium mt-0.5">{task.cleaners?.name}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-400 uppercase tracking-wide text-[10px]">Abreise</p>
+                          <p className="font-medium mt-0.5">{fmt(task.checkout_time)}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-400 uppercase tracking-wide text-[10px]">Anreise</p>
+                          <p className="font-medium mt-0.5">{fmt(task.checkin_time)}</p>
+                        </div>
+                      </div>
+                      <div>
+                        <SendButton taskId={task.id} status={task.status} />
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </>
           )}
         </div>
       </main>
