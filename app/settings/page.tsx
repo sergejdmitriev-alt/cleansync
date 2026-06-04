@@ -4,7 +4,7 @@ import Link from 'next/link'
 import Header from '@/app/components/Header'
 
 interface Cleaner  { id: string; name: string; telegram_chat_id: number }
-interface Property { id: string; name: string; address: string; default_notes?: string | null }
+interface Property { id: string; name: string; address: string; default_notes?: string | null; ical_url?: string | null }
 
 const sectionStyle: React.CSSProperties = {
   marginBottom: '24px',
@@ -22,7 +22,7 @@ export default function SettingsPage() {
   const [cleaners,    setCleaners]    = useState<Cleaner[]>([])
   const [properties,  setProperties]  = useState<Property[]>([])
   const [newCleaner,  setNewCleaner]  = useState({ name: '', telegram_chat_id: '' })
-  const [newProperty, setNewProperty] = useState({ name: '', address: '', default_notes: '' })
+  const [newProperty, setNewProperty] = useState({ name: '', address: '', default_notes: '', ical_url: '' })
   const [editingCleaner,  setEditingCleaner]  = useState<Cleaner | null>(null)
   const [editingProperty, setEditingProperty] = useState<Property | null>(null)
 
@@ -62,6 +62,21 @@ export default function SettingsPage() {
     setEditingCleaner(null)
     load()
   }
+  async function syncProperty(id: string) {
+    const res = await fetch('/api/sync/ical', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ property_id: id }),
+    })
+    const { results } = await res.json()
+    const r = results?.[0]
+    if (r?.error) {
+      alert(`Fehler: ${r.error}`)
+    } else {
+      alert(`Synchronisiert: ${r?.created ?? 0} neue Aufträge, ${r?.skipped ?? 0} übersprungen`)
+      load()
+    }
+  }
   async function saveProperty() {
     if (!editingProperty) return
     await fetch(`/api/properties/${editingProperty.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(editingProperty) })
@@ -97,6 +112,12 @@ export default function SettingsPage() {
                       placeholder="Notizvorlage (optional)"
                       value={editingProperty.default_notes ?? ''}
                       onChange={e => setEditingProperty({ ...editingProperty, default_notes: e.target.value })} />
+                    <input
+                      className="cs-input"
+                      placeholder="Airbnb iCal URL (optional)"
+                      value={editingProperty.ical_url ?? ''}
+                      onChange={e => setEditingProperty({ ...editingProperty, ical_url: e.target.value })}
+                    />
                     <div style={{ display: 'flex', gap: '8px' }}>
                       <button onClick={saveProperty} className="cs-btn-primary" style={{ fontSize: '13px', padding: '7px 16px' }}>Speichern</button>
                       <button onClick={() => setEditingProperty(null)} className="cs-btn-secondary" style={{ fontSize: '13px', padding: '7px 16px' }}>Abbrechen</button>
@@ -113,6 +134,15 @@ export default function SettingsPage() {
                         </p>
                       )}
                     </div>
+                    {p.ical_url && (
+                      <button
+                        onClick={() => syncProperty(p.id)}
+                        className="cs-btn-secondary"
+                        style={{ fontSize: '12px', padding: '5px 10px' }}
+                      >
+                        🔄 Sync
+                      </button>
+                    )}
                     <button onClick={() => setEditingProperty(p)} className="cs-btn-secondary" style={{ fontSize: '12px', padding: '5px 12px' }}>Bearbeiten</button>
                     <button onClick={() => deleteProperty(p.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--cs-text-3)', fontSize: '16px', padding: '4px' }}>🗑</button>
                   </div>

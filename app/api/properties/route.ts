@@ -12,7 +12,7 @@ export async function GET() {
   const supabase = createServiceSupabaseClient()
   const { data, error } = await supabase
     .from('properties')
-    .select('id, name, address, default_notes')
+    .select('id, name, address, default_notes, ical_url')
     .eq('user_id', user.id)
     .order('name')
 
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await serverSupabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { name, address, default_notes } = await req.json()
+  const { name, address, default_notes, ical_url } = await req.json()
   if (!name || !address) {
     return NextResponse.json({ error: 'Name und Adresse sind erforderlich' }, { status: 400 })
   }
@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
   const supabase = createServiceSupabaseClient()
   const { data, error } = await supabase
     .from('properties')
-    .insert({ name, address, default_notes: default_notes ?? null, user_id: user.id })
+    .insert({ name, address, default_notes: default_notes ?? null, ical_url: ical_url ?? null, user_id: user.id })
     .select()
     .single()
 
