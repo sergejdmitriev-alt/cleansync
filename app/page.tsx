@@ -35,9 +35,12 @@ export default async function Home() {
         .order('created_at', { ascending: false })
       if (error) console.error('Supabase error:', error)
       const raw = data ?? []
+      const sortByDate = (a: any, b: any) =>
+        new Date(a.checkout_time).getTime() - new Date(b.checkout_time).getTime()
+
       tasks = [
-        ...raw.filter(t => t.status !== 'done'),
-        ...raw.filter(t => t.status === 'done'),
+        ...raw.filter(t => t.status !== 'done').sort(sortByDate),
+        ...raw.filter(t => t.status === 'done').sort(sortByDate),
       ]
     }
   } catch (e) {
