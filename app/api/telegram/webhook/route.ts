@@ -1,5 +1,5 @@
 import { createServiceSupabaseClient } from '@/lib/supabase/service'
-import { removeKeyboard, sendMessage, sendErledigtButton, getResponseMessages } from '@/lib/telegram'
+import { removeKeyboard, sendMessage, sendErledigtButton, getResponseMessages, sendHostNotification } from '@/lib/telegram'
 import { NextRequest, NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
@@ -21,7 +21,6 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json()
 
-  // Обработка команды /start
   const message = body?.message
   if (message?.text === '/start') {
     const chatId = String(message.from.id)
@@ -40,7 +39,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true })
   }
 
-  // Обработка callback_query
   const callback = body?.callback_query
   if (!callback) return NextResponse.json({ ok: true })
 
@@ -48,7 +46,6 @@ export async function POST(req: NextRequest) {
   const chatId = String(callback.from.id)
   const msgId  = String(callback.message?.message_id)
 
-  // Выбор языка
   if (data.startsWith('lang_')) {
     const lang = data.slice(5)
     const { bot } = await import('@/lib/telegram')
@@ -67,7 +64,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true })
   }
 
-  // Логика accept/decline/done
   const underscoreIndex = data.indexOf('_')
   const action = data.slice(0, underscoreIndex)
   const taskId = data.slice(underscoreIndex + 1)
@@ -78,7 +74,7 @@ export async function POST(req: NextRequest) {
 
   const { data: task } = await supabase
     .from('tasks')
-    .select('id, status, cleaners(telegram_chat_id, language)')
+    .select('id, status, cleaners(telegram_chat_id, language, name), properties(name)')
     .eq('id', taskId)
     .single()
 
@@ -91,8 +87,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true })
   }
 
-  const lang = (task.cleaners as any)?.language ?? 'de'
-  const resp = getResponseMessages(lang)
+  const lang         = (task.cleaners as any)?.language   ?? 'de'
+  const cleanerName  = (task.cleaners as any)?.name       ?? 'Reinigungskraft'
+  const propertyName = (task.properties as any)?.name     ?? 'Wohnung'
+  const resp         = getResponseMessages(lang)
 
   if (action === 'accept') {
     await supabase
@@ -102,6 +100,7 @@ export async function POST(req: NextRequest) {
     await removeKeyboard(chatId, msgId)
     await sendMessage(chatId, resp.accepted)
     await sendErledigtButton(chatId, taskId, lang)
+    await sendHostNotification(`✅ ${cleanerName} hat den Auftrag angenommen — ${propertyName}`)
   } else if (action === 'decline') {
     await supabase
       .from('tasks')
@@ -116,6 +115,7 @@ export async function POST(req: NextRequest) {
       .eq('id', taskId)
     await removeKeyboard(chatId, msgId)
     await sendMessage(chatId, resp.done)
+    await sendHostNotification(`🎉 Reinigung abgeschlossen — ${propertyName}`)
   }
 
   return NextResponse.json({ ok: true })

@@ -1,6 +1,7 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { createServiceSupabaseClient } from '@/lib/supabase/service'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import Header from '@/app/components/Header'
 import RestoreButton from '@/app/components/RestoreButton'
 
@@ -34,6 +35,9 @@ export default async function ArchivePage() {
     <div className="min-h-screen bg-gray-50">
       <Header />
       <main className="max-w-4xl mx-auto px-4 py-8">
+        <Link href="/" className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-gray-700 mb-4">
+          <i className="ti ti-arrow-left" /> Zurück zur Übersicht
+        </Link>
         <h1 className="text-2xl font-bold mb-6">📦 Archiv</h1>
 
         {!tasks || tasks.length === 0 ? (

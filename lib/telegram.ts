@@ -180,4 +180,10 @@ export async function sendMessage(chatId: string, text: string): Promise<void> {
   await bot.sendMessage(chatId, text)
 }
 
+const HOST_CHAT_ID = '451676731' // Telegram chat ID хоста
+
+export async function sendHostNotification(text: string): Promise<void> {
+  await bot.sendMessage(HOST_CHAT_ID, text)
+}
+
 export { bot }
