@@ -1,14 +1,15 @@
 import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer'
+import path from 'path'
 
 Font.register({
   family: 'Roboto',
   fonts: [
     {
-      src: 'https://raw.githubusercontent.com/google/fonts/main/apache/roboto/static/Roboto-Regular.ttf',
+      src: path.join(process.cwd(), 'public', 'fonts', 'Roboto-Regular.ttf'),
       fontWeight: 400,
     },
     {
-      src: 'https://raw.githubusercontent.com/google/fonts/main/apache/roboto/static/Roboto-Bold.ttf',
+      src: path.join(process.cwd(), 'public', 'fonts', 'Roboto-Bold.ttf'),
       fontWeight: 700,
     },
   ],
