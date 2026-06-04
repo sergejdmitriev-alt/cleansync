@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { SendButton, DeleteButton, ArchiveButton } from './TaskActions'
 
 const statusConfig: Record<string, { label: string; className: string }> = {
@@ -17,12 +18,16 @@ function fmt(dt: string) {
 
 export default function TaskCard({ task }: { task: any }) {
   const s = statusConfig[task.status] ?? statusConfig.pending
-
   return (
     <div className="p-4 space-y-3">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <p className="font-semibold text-gray-900 text-sm">{task.properties?.name}</p>
+          <Link
+            href={`/tasks/${task.id}`}
+            className="font-semibold text-gray-900 text-sm hover:text-blue-600 transition-colors"
+          >
+            {task.properties?.name}
+          </Link>
           <p className="text-xs text-gray-400 mt-0.5">{task.properties?.address}</p>
         </div>
         <span className={`shrink-0 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${s.className}`}>
