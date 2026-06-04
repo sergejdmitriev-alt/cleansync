@@ -2,6 +2,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { createServiceSupabaseClient } from '@/lib/supabase/service'
 import Header from './components/Header'
 import TasksFilter from './components/TasksFilter'
+import ExportButton from './components/ExportButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -56,6 +57,10 @@ export default async function Home() {
               <p className={`text-3xl font-bold mt-1 ${s.color}`}>{s.value}</p>
             </div>
           ))}
+        </div>
+
+        <div className="flex justify-end mb-4">
+          <ExportButton />
         </div>
 
         <TasksFilter tasks={tasks} />
