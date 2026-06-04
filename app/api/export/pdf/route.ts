@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
     createElement(MonthlyReport, { tasks: tasks ?? [], monthLabel }) as ReactElement<DocumentProps>
   )
 
-  return new NextResponse(buffer, {
+  return new NextResponse(new Uint8Array(buffer), {
     headers: {
       'Content-Type':        'application/pdf',
       'Content-Disposition': `attachment; filename="CleanSync_${month}.pdf"`,
