@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
-type Property = { id: string; name: string }
+type Property = { id: string; name: string; default_notes?: string | null }
 type Cleaner  = { id: string; name: string }
 
 export default function NewTaskPage() {
@@ -96,7 +96,14 @@ export default function NewTaskPage() {
             </label>
             <select
               value={form.property_id}
-              onChange={e => set('property_id', e.target.value)}
+              onChange={e => {
+                const id = e.target.value
+                set('property_id', id)
+                const selected = properties.find(p => p.id === id)
+                if (selected?.default_notes) {
+                  set('notes', selected.default_notes)
+                }
+              }}
               className="w-full border border-gray-300 rounded-lg px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
             >
               <option value="">— Objekt auswählen —</option>

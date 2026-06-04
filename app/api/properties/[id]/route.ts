@@ -8,11 +8,11 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   const { data: { user } } = await serverSupabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { name, address } = await req.json()
+  const { name, address, default_notes } = await req.json()
   const supabase = createServiceSupabaseClient()
   const { data, error } = await supabase
     .from('properties')
-    .update({ name, address })
+    .update({ name, address, default_notes: default_notes ?? null })
     .eq('id', id)
     .eq('user_id', user.id)
     .select()
