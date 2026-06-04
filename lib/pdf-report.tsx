@@ -1,13 +1,27 @@
-import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
+import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer'
+
+Font.register({
+  family: 'Roboto',
+  fonts: [
+    {
+      src: 'https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Me5WQ.ttf',
+      fontWeight: 400,
+    },
+    {
+      src: 'https://fonts.gstatic.com/s/roboto/v30/KFOlCnqEu92Fr1MmWUlfBBc-.ttf',
+      fontWeight: 700,
+    },
+  ],
+})
 
 const s = StyleSheet.create({
-  page:       { padding: 40, fontFamily: 'Helvetica', fontSize: 10, color: '#1a1a1a' },
+  page:       { padding: 40, fontFamily: 'Roboto', fontSize: 10, color: '#1a1a1a' },
   header:     { marginBottom: 24 },
-  title:      { fontSize: 20, fontFamily: 'Helvetica-Bold', marginBottom: 4 },
+  title:      { fontSize: 20, fontWeight: 700, marginBottom: 4 },
   subtitle:   { fontSize: 11, color: '#666' },
   statsRow:   { flexDirection: 'row', gap: 16, marginBottom: 24 },
   statBox:    { backgroundColor: '#f5f5f5', padding: 12, borderRadius: 6, flex: 1 },
-  statNum:    { fontSize: 18, fontFamily: 'Helvetica-Bold', marginBottom: 2 },
+  statNum:    { fontSize: 18, fontWeight: 700, marginBottom: 2 },
   statLabel:  { fontSize: 9, color: '#888' },
   tableHead:  { flexDirection: 'row', backgroundColor: '#f0f0f0', padding: '8 10', borderRadius: 4, marginBottom: 4 },
   tableRow:   { flexDirection: 'row', padding: '8 10', borderBottom: '1 solid #eee' },
@@ -15,8 +29,8 @@ const s = StyleSheet.create({
   colCleaner: { flex: 1.5 },
   colDate:    { flex: 1.5 },
   colDone:    { flex: 1.5 },
-  headText:   { fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#555', textTransform: 'uppercase' },
-  cellMain:   { fontFamily: 'Helvetica-Bold', fontSize: 10, marginBottom: 2 },
+  headText:   { fontSize: 8, fontWeight: 700, color: '#555', textTransform: 'uppercase' },
+  cellMain:   { fontWeight: 700, fontSize: 10, marginBottom: 2 },
   cellSub:    { fontSize: 8, color: '#888' },
   cellText:   { fontSize: 10 },
   footer:     { position: 'absolute', bottom: 30, left: 40, right: 40, flexDirection: 'row', justifyContent: 'space-between' },
