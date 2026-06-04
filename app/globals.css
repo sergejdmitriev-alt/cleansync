@@ -181,3 +181,8 @@ body {
 .cs-problem-row {
   border-left: 3px solid var(--cs-danger);
 }
+
+/* Отступ снизу на мобиле под BottomNav */
+@media (max-width: 639px) {
+  body { padding-bottom: 72px; }
+}
