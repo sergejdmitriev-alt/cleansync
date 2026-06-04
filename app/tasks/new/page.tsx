@@ -132,7 +132,7 @@ export default function NewTaskPage() {
                     : 'bg-white text-gray-600 hover:bg-gray-50'
                 }`}
               >
-                🏢 CleanSync Cleaning
+                🧹 Reinraum
               </button>
             </div>
 
@@ -149,7 +149,7 @@ export default function NewTaskPage() {
               </select>
             ) : (
               <div className="border border-blue-200 bg-blue-50 rounded-lg px-4 py-3 text-sm text-blue-700">
-                📋 Auftrag wird direkt an <strong>CleanSync Cleaning</strong> weitergeleitet.
+                📋 Auftrag wird direkt an <strong>Reinraum</strong> weitergeleitet.
               </div>
             )}
           </div>

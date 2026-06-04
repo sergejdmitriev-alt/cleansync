@@ -32,7 +32,7 @@ export default function TaskCard({ task }: { task: any }) {
       <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
         <div>
           <p className="text-gray-400 uppercase tracking-wide text-[10px]">Reinigungskraft</p>
-          <p className="font-medium mt-0.5">{task.send_to_agency ? '🏢 CleanSync Cleaning' : task.cleaners?.name}</p>
+          <p className="font-medium mt-0.5">{task.send_to_agency ? '🧹 Reinraum' : task.cleaners?.name}</p>
         </div>
         <div>
           <p className="text-gray-400 uppercase tracking-wide text-[10px]">Abreise</p>

@@ -22,14 +22,16 @@ export async function GET() {
   return NextResponse.json(data)
 }
 
-// POST /api/tasks — создать задачу
 export async function POST(req: NextRequest) {
   const supabase = createServiceSupabaseClient()
   const body = await req.json()
-  const { property_id, cleaner_id, checkout_time, checkin_time, notes } = body
+  const { property_id, cleaner_id, checkout_time, checkin_time, notes, send_to_agency } = body
 
-  if (!property_id || !cleaner_id || !checkout_time || !checkin_time) {
+  if (!property_id || !checkout_time || !checkin_time) {
     return NextResponse.json({ error: 'Alle Felder sind erforderlich' }, { status: 400 })
+  }
+  if (!send_to_agency && !cleaner_id) {
+    return NextResponse.json({ error: 'Bitte eine Reinigungskraft auswählen.' }, { status: 400 })
   }
 
   const serverSupabase = await createServerSupabaseClient()
@@ -37,7 +39,16 @@ export async function POST(req: NextRequest) {
 
   const { data, error } = await supabase
     .from('tasks')
-    .insert({ property_id, cleaner_id, checkout_time, checkin_time, notes, status: 'pending', user_id: user!.id })
+    .insert({
+      property_id,
+      cleaner_id:     send_to_agency ? null : cleaner_id,
+      checkout_time,
+      checkin_time,
+      notes,
+      send_to_agency: send_to_agency ?? false,
+      status:         'pending',
+      user_id:        user!.id,
+    })
     .select()
     .single()
 

@@ -193,7 +193,7 @@ export async function sendAgencyNotification(task: TaskForTelegram): Promise<voi
   const notes    = task.notes ? `\n📝 *Notizen:* ${task.notes}` : ''
 
   const text = [
-    '🏢 *Neuer Auftrag für CleanSync Cleaning!*',
+    '🏢 *Neuer Auftrag für Reinraum!*',
     '',
     `📍 *Adresse:* ${address}`,
     `🟥 *Abreise:* ${checkout}`,
