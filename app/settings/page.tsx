@@ -43,7 +43,7 @@ export default function SettingsPage() {
   }
   async function addProperty() {
     await fetch('/api/properties', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newProperty) })
-    setNewProperty({ name: '', address: '', default_notes: '' })
+    setNewProperty({ name: '', address: '', default_notes: '', ical_url: '' })
     load()
   }
   async function deleteCleaner(id: string) {
@@ -163,6 +163,12 @@ export default function SettingsPage() {
                 placeholder="Notizvorlage (optional)"
                 value={newProperty.default_notes}
                 onChange={e => setNewProperty({ ...newProperty, default_notes: e.target.value })} />
+              <input
+                className="cs-input"
+                placeholder="Airbnb iCal URL (optional)"
+                value={newProperty.ical_url}
+                onChange={e => setNewProperty({ ...newProperty, ical_url: e.target.value })}
+              />
               <button onClick={addProperty} className="cs-btn-primary" style={{ alignSelf: 'flex-start', fontSize: '13px' }}>
                 + Hinzufügen
               </button>
