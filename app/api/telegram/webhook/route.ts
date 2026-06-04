@@ -1,5 +1,8 @@
 import { createServiceSupabaseClient } from '@/lib/supabase/service'
-import { removeKeyboard, sendMessage, sendErledigtButton, getResponseMessages, sendHostNotification } from '@/lib/telegram'
+import {
+  removeKeyboard, sendMessage, sendErledigtButton,
+  getResponseMessages, sendHostNotification, getPhotoMessages,
+} from '@/lib/telegram'
 import { NextRequest, NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
@@ -11,6 +14,46 @@ const WELCOME: Record<string, string> = {
   pl: '👋 Cześć! Jesteś połączony z CleanSync.\n\nTutaj będziesz otrzymywać zlecenia sprzątania. Czekaj na powiadomienia! 🧹',
 }
 
+async function getCleanerLang(supabase: any, chatId: string) {
+  const { data } = await supabase
+    .from('cleaners')
+    .select('language, name')
+    .eq('telegram_chat_id', Number(chatId))
+    .single()
+  return { lang: data?.language ?? 'de', name: data?.name ?? 'Reinigungskraft' }
+}
+
+async function savePhoto(
+  supabase: any,
+  chatId: string,
+  message: any,
+  taskId: string,
+  mode: 'completion_photos' | 'problem',
+) {
+  const { bot } = await import('@/lib/telegram')
+  const largest  = message.photo[message.photo.length - 1]
+  const file     = await bot.getFile(largest.file_id)
+  const fileUrl  = `https://api.telegram.org/file/bot${process.env.TELEGRAM_BOT_TOKEN}/${file.file_path}`
+  const res      = await fetch(fileUrl)
+  const buffer   = await res.arrayBuffer()
+
+  const photoType   = mode === 'problem' ? 'problem' : 'completion'
+  const storagePath = `${taskId}/${photoType}/${Date.now()}.jpg`
+
+  await supabase.storage
+    .from('task-photos')
+    .upload(storagePath, buffer, { contentType: 'image/jpeg' })
+
+  await supabase.from('task_photos').insert({
+    task_id:      taskId,
+    storage_path: storagePath,
+    photo_type:   photoType,
+    caption:      message.caption ?? null,
+  })
+
+  return { largest, storagePath }
+}
+
 export async function POST(req: NextRequest) {
   const supabase = createServiceSupabaseClient()
 
@@ -19,26 +62,108 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
   }
 
-  const body = await req.json()
-
+  const body    = await req.json()
   const message = body?.message
+
+  // ── /start ──────────────────────────────────────────────
   if (message?.text === '/start') {
     const chatId = String(message.from.id)
     const { bot } = await import('@/lib/telegram')
-    await bot.sendMessage(chatId, '👋 Willkommen bei CleanSync!\n\nBitte wähle deine Sprache / Выбери язык / Вибери мову / Alege limba / Wybierz język:', {
-      reply_markup: {
-        inline_keyboard: [[
-          { text: '🇷🇺 Русский',    callback_data: 'lang_ru' },
-          { text: '🇺🇦 Українська', callback_data: 'lang_uk' },
-        ], [
-          { text: '🇷🇴 Română',     callback_data: 'lang_ro' },
-          { text: '🇵🇱 Polski',     callback_data: 'lang_pl' },
-        ]],
-      },
-    })
+    await bot.sendMessage(chatId,
+      '👋 Willkommen bei CleanSync!\n\nBitte wähle deine Sprache / Выбери язык / Вибери мову / Alege limba / Wybierz język:',
+      {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: '🇷🇺 Русский', callback_data: 'lang_ru' }, { text: '🇺🇦 Українська', callback_data: 'lang_uk' }],
+            [{ text: '🇷🇴 Română',  callback_data: 'lang_ro' }, { text: '🇵🇱 Polski',     callback_data: 'lang_pl' }],
+          ],
+        },
+      }
+    )
     return NextResponse.json({ ok: true })
   }
 
+  // ── /fertig — завершить загрузку фото ───────────────────
+  if (message?.text === '/fertig') {
+    const chatId = String(message.from.id)
+    const { data: session } = await supabase
+      .from('bot_sessions')
+      .select('task_id, mode, photo_count')
+      .eq('chat_id', Number(chatId))
+      .single()
+
+    if (!session) return NextResponse.json({ ok: true })
+
+    const { lang } = await getCleanerLang(supabase, chatId)
+    const pm       = getPhotoMessages(lang)
+
+    await supabase.from('bot_sessions').delete().eq('chat_id', Number(chatId))
+    await sendMessage(chatId, pm.completionDone)
+    return NextResponse.json({ ok: true })
+  }
+
+  // ── Входящее фото ────────────────────────────────────────
+  if (message?.photo) {
+    const chatId = String(message.from.id)
+
+    const { data: session } = await supabase
+      .from('bot_sessions')
+      .select('task_id, mode, photo_count')
+      .eq('chat_id', Number(chatId))
+      .single()
+
+    if (!session) return NextResponse.json({ ok: true })
+
+    const { lang, name: cleanerName } = await getCleanerLang(supabase, chatId)
+    const pm = getPhotoMessages(lang)
+
+    // Лимит 10 фото для completion
+    if (session.mode === 'completion_photos' && session.photo_count >= 10) {
+      await sendMessage(chatId, pm.limitReached)
+      return NextResponse.json({ ok: true })
+    }
+
+    const { largest } = await savePhoto(supabase, chatId, message, session.task_id, session.mode)
+
+    // Problem mode: уведомить хоста фото + закрыть сессию
+    if (session.mode === 'problem') {
+      const { data: task } = await supabase
+        .from('tasks')
+        .select('properties(name)')
+        .eq('id', session.task_id)
+        .single()
+      const propertyName = (task?.properties as any)?.name ?? 'Wohnung'
+      const caption      = message.caption ? `\n📝 ${message.caption}` : ''
+      const { bot }      = await import('@/lib/telegram')
+
+      await bot.sendPhoto(
+        '451676731',
+        largest.file_id,
+        { caption: `⚠️ Problem gemeldet — ${propertyName} (${cleanerName})${caption}` }
+      )
+      await sendMessage(chatId, pm.problemSaved)
+      await supabase.from('bot_sessions').delete().eq('chat_id', Number(chatId))
+      return NextResponse.json({ ok: true })
+    }
+
+    // Completion mode: сохранить, обновить счётчик
+    const newCount = session.photo_count + 1
+    await supabase
+      .from('bot_sessions')
+      .update({ photo_count: newCount })
+      .eq('chat_id', Number(chatId))
+
+    if (newCount >= 10) {
+      await supabase.from('bot_sessions').delete().eq('chat_id', Number(chatId))
+      await sendMessage(chatId, pm.completionDone)
+    } else {
+      await sendMessage(chatId, `${pm.photoSaved} (${newCount}/10). ${pm.fertigHint}`)
+    }
+
+    return NextResponse.json({ ok: true })
+  }
+
+  // ── Callback query ───────────────────────────────────────
   const callback = body?.callback_query
   if (!callback) return NextResponse.json({ ok: true })
 
@@ -46,8 +171,9 @@ export async function POST(req: NextRequest) {
   const chatId = String(callback.from.id)
   const msgId  = String(callback.message?.message_id)
 
+  // lang_*
   if (data.startsWith('lang_')) {
-    const lang = data.slice(5)
+    const lang    = data.slice(5)
     const { bot } = await import('@/lib/telegram')
 
     await supabase
@@ -59,14 +185,31 @@ export async function POST(req: NextRequest) {
       { inline_keyboard: [] },
       { chat_id: chatId, message_id: Number(msgId) }
     )
-
     await sendMessage(chatId, WELCOME[lang])
     return NextResponse.json({ ok: true })
   }
 
+  // problem_*
+  if (data.startsWith('problem_')) {
+    const taskId   = data.slice(8)
+    const { lang } = await getCleanerLang(supabase, chatId)
+    const pm       = getPhotoMessages(lang)
+
+    await supabase.from('bot_sessions').upsert({
+      chat_id:     Number(chatId),
+      task_id:     taskId,
+      mode:        'problem',
+      photo_count: 0,
+    })
+
+    await sendMessage(chatId, pm.problemPrompt)
+    return NextResponse.json({ ok: true })
+  }
+
+  // accept / decline / done
   const underscoreIndex = data.indexOf('_')
-  const action = data.slice(0, underscoreIndex)
-  const taskId = data.slice(underscoreIndex + 1)
+  const action          = data.slice(0, underscoreIndex)
+  const taskId          = data.slice(underscoreIndex + 1)
 
   if (!['accept', 'decline', 'done'].includes(action) || !taskId) {
     return NextResponse.json({ ok: true })
@@ -80,17 +223,16 @@ export async function POST(req: NextRequest) {
 
   if (!task) return NextResponse.json({ ok: true })
 
-  if (action === 'done' && task.status === 'done') {
-    return NextResponse.json({ ok: true })
-  }
+  if (action === 'done' && task.status === 'done') return NextResponse.json({ ok: true })
   if (action !== 'done' && (task.status === 'accepted' || task.status === 'done')) {
     return NextResponse.json({ ok: true })
   }
 
-  const lang         = (task.cleaners as any)?.language   ?? 'de'
-  const cleanerName  = (task.cleaners as any)?.name       ?? 'Reinigungskraft'
-  const propertyName = (task.properties as any)?.name     ?? 'Wohnung'
+  const lang         = (task.cleaners as any)?.language ?? 'de'
+  const cleanerName  = (task.cleaners as any)?.name     ?? 'Reinigungskraft'
+  const propertyName = (task.properties as any)?.name   ?? 'Wohnung'
   const resp         = getResponseMessages(lang)
+  const pm           = getPhotoMessages(lang)
 
   if (action === 'accept') {
     await supabase
@@ -101,6 +243,7 @@ export async function POST(req: NextRequest) {
     await sendMessage(chatId, resp.accepted)
     await sendErledigtButton(chatId, taskId, lang)
     await sendHostNotification(`✅ ${cleanerName} hat den Auftrag angenommen — ${propertyName}`)
+
   } else if (action === 'decline') {
     await supabase
       .from('tasks')
@@ -108,6 +251,7 @@ export async function POST(req: NextRequest) {
       .eq('id', taskId)
     await removeKeyboard(chatId, msgId)
     await sendMessage(chatId, resp.declined)
+
   } else if (action === 'done') {
     await supabase
       .from('tasks')
@@ -115,6 +259,14 @@ export async function POST(req: NextRequest) {
       .eq('id', taskId)
     await removeKeyboard(chatId, msgId)
     await sendMessage(chatId, resp.done)
+
+    await supabase.from('bot_sessions').upsert({
+      chat_id:     Number(chatId),
+      task_id:     taskId,
+      mode:        'completion_photos',
+      photo_count: 0,
+    })
+    await sendMessage(chatId, pm.completionPrompt)
     await sendHostNotification(`🎉 Reinigung abgeschlossen — ${propertyName}`)
   }
 

@@ -89,6 +89,72 @@ const DONE_MESSAGES: Record<string, { prompt: string; button: string }> = {
   de: { prompt: '🧹 Reinigung gestartet. Bitte bestätige wenn fertig:', button: '✅ Erledigt' },
 }
 
+const PHOTO_MESSAGES: Record<string, {
+  problemButton:    string
+  problemPrompt:    string
+  problemSaved:     string
+  completionPrompt: string
+  photoSaved:       string
+  completionDone:   string
+  limitReached:     string
+  fertigHint:       string
+}> = {
+  ru: {
+    problemButton:    '⚠️ Проблема',
+    problemPrompt:    '📸 Отправь фото проблемы. Можешь добавить описание.',
+    problemSaved:     '✅ Проблема зафиксирована. Хозяин уведомлён.',
+    completionPrompt: '📸 Отправь до 10 фото убранной квартиры. Напиши /fertig когда закончишь.',
+    photoSaved:       '✅ Фото сохранено',
+    completionDone:   '🎉 Все фото сохранены. Спасибо!',
+    limitReached:     '⚠️ Максимум 10 фото. Напиши /fertig чтобы завершить.',
+    fertigHint:       'Напиши /fertig чтобы завершить.',
+  },
+  uk: {
+    problemButton:    '⚠️ Проблема',
+    problemPrompt:    '📸 Надішли фото проблеми. Можеш додати опис.',
+    problemSaved:     '✅ Проблему зафіксовано. Господаря повідомлено.',
+    completionPrompt: '📸 Надішли до 10 фото прибраної квартири. Напиши /fertig коли закінчиш.',
+    photoSaved:       '✅ Фото збережено',
+    completionDone:   '🎉 Усі фото збережено. Дякую!',
+    limitReached:     '⚠️ Максимум 10 фото. Напиши /fertig щоб завершити.',
+    fertigHint:       'Напиши /fertig щоб завершити.',
+  },
+  ro: {
+    problemButton:    '⚠️ Problemă',
+    problemPrompt:    '📸 Trimite o poză cu problema. Poți adăuga o descriere.',
+    problemSaved:     '✅ Problema a fost înregistrată. Proprietarul a fost notificat.',
+    completionPrompt: '📸 Trimite până la 10 poze. Scrie /fertig când ai terminat.',
+    photoSaved:       '✅ Poză salvată',
+    completionDone:   '🎉 Toate pozele au fost salvate. Mulțumesc!',
+    limitReached:     '⚠️ Maximum 10 poze. Scrie /fertig pentru a termina.',
+    fertigHint:       'Scrie /fertig pentru a termina.',
+  },
+  pl: {
+    problemButton:    '⚠️ Problem',
+    problemPrompt:    '📸 Wyślij zdjęcie problemu. Możesz dodać opis.',
+    problemSaved:     '✅ Problem został zarejestrowany. Właściciel został powiadomiony.',
+    completionPrompt: '📸 Wyślij do 10 zdjęć. Napisz /fertig gdy skończysz.',
+    photoSaved:       '✅ Zdjęcie zapisane',
+    completionDone:   '🎉 Wszystkie zdjęcia zapisane. Dziękuję!',
+    limitReached:     '⚠️ Maksimum 10 zdjęć. Napisz /fertig aby zakończyć.',
+    fertigHint:       'Napisz /fertig aby zakończyć.',
+  },
+  de: {
+    problemButton:    '⚠️ Problem melden',
+    problemPrompt:    '📸 Sende ein Foto des Problems. Du kannst eine Beschreibung hinzufügen.',
+    problemSaved:     '✅ Problem wurde gespeichert. Der Auftraggeber wurde benachrichtigt.',
+    completionPrompt: '📸 Sende bis zu 10 Fotos der gereinigten Wohnung. Schreibe /fertig wenn du fertig bist.',
+    photoSaved:       '✅ Foto gespeichert',
+    completionDone:   '🎉 Alle Fotos gespeichert. Danke!',
+    limitReached:     '⚠️ Maximum 10 Fotos. Schreibe /fertig um abzuschließen.',
+    fertigHint:       'Schreibe /fertig wenn du fertig bist.',
+  },
+}
+
+export function getPhotoMessages(lang?: string | null) {
+  return PHOTO_MESSAGES[lang ?? 'de'] ?? PHOTO_MESSAGES.de
+}
+
 const RESPONSE_MESSAGES: Record<string, { accepted: string; declined: string; done: string }> = {
   ru: {
     accepted: '✅ Задание принято! Удачи с уборкой! 🧹',
@@ -157,12 +223,14 @@ export async function sendTaskNotification(task: TaskForTelegram): Promise<strin
 }
 
 export async function sendErledigtButton(chatId: string, taskId: string, lang?: string | null): Promise<void> {
-  const d = DONE_MESSAGES[lang ?? 'de'] ?? DONE_MESSAGES.de
+  const d  = DONE_MESSAGES[lang ?? 'de']  ?? DONE_MESSAGES.de
+  const pm = PHOTO_MESSAGES[lang ?? 'de'] ?? PHOTO_MESSAGES.de
   await bot.sendMessage(chatId, d.prompt, {
     reply_markup: {
-      inline_keyboard: [[
-        { text: d.button, callback_data: `done_${taskId}` },
-      ]],
+      inline_keyboard: [
+        [{ text: d.button,         callback_data: `done_${taskId}` }],
+        [{ text: pm.problemButton, callback_data: `problem_${taskId}` }],
+      ],
     },
   })
 }
