@@ -1,4 +1,3 @@
-import ical from 'node-ical'
 import { createServiceSupabaseClient } from '@/lib/supabase/service'
 
 export interface SyncResult {
@@ -9,29 +8,86 @@ export interface SyncResult {
   error?:        string
 }
 
+interface ICalEvent {
+  uid:   string
+  start: Date
+  end:   Date
+}
+
+function parseIcal(content: string): ICalEvent[] {
+  const events: ICalEvent[] = []
+  const lines = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n')
+
+  let inEvent  = false
+  let current: Partial<ICalEvent> = {}
+
+  for (const raw of lines) {
+    const line = raw.trim()
+
+    if (line === 'BEGIN:VEVENT') {
+      inEvent = true
+      current = {}
+      continue
+    }
+
+    if (line === 'END:VEVENT') {
+      if (current.uid && current.start && current.end) {
+        events.push(current as ICalEvent)
+      }
+      inEvent = false
+      continue
+    }
+
+    if (!inEvent) continue
+
+    if (line.startsWith('UID:')) {
+      current.uid = line.slice(4).trim()
+    } else if (line.startsWith('DTSTART')) {
+      const val = line.split(':').slice(1).join(':').trim()
+      if (val) current.start = parseIcalDate(val)
+    } else if (line.startsWith('DTEND')) {
+      const val = line.split(':').slice(1).join(':').trim()
+      if (val) current.end = parseIcalDate(val)
+    }
+  }
+
+  return events
+}
+
+function parseIcalDate(value: string): Date {
+  if (value.includes('T')) {
+    const iso = value.replace(
+      /^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})(Z?)$/,
+      '$1-$2-$3T$4:$5:$6$7'
+    )
+    return new Date(iso)
+  }
+  const iso = value.replace(/^(\d{4})(\d{2})(\d{2})$/, '$1-$2-$3')
+  return new Date(iso)
+}
+
 export async function syncPropertyIcal(property: {
-  id:        string
-  name:      string
-  ical_url:  string
-  user_id:   string
-  cleaner_id?: string | null
+  id:       string
+  name:     string
+  ical_url: string
+  user_id:  string
 }): Promise<SyncResult> {
   const supabase = createServiceSupabaseClient()
   let created = 0
   let skipped = 0
 
   try {
-    const events = await ical.async.fromURL(property.ical_url)
+    const res = await fetch(property.ical_url, {
+      headers: { 'User-Agent': 'CleanSync/1.0' },
+    })
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    const content = await res.text()
 
-    const now      = new Date()
-    const bookings = Object.values(events)
-      .filter((e: any) => e.type === 'VEVENT' && e.start && e.end)
-      .map((e: any) => ({
-        uid:   String(e.uid),
-        start: new Date(e.start),
-        end:   new Date(e.end),
-      }))
-      .filter(b => b.end > now)
+    const events = parseIcal(content)
+    const now    = new Date()
+
+    const bookings = events
+      .filter(e => e.end > now)
       .sort((a, b) => a.start.getTime() - b.start.getTime())
 
     for (let i = 0; i < bookings.length - 1; i++) {
@@ -49,8 +105,6 @@ export async function syncPropertyIcal(property: {
         continue
       }
 
-      const icalUid = `${current.uid}`
-
       const { error } = await supabase
         .from('tasks')
         .insert({
@@ -60,17 +114,13 @@ export async function syncPropertyIcal(property: {
           checkout_time:  checkoutTime.toISOString(),
           checkin_time:   checkinTime.toISOString(),
           status:         'pending',
-          ical_uid:       icalUid,
+          ical_uid:       current.uid,
           send_to_agency: false,
         })
 
       if (error) {
-        if (error.code === '23505') {
-          skipped++
-        } else {
-          console.error('Insert error:', error)
-          skipped++
-        }
+        if (error.code === '23505') skipped++
+        else { console.error('Insert error:', error); skipped++ }
       } else {
         created++
       }
