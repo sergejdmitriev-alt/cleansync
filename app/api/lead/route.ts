@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { appendLeadToSheet, type Lead } from '@/lib/google-sheets';
 
+export const runtime = 'nodejs';
+
 const BIG_LEAD_VALUES = new Set(['6-10', '10+']);
 
 export async function POST(req: NextRequest) {
