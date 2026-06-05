@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { appendLeadToSheet, type Lead } from '@/lib/google-sheets';
 import { verifyTurnstile } from '@/lib/turnstile';
+import { sendLeadConfirmation } from './email';
 
 export const runtime = 'nodejs';
 
@@ -34,6 +35,9 @@ export async function POST(req: NextRequest) {
     };
 
     await appendLeadToSheet(lead);
+    await sendLeadConfirmation(lead.name, lead.email).catch(err =>
+      console.error('[lead] email error:', err)
+    );
     await sendTelegramNotification(lead);
 
     return NextResponse.json({ success: true });
