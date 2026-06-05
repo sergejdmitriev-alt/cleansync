@@ -2,19 +2,31 @@ import Link from 'next/link'
 import { SendButton, DeleteButton, ArchiveButton } from './TaskActions'
 
 const STATUS_LABEL: Record<string, string> = {
-  pending:  'Ausstehend',
-  sent:     'Gesendet',
-  accepted: 'Angenommen',
-  declined: 'Abgelehnt',
-  done:     'Erledigt',
+  pending:            'Ausstehend',
+  sent:               'Gesendet',
+  accepted:           'Angenommen',
+  declined:           'Abgelehnt',
+  done:               'Erledigt',
+  reinraum_pending:   'Reinraum – Anfrage',
+  reinraum_confirmed: 'Reinraum – Bestätigt ✨',
+  reinraum_declined:  'Reinraum – Abgelehnt',
 }
 
 const STATUS_BADGE: Record<string, string> = {
-  pending:  'cs-badge cs-badge-pending',
-  sent:     'cs-badge cs-badge-sent',
-  accepted: 'cs-badge cs-badge-accepted',
-  declined: 'cs-badge cs-badge-declined',
-  done:     'cs-badge cs-badge-done',
+  pending:            'cs-badge cs-badge-pending',
+  sent:               'cs-badge cs-badge-sent',
+  accepted:           'cs-badge cs-badge-accepted',
+  declined:           'cs-badge cs-badge-declined',
+  done:               'cs-badge cs-badge-done',
+  reinraum_pending:   'cs-badge',
+  reinraum_confirmed: 'cs-badge',
+  reinraum_declined:  'cs-badge',
+}
+
+const REINRAUM_BADGE_STYLE: Record<string, React.CSSProperties> = {
+  reinraum_pending:   { background: '#fef3c7', color: '#92400e', border: '1px solid #fcd34d' },
+  reinraum_confirmed: { background: '#d1fae5', color: '#065f46', border: '1px solid #6ee7b7' },
+  reinraum_declined:  { background: '#fee2e2', color: '#991b1b', border: '1px solid #fca5a5' },
 }
 
 function fmt(dt: string) {
@@ -25,17 +37,24 @@ function fmt(dt: string) {
 }
 
 export default function TaskCard({ task }: { task: any }) {
-  const photos  = task._photos ?? { completion: 0, problem: 0 }
-  const hasProb = photos.problem > 0
+  const photos     = task._photos ?? { completion: 0, problem: 0 }
+  const hasProb    = photos.problem > 0
+  const isReinraum = task.send_to_agency
+
+  const borderColor = hasProb
+    ? 'var(--cs-danger)'
+    : isReinraum
+    ? '#d97706'
+    : 'transparent'
 
   return (
     <div style={{
       borderBottom: '1px solid var(--cs-border)',
-      borderLeft:   hasProb ? '3px solid var(--cs-danger)' : '3px solid transparent',
+      borderLeft:   `3px solid ${borderColor}`,
+      background:   isReinraum ? 'rgba(251,191,36,0.04)' : 'transparent',
       padding:      '14px 16px',
     }}>
 
-      {/* Проблема */}
       {hasProb && (
         <div style={{
           display:      'inline-flex',
@@ -53,7 +72,6 @@ export default function TaskCard({ task }: { task: any }) {
         </div>
       )}
 
-      {/* Заголовок */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px', marginBottom: '10px' }}>
         <div style={{ flex: 1, minWidth: 0 }}>
           <Link href={`/tasks/${task.id}`} style={{
@@ -67,19 +85,21 @@ export default function TaskCard({ task }: { task: any }) {
             {task.properties?.address}
           </p>
         </div>
-        <span className={STATUS_BADGE[task.status] ?? 'cs-badge cs-badge-pending'}>
+        <span
+          className={STATUS_BADGE[task.status] ?? 'cs-badge cs-badge-pending'}
+          style={REINRAUM_BADGE_STYLE[task.status]}
+        >
           {STATUS_LABEL[task.status] ?? task.status}
         </span>
       </div>
 
-      {/* Детали */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '12px' }}>
         <div>
           <p style={{ fontSize: '10px', color: 'var(--cs-text-3)', textTransform: 'uppercase', letterSpacing: '0.04em', margin: '0 0 2px', fontWeight: '500' }}>
             Reinigungskraft
           </p>
-          <p style={{ fontSize: '13px', color: 'var(--cs-text-1)', margin: 0, fontWeight: '500' }}>
-            {task.send_to_agency ? '🧹 Reinraum' : task.cleaners?.name}
+          <p style={{ fontSize: '13px', margin: 0, fontWeight: '500', color: isReinraum ? '#d97706' : 'var(--cs-text-1)' }}>
+            {isReinraum ? '🧹 Reinraum' : task.cleaners?.name}
           </p>
         </div>
         <div>
@@ -111,7 +131,6 @@ export default function TaskCard({ task }: { task: any }) {
         )}
       </div>
 
-      {/* Кнопки */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ display: 'flex', gap: '6px' }}>
           <SendButton taskId={task.id} status={task.status} />

@@ -53,10 +53,11 @@ export default async function Home() {
   }
 
   const counts = {
-    total:   tasks.length,
-    pending: tasks.filter(t => t.status === 'pending').length,
-    active:  tasks.filter(t => ['sent', 'accepted'].includes(t.status)).length,
-    done:    tasks.filter(t => t.status === 'done').length,
+    total:    tasks.length,
+    pending:  tasks.filter(t => t.status === 'pending').length,
+    active:   tasks.filter(t => ['sent', 'accepted', 'reinraum_pending', 'reinraum_confirmed'].includes(t.status)).length,
+    done:     tasks.filter(t => t.status === 'done').length,
+    reinraum: tasks.filter(t => ['reinraum_pending', 'reinraum_confirmed', 'reinraum_declined'].includes(t.status)).length,
   }
 
   return (
@@ -71,6 +72,7 @@ export default async function Home() {
             { label: 'Ausstehend',     value: counts.pending, color: 'var(--cs-text-2)' },
             { label: 'In Bearbeitung', value: counts.active,  color: 'var(--cs-blue)'   },
             { label: 'Erledigt',       value: counts.done,    color: '#059669'           },
+            { label: 'Reinraum',       value: counts.reinraum, color: '#d97706'          },
           ].map(s => (
             <div key={s.label} className="cs-card" style={{ padding: '16px 20px' }}>
               <p style={{ fontSize: '12px', color: 'var(--cs-text-3)', margin: '0 0 6px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.04em' }}>

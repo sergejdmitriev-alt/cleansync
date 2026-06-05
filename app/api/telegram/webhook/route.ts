@@ -206,6 +206,46 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true })
   }
 
+  // ── rr_confirm / rr_decline (Reinraum host confirmation) ─────────────
+  if (data.startsWith('rr_confirm_') || data.startsWith('rr_decline_')) {
+    const isConfirm = data.startsWith('rr_confirm_')
+    const taskId    = data.slice(11) // 'rr_confirm_' и 'rr_decline_' = 11 символов
+    const { bot }   = await import('@/lib/telegram')
+
+    const { data: task } = await supabase
+      .from('tasks')
+      .select('properties(name)')
+      .eq('id', taskId)
+      .single()
+
+    const propertyName = (task?.properties as any)?.name ?? 'Wohnung'
+
+    if (isConfirm) {
+      await supabase
+        .from('tasks')
+        .update({ status: 'reinraum_confirmed' })
+        .eq('id', taskId)
+
+      await bot.editMessageText(
+        `✅ <b>Reinraum-Auftrag bestätigt</b>\n\n🏠 ${propertyName}\n\n✨ Danke, dass Sie Reinraum wählen! Wir kümmern uns darum.`,
+        { chat_id: Number(chatId), message_id: Number(msgId), parse_mode: 'HTML' }
+      )
+    } else {
+      await supabase
+        .from('tasks')
+        .update({ status: 'reinraum_declined' })
+        .eq('id', taskId)
+
+      await bot.editMessageText(
+        `❌ <b>Reinraum-Auftrag abgelehnt</b>\n\n🏠 ${propertyName}`,
+        { chat_id: Number(chatId), message_id: Number(msgId), parse_mode: 'HTML' }
+      )
+    }
+
+    await bot.answerCallbackQuery(callback.id)
+    return NextResponse.json({ ok: true })
+  }
+
   // accept / decline / done
   const underscoreIndex = data.indexOf('_')
   const action          = data.slice(0, underscoreIndex)

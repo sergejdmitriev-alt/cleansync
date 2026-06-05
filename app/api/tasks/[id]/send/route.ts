@@ -22,18 +22,31 @@ export async function POST(
   }
 
   if (task.send_to_agency) {
-    await sendAgencyNotification(task)
+    const msgId = await sendAgencyNotification(task)
+
+    const { error: updateError } = await supabase
+      .from('tasks')
+      .update({
+        status: 'reinraum_pending',
+        sent_at: new Date().toISOString(),
+        ...(msgId ? { telegram_message_id: String(msgId) } : {}),
+      })
+      .eq('id', id)
+
+    if (updateError) {
+      return NextResponse.json({ error: 'Failed to update task' }, { status: 500 })
+    }
   } else {
     await sendTaskNotification(task)
-  }
 
-  const { error: updateError } = await supabase
-    .from('tasks')
-    .update({ status: 'sent', sent_at: new Date().toISOString() })
-    .eq('id', id)
+    const { error: updateError } = await supabase
+      .from('tasks')
+      .update({ status: 'sent', sent_at: new Date().toISOString() })
+      .eq('id', id)
 
-  if (updateError) {
-    return NextResponse.json({ error: 'Failed to update task' }, { status: 500 })
+    if (updateError) {
+      return NextResponse.json({ error: 'Failed to update task' }, { status: 500 })
+    }
   }
 
   return NextResponse.json({ success: true })

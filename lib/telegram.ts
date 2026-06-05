@@ -254,22 +254,39 @@ export async function sendHostNotification(text: string): Promise<void> {
   await bot.sendMessage(HOST_CHAT_ID, text)
 }
 
-export async function sendAgencyNotification(task: TaskForTelegram): Promise<void> {
-  const address  = task.properties?.address ?? '—'
-  const checkout = formatDate(task.checkout_time)
-  const checkin  = formatDate(task.checkin_time)
-  const notes    = task.notes ? `\n📝 *Notizen:* ${task.notes}` : ''
+export async function sendAgencyNotification(task: any): Promise<number | null> {
+  const propertyName = task.properties?.name ?? 'Wohnung'
+  const checkout = task.checkout_time
+    ? new Date(task.checkout_time).toLocaleString('de-AT', { dateStyle: 'short', timeStyle: 'short' })
+    : '—'
+  const checkin = task.checkin_time
+    ? new Date(task.checkin_time).toLocaleString('de-AT', { dateStyle: 'short', timeStyle: 'short' })
+    : '—'
+  const notes = task.notes ? `\n📝 ${task.notes}` : ''
 
-  const text = [
-    '🏢 *Neuer Auftrag für Reinraum!*',
-    '',
-    `📍 *Adresse:* ${address}`,
-    `🟥 *Abreise:* ${checkout}`,
-    `🔑 *Anreise:* ${checkin}`,
-    notes,
-  ].filter(s => s !== undefined).join('\n')
+  const text =
+    `🏢 <b>Neue Reinraum-Anfrage</b>\n\n` +
+    `🏠 Objekt: <b>${propertyName}</b>\n` +
+    `🚪 Abreise: ${checkout}\n` +
+    `🔑 Anreise: ${checkin}` +
+    `${notes}\n\n` +
+    `Bitte bestätigen oder ablehnen:`
 
-  await bot.sendMessage(HOST_CHAT_ID, text, { parse_mode: 'Markdown' })
+  try {
+    const res = await bot.sendMessage('451676731', text, {
+      parse_mode: 'HTML',
+      reply_markup: {
+        inline_keyboard: [[
+          { text: '✅ Bestätigen', callback_data: `rr_confirm_${task.id}` },
+          { text: '❌ Ablehnen',   callback_data: `rr_decline_${task.id}` },
+        ]],
+      },
+    })
+    return res.message_id
+  } catch (e) {
+    console.error('sendAgencyNotification error:', e)
+    return null
+  }
 }
 
 export { bot }
