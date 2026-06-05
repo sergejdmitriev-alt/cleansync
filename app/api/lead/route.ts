@@ -31,6 +31,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error('[lead] error:', err);
+    console.error('[lead] full error:', JSON.stringify(err, Object.getOwnPropertyNames(err)));
     return NextResponse.json({ error: 'Serverfehler' }, { status: 500 });
   }
 }
