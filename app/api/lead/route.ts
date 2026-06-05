@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { appendLeadToSheet, type Lead } from '@/lib/google-sheets';
+import { verifyTurnstile } from '@/lib/turnstile';
 
 export const runtime = 'nodejs';
 
@@ -8,7 +9,12 @@ const BIG_LEAD_VALUES = new Set(['6-10', '10+']);
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, email, phone, properties, message } = body as Partial<Lead>;
+    const { name, email, phone, properties, message, turnstileToken } = body as Partial<Lead> & { turnstileToken?: string };
+
+    const isHuman = await verifyTurnstile(turnstileToken ?? '');
+    if (!isHuman) {
+      return NextResponse.json({ error: 'Bot detected' }, { status: 403 });
+    }
 
     if (!name?.trim() || !email?.trim() || !phone?.trim() || !properties) {
       return NextResponse.json({ error: 'Pflichtfelder fehlen' }, { status: 400 });

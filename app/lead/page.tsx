@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Turnstile } from '@marsidev/react-turnstile';
 
 const PROPERTIES_OPTIONS = [
   { value: '1', label: '1 Objekt' },
@@ -14,6 +15,7 @@ type FormState = 'idle' | 'loading' | 'success' | 'error';
 export default function LeadPage() {
   const [form, setForm] = useState({ name: '', email: '', phone: '', properties: '', message: '' });
   const [state, setState] = useState<FormState>('idle');
+  const [turnstileToken, setTurnstileToken] = useState<string>('');
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -26,7 +28,7 @@ export default function LeadPage() {
       const res = await fetch('/api/lead', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, turnstileToken }),
       });
       if (!res.ok) throw new Error();
       setState('success');
@@ -89,7 +91,11 @@ export default function LeadPage() {
             <textarea id="message" name="message" rows={3} placeholder="Wie koordinieren Sie Ihre Reinigungen gerade?" value={form.message} onChange={handleChange} />
           </div>
           {state === 'error' && <p className="form-error">Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.</p>}
-          <button type="submit" className="submit-btn" disabled={state === 'loading'}>
+          <Turnstile
+            siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+            onSuccess={(token) => setTurnstileToken(token)}
+          />
+          <button type="submit" className="submit-btn" disabled={state === 'loading' || !turnstileToken}>
             {state === 'loading' ? 'Wird gesendet …' : 'Demo anfragen →'}
           </button>
           <p className="form-note">Kein Spam. Keine Verpflichtung. Wir melden uns persönlich.</p>

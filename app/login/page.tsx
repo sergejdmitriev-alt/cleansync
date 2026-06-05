@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { Turnstile } from '@marsidev/react-turnstile'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -10,19 +10,27 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [turnstileToken, setTurnstileToken] = useState<string>('')
 
   async function handleLogin() {
     if (!email || !password) {
       setError('Bitte E-Mail und Passwort eingeben.')
       return
     }
+    if (!turnstileToken) {
+      setError('Bitte die Sicherheitsüberprüfung abschließen.')
+      return
+    }
     setLoading(true)
     setError('')
 
-    const supabase = createClient()
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, turnstileToken }),
+    })
 
-    if (error) {
+    if (!res.ok) {
       setError('Ungültige E-Mail oder Passwort.')
       setLoading(false)
       return
@@ -77,9 +85,14 @@ export default function LoginPage() {
             </div>
           )}
 
+          <Turnstile
+            siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+            onSuccess={(token) => setTurnstileToken(token)}
+          />
+
           <button
             onClick={handleLogin}
-            disabled={loading}
+            disabled={loading || !turnstileToken}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2.5 rounded-lg transition-colors disabled:opacity-50"
           >
             {loading ? 'Wird angemeldet...' : 'Anmelden'}
