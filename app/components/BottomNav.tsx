@@ -13,7 +13,7 @@ const ITEMS_RIGHT = [
 
 export default function BottomNav() {
   const pathname = usePathname()
-  if (pathname === '/login') return null
+  if (pathname === '/login' || pathname === '/lead') return null
 
   const itemStyle = (active: boolean) => ({
     display:        'flex',
