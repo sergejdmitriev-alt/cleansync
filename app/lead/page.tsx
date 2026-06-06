@@ -16,6 +16,7 @@ export default function LeadPage() {
   const [form, setForm] = useState({ name: '', email: '', phone: '', properties: '', message: '' });
   const [state, setState] = useState<FormState>('idle');
   const [turnstileToken, setTurnstileToken] = useState<string>('');
+  const [objects, setObjects] = useState(5);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -61,6 +62,44 @@ export default function LeadPage() {
         <h1>Übergaben automatisch.<br />Fotos, Bestätigungen, alles.</h1>
         <p className="lead-sub">CleanSync verbindet Ihre Reinigungskräfte mit Ihrem Kalender — kein WhatsApp-Chaos, keine verpassten Checkouts.</p>
       </section>
+
+      <div className="calc-card">
+        <div className="calc-title">Wie viel sparen Sie mit CleanSync?</div>
+        <div className="calc-sub">Ø 20 Min. Koordinationsaufwand pro Reinigung · 12 €/Std.</div>
+
+        <div className="slider-label">
+          <span>Anzahl der Objekte</span>
+          <span className="slider-value">{objects}</span>
+        </div>
+
+        <input
+          type="range"
+          min={1}
+          max={20}
+          value={objects}
+          onChange={(e) => setObjects(parseInt(e.target.value))}
+          className="calc-slider"
+        />
+
+        <div className="calc-results">
+          <div className="calc-box">
+            <div className="calc-number">{objects * 8}</div>
+            <div className="calc-label">Reinigungen / Monat</div>
+          </div>
+          <div className="calc-box">
+            <div className="calc-number">{(objects * 8 * 20 / 60).toFixed(1)}h</div>
+            <div className="calc-label">Stunden gespart / Monat</div>
+          </div>
+          <div className="calc-box">
+            <div className="calc-number green">{Math.round(objects * 8 * 20 / 60 * 12)} €</div>
+            <div className="calc-label">Kosten gespart / Monat</div>
+          </div>
+        </div>
+
+        <div className="calc-yearly">
+          → Das sind {(Math.round(objects * 8 * 20 / 60 * 12) * 12).toLocaleString('de-AT')} € pro Jahr
+        </div>
+      </div>
 
       <div className="lead-card">
         <h2 className="form-title">Kostenlose Demo anfragen</h2>
@@ -145,4 +184,18 @@ const styles = `
   .success-icon { width: 56px; height: 56px; background: #dcfce7; color: #16a34a; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; }
   .success-card h2 { font-size: 22px; font-weight: 800; }
   .success-card p { font-size: 15px; color: #555; line-height: 1.6; }
+  .calc-card { background: #fff; border-radius: 16px; padding: 28px 24px; border: 1px solid #e5e5e5; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+  .calc-title { font-size: 16px; font-weight: 700; color: #111; margin-bottom: 4px; }
+  .calc-sub { font-size: 13px; color: #888; margin-bottom: 24px; }
+  .slider-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .slider-label span:first-child { font-size: 14px; font-weight: 600; color: #444; }
+  .slider-value { font-size: 20px; font-weight: 800; color: #2563eb; }
+  .calc-slider { width: 100%; height: 6px; border-radius: 3px; background: #e0e0e0; outline: none; -webkit-appearance: none; appearance: none; margin-bottom: 24px; cursor: pointer; }
+  .calc-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: #2563eb; cursor: pointer; box-shadow: 0 2px 6px rgba(37,99,235,0.3); }
+  .calc-results { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+  .calc-box { background: #f4f4f2; border-radius: 12px; padding: 16px 12px; text-align: center; }
+  .calc-number { font-size: 24px; font-weight: 800; color: #111; margin-bottom: 6px; line-height: 1; }
+  .calc-number.green { color: #16a34a; }
+  .calc-label { font-size: 11px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.4px; line-height: 1.3; }
+  .calc-yearly { font-size: 13px; color: #555; text-align: center; font-weight: 500; }
 `;
