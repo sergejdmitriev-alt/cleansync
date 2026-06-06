@@ -4,7 +4,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function sendLeadConfirmation(name: string, email: string) {
   await resend.emails.send({
-    from: 'CleanSync <onboarding@resend.dev>',
+    from: 'CleanSync <noreply@cleansync.at>',
     to: email,
     subject: 'Ihre Demo-Anfrage bei CleanSync',
     html: `
