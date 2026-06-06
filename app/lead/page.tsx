@@ -14,10 +14,6 @@ type FormState = 'idle' | 'loading' | 'success' | 'error';
 
 const FAQS = [
   {
-    q: 'Was kostet CleanSync?',
-    a: 'Aktuell nehmen wir die ersten Nutzer kostenlos auf. Später ist ein monatliches Abo geplant — Sie werden rechtzeitig informiert.',
-  },
-  {
     q: 'Braucht meine Reinigungskraft ein Smartphone?',
     a: 'Ja, nur Telegram. Die App ist kostenlos und auf jedem Smartphone verfügbar. Keine Registrierung für die Reinigungskraft nötig.',
   },
