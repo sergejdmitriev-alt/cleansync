@@ -257,7 +257,7 @@ export default function SettingsPage() {
                   onChange={e => { setTelegramId(e.target.value); setTelegramSaved(false) }}
                 />
                 <p style={{ fontSize: '12px', color: 'var(--cs-text-3)', margin: '6px 0 0' }}>
-                  Schreiben Sie /start an @userinfobot um Ihre ID zu erhalten
+                  Um Ihre Chat-ID zu erhalten: Öffnen Sie Telegram → suchen Sie @userinfobot → drücken Sie Start
                 </p>
               </div>
               <button
