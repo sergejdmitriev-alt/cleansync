@@ -33,17 +33,17 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-      <div className="bg-white rounded-xl border border-gray-200 p-8 w-full max-w-sm">
+    <div className="min-h-screen flex items-center justify-center px-4">
+      <div style={{ background: 'var(--cs-surface)', border: '1px solid var(--cs-border)', borderRadius: 'var(--cs-radius-lg)', padding: '32px', width: '100%', maxWidth: '384px' }}>
         <div className="flex items-center gap-2 mb-8">
-          <span className="text-xl font-bold text-gray-900">✦ CleanSync</span>
+          <span className="text-xl font-bold" style={{ color: 'var(--cs-text-1)' }}>✦ CleanSync</span>
         </div>
 
-        <h1 className="text-lg font-semibold text-gray-900 mb-6">Anmelden</h1>
+        <h1 className="text-lg font-semibold mb-6" style={{ color: 'var(--cs-text-1)' }}>Anmelden</h1>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium mb-1" style={{ color: 'var(--cs-text-2)' }}>
               E-Mail
             </label>
             <input
@@ -52,12 +52,12 @@ export default function LoginPage() {
               onChange={e => { setEmail(e.target.value); setError('') }}
               onKeyDown={e => e.key === 'Enter' && handleLogin()}
               placeholder="name@example.com"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="cs-input"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium mb-1" style={{ color: 'var(--cs-text-2)' }}>
               Passwort
             </label>
             <input
@@ -66,12 +66,12 @@ export default function LoginPage() {
               onChange={e => { setPassword(e.target.value); setError('') }}
               onKeyDown={e => e.key === 'Enter' && handleLogin()}
               placeholder="••••••••"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="cs-input"
             />
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg">
+            <div style={{ background: 'var(--cs-danger-bg)', border: '1px solid var(--cs-danger-border)', color: 'var(--cs-danger-text)', fontSize: '14px', padding: '12px 16px', borderRadius: 'var(--cs-radius-md)' }}>
               {error}
             </div>
           )}
@@ -79,7 +79,7 @@ export default function LoginPage() {
           <button
             onClick={handleLogin}
             disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2.5 rounded-lg transition-colors disabled:opacity-50"
+            className="cs-btn-primary w-full justify-center" style={{ padding: '10px', fontSize: '14px' }}
           >
             {loading ? 'Wird angemeldet...' : 'Anmelden'}
           </button>

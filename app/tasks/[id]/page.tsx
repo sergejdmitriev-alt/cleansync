@@ -4,12 +4,15 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import Header from '@/app/components/Header'
 
-const statusConfig: Record<string, { label: string; className: string }> = {
-  pending:  { label: 'Ausstehend',  className: 'bg-gray-100 text-gray-600' },
-  sent:     { label: 'Gesendet',    className: 'bg-blue-100 text-blue-700' },
-  accepted: { label: 'Angenommen',  className: 'bg-green-100 text-green-700' },
-  declined: { label: 'Abgelehnt',   className: 'bg-red-100 text-red-700' },
-  done:     { label: 'Erledigt',    className: 'bg-emerald-100 text-emerald-700' },
+const statusConfig: Record<string, { label: string; bg: string; color: string }> = {
+  pending:            { label: 'Ausstehend',          bg: 'var(--cs-pending-bg)',  color: 'var(--cs-pending-text)'  },
+  sent:               { label: 'Gesendet',             bg: 'var(--cs-sent-bg)',     color: 'var(--cs-sent-text)'     },
+  accepted:           { label: 'Angenommen',           bg: 'var(--cs-accepted-bg)', color: 'var(--cs-accepted-text)' },
+  declined:           { label: 'Abgelehnt',            bg: 'var(--cs-declined-bg)', color: 'var(--cs-declined-text)' },
+  done:               { label: 'Erledigt',             bg: 'var(--cs-done-bg)',     color: 'var(--cs-done-text)'     },
+  reinraum_pending:   { label: 'Reinraum – Anfrage',   bg: 'rgba(245,158,11,0.15)', color: '#fbbf24'                 },
+  reinraum_confirmed: { label: 'Reinraum – Bestätigt', bg: 'rgba(34,197,94,0.15)',  color: '#86efac'                 },
+  reinraum_declined:  { label: 'Reinraum – Abgelehnt', bg: 'var(--cs-declined-bg)', color: 'var(--cs-declined-text)' },
 }
 
 function fmt(dt: string) {
@@ -61,121 +64,133 @@ export default async function TaskDetailPage({
   const s = statusConfig[task.status] ?? statusConfig.pending
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div style={{ minHeight: '100vh', background: 'transparent', position: 'relative', zIndex: 1 }}>
       <Header />
-      <main className="max-w-3xl mx-auto px-4 py-8 space-y-6">
+      <main style={{ maxWidth: '768px', margin: '0 auto', padding: '24px 20px 80px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
-        {/* Назад */}
-        <Link href="/" className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-gray-700">
+        <Link href="/" style={{ fontSize: '13px', color: 'var(--cs-text-3)', textDecoration: 'none' }}>
           ← Zurück zur Übersicht
         </Link>
 
-        {/* Детали задачи */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
-          <div className="flex items-start justify-between gap-4">
+        {/* Task details */}
+        <div className="cs-card" style={{ padding: '24px' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px', marginBottom: '20px' }}>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">
+              <h1 style={{ fontSize: '20px', fontWeight: '700', color: 'var(--cs-text-1)', margin: '0 0 4px' }}>
                 {task.properties?.name ?? '—'}
               </h1>
-              <p className="text-sm text-gray-500 mt-1">{task.properties?.address}</p>
+              <p style={{ fontSize: '13px', color: 'var(--cs-text-3)', margin: 0 }}>{task.properties?.address}</p>
             </div>
-            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${s.className}`}>
+            <span style={{
+              flexShrink: 0,
+              display: 'inline-flex', alignItems: 'center',
+              padding: '4px 12px', borderRadius: 'var(--cs-radius-full)',
+              fontSize: '12px', fontWeight: '500',
+              background: s.bg, color: s.color,
+            }}>
               {s.label}
             </span>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-100 text-sm">
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', paddingTop: '16px', borderTop: '1px solid var(--cs-border)', fontSize: '13px' }}>
             <div>
-              <p className="text-gray-400 text-xs mb-1">Reinigungskraft</p>
-              <p className="font-medium">
+              <p style={{ fontSize: '11px', color: 'var(--cs-text-3)', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: '500' }}>Reinigungskraft</p>
+              <p style={{ margin: 0, fontWeight: '500', color: 'var(--cs-text-1)' }}>
                 {task.send_to_agency ? 'Reinraum' : (task.cleaners?.name ?? '—')}
               </p>
             </div>
             <div>
-              <p className="text-gray-400 text-xs mb-1">Abreise</p>
-              <p className="font-medium">{fmt(task.checkout_time)}</p>
+              <p style={{ fontSize: '11px', color: 'var(--cs-text-3)', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: '500' }}>Abreise</p>
+              <p style={{ margin: 0, fontWeight: '500', color: 'var(--cs-text-1)' }}>{fmt(task.checkout_time)}</p>
             </div>
             <div>
-              <p className="text-gray-400 text-xs mb-1">Anreise</p>
-              <p className="font-medium">{fmt(task.checkin_time)}</p>
+              <p style={{ fontSize: '11px', color: 'var(--cs-text-3)', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: '500' }}>Anreise</p>
+              <p style={{ margin: 0, fontWeight: '500', color: 'var(--cs-text-1)' }}>{fmt(task.checkin_time)}</p>
             </div>
             {task.done_at && (
               <div>
-                <p className="text-gray-400 text-xs mb-1">Abgeschlossen</p>
-                <p className="font-medium">{fmt(task.done_at)}</p>
+                <p style={{ fontSize: '11px', color: 'var(--cs-text-3)', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: '500' }}>Abgeschlossen</p>
+                <p style={{ margin: 0, fontWeight: '500', color: 'var(--cs-text-1)' }}>{fmt(task.done_at)}</p>
               </div>
             )}
             {task.notes && (
-              <div className="col-span-2">
-                <p className="text-gray-400 text-xs mb-1">Notizen</p>
-                <p className="font-medium">{task.notes}</p>
+              <div style={{ gridColumn: '1 / -1' }}>
+                <p style={{ fontSize: '11px', color: 'var(--cs-text-3)', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: '500' }}>Notizen</p>
+                <p style={{ margin: 0, fontWeight: '500', color: 'var(--cs-text-1)' }}>{task.notes}</p>
               </div>
             )}
           </div>
         </div>
 
-        {/* Фото проблем */}
+        {/* Problem photos */}
         {problemPhotos.length > 0 && (
-          <div className="bg-white rounded-xl border border-red-100 p-6 space-y-4">
-            <h2 className="font-semibold text-red-600">⚠️ Gemeldete Probleme ({problemPhotos.length})</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <div className="cs-card" style={{ padding: '24px', borderColor: 'var(--cs-danger-border)' }}>
+            <h2 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--cs-danger-text)', margin: '0 0 16px' }}>
+              ⚠️ Gemeldete Probleme ({problemPhotos.length})
+            </h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
               {problemPhotos.map(photo => (
-                <div key={photo.id} className="space-y-1">
+                <div key={photo.id} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   {photo.url ? (
                     <a href={photo.url} target="_blank" rel="noopener noreferrer">
                       <img
                         src={photo.url}
                         alt="Problem"
-                        className="w-full aspect-square object-cover rounded-lg border border-red-100 hover:opacity-90 transition-opacity"
+                        style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 'var(--cs-radius-md)', border: '1px solid var(--cs-danger-border)', opacity: 1, transition: 'opacity 0.15s' }}
+                        onMouseOver={e => (e.currentTarget.style.opacity = '0.85')}
+                        onMouseOut={e => (e.currentTarget.style.opacity = '1')}
                       />
                     </a>
                   ) : (
-                    <div className="w-full aspect-square bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 text-xs">
+                    <div style={{ width: '100%', aspectRatio: '1', background: 'var(--cs-surface-2)', borderRadius: 'var(--cs-radius-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', color: 'var(--cs-text-3)' }}>
                       Nicht verfügbar
                     </div>
                   )}
                   {photo.caption && (
-                    <p className="text-xs text-gray-500">{photo.caption}</p>
+                    <p style={{ fontSize: '11px', color: 'var(--cs-text-2)', margin: 0 }}>{photo.caption}</p>
                   )}
-                  <p className="text-xs text-gray-300">{fmt(photo.created_at)}</p>
+                  <p style={{ fontSize: '11px', color: 'var(--cs-text-3)', margin: 0 }}>{fmt(photo.created_at)}</p>
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        {/* Фото уборки */}
+        {/* Completion photos */}
         {completionPhotos.length > 0 && (
-          <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
-            <h2 className="font-semibold text-gray-900">Reinigungsfotos ({completionPhotos.length})</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <div className="cs-card" style={{ padding: '24px' }}>
+            <h2 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--cs-text-1)', margin: '0 0 16px' }}>
+              Reinigungsfotos ({completionPhotos.length})
+            </h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
               {completionPhotos.map(photo => (
-                <div key={photo.id} className="space-y-1">
+                <div key={photo.id} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   {photo.url ? (
                     <a href={photo.url} target="_blank" rel="noopener noreferrer">
                       <img
                         src={photo.url}
                         alt="Reinigung"
-                        className="w-full aspect-square object-cover rounded-lg border border-gray-100 hover:opacity-90 transition-opacity"
+                        style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 'var(--cs-radius-md)', border: '1px solid var(--cs-border)', opacity: 1, transition: 'opacity 0.15s' }}
+                        onMouseOver={e => (e.currentTarget.style.opacity = '0.85')}
+                        onMouseOut={e => (e.currentTarget.style.opacity = '1')}
                       />
                     </a>
                   ) : (
-                    <div className="w-full aspect-square bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 text-xs">
+                    <div style={{ width: '100%', aspectRatio: '1', background: 'var(--cs-surface-2)', borderRadius: 'var(--cs-radius-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', color: 'var(--cs-text-3)' }}>
                       Nicht verfügbar
                     </div>
                   )}
-                  <p className="text-xs text-gray-300">{fmt(photo.created_at)}</p>
+                  <p style={{ fontSize: '11px', color: 'var(--cs-text-3)', margin: 0 }}>{fmt(photo.created_at)}</p>
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        {/* Нет фото */}
+        {/* No photos */}
         {photosWithUrls.length === 0 && (
-          <div className="bg-white rounded-xl border border-gray-200 p-6 text-center text-gray-400">
-            <p className="text-3xl mb-2">📷</p>
-            <p className="text-sm">Noch keine Fotos für diesen Auftrag</p>
+          <div className="cs-card" style={{ padding: '48px 24px', textAlign: 'center' }}>
+            <p style={{ fontSize: '13px', color: 'var(--cs-text-3)', margin: 0 }}>Noch keine Fotos für diesen Auftrag</p>
           </div>
         )}
 

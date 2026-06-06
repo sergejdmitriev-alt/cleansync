@@ -3,59 +3,59 @@
 /* ─── Design Tokens ─────────────────────────────── */
 :root {
   /* Surfaces */
-  --cs-bg:        #F7F6F3;
-  --cs-surface:   #FFFFFF;
-  --cs-surface-2: #F3F2EF;
+  --cs-bg:        #10141c;
+  --cs-surface:   #161c28;
+  --cs-surface-2: #1d2535;
 
   /* Text */
-  --cs-text-1: #1C1917;
-  --cs-text-2: #57534E;
-  --cs-text-3: #A8A29E;
+  --cs-text-1: #e8eaf0;
+  --cs-text-2: #8892a4;
+  --cs-text-3: #4a5568;
 
   /* Borders */
-  --cs-border:       #E7E5E1;
-  --cs-border-hover: #D4D2CE;
+  --cs-border:       rgba(255, 255, 255, 0.08);
+  --cs-border-hover: rgba(100, 170, 255, 0.22);
 
   /* Status — pending */
-  --cs-pending-bg:   #F5F4F1;
-  --cs-pending-text: #57534E;
+  --cs-pending-bg:   rgba(255, 255, 255, 0.07);
+  --cs-pending-text: #9ca3af;
 
   /* Status — sent */
-  --cs-sent-bg:   #EFF6FF;
-  --cs-sent-text: #1D4ED8;
+  --cs-sent-bg:   rgba(37, 99, 235, 0.18);
+  --cs-sent-text: #93c5fd;
 
   /* Status — accepted */
-  --cs-accepted-bg:   #F0FDF4;
-  --cs-accepted-text: #15803D;
+  --cs-accepted-bg:   rgba(21, 128, 61, 0.18);
+  --cs-accepted-text: #86efac;
 
   /* Status — declined */
-  --cs-declined-bg:   #FEF2F2;
-  --cs-declined-text: #B91C1C;
+  --cs-declined-bg:   rgba(185, 28, 28, 0.18);
+  --cs-declined-text: #fca5a5;
 
   /* Status — done */
-  --cs-done-bg:   #ECFDF5;
-  --cs-done-text: #047857;
+  --cs-done-bg:   rgba(4, 120, 87, 0.18);
+  --cs-done-text: #6ee7b7;
 
   /* Brand blue */
-  --cs-blue:      #2563EB;
-  --cs-blue-bg:   #EFF6FF;
-  --cs-blue-text: #1D4ED8;
+  --cs-blue:      #3b7ef8;
+  --cs-blue-bg:   rgba(59, 126, 248, 0.15);
+  --cs-blue-text: #93c5fd;
 
-  /* Danger/problem red */
-  --cs-danger:        #DC2626;
-  --cs-danger-bg:     #FEF2F2;
-  --cs-danger-text:   #B91C1C;
-  --cs-danger-border: #FECACA;
+  /* Danger */
+  --cs-danger:        #ef4444;
+  --cs-danger-bg:     rgba(239, 68, 68, 0.12);
+  --cs-danger-text:   #fca5a5;
+  --cs-danger-border: rgba(239, 68, 68, 0.3);
 
-  /* Radius */
+  /* Radius — без изменений */
   --cs-radius-sm:   8px;
   --cs-radius-md:   12px;
   --cs-radius-lg:   16px;
   --cs-radius-full: 9999px;
 
   /* Shadows */
-  --cs-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --cs-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.08);
+  --cs-shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.3);
+  --cs-shadow-md: 0 4px 12px -1px rgb(0 0 0 / 0.4);
 }
 
 /* ─── Base ───────────────────────────────────────── */
@@ -71,6 +71,9 @@ html {
 
 body {
   background-color: var(--cs-bg);
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 28px 28px;
+  background-attachment: fixed;
   color: var(--cs-text-1);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -107,8 +110,8 @@ body {
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
-  background: var(--cs-text-1);
-  color: var(--cs-surface);
+  background: var(--cs-blue);
+  color: #ffffff;
   border: none;
   border-radius: var(--cs-radius-md);
   font-size: 13px;
@@ -154,9 +157,9 @@ body {
 }
 .cs-pill:hover { border-color: var(--cs-border-hover); }
 .cs-pill-active {
-  background: var(--cs-text-1);
-  color: var(--cs-surface);
-  border-color: var(--cs-text-1);
+  background: var(--cs-blue);
+  color: #ffffff;
+  border-color: var(--cs-blue);
 }
 
 /* Input / Select */

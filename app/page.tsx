@@ -105,7 +105,7 @@ export default async function Home() {
     : null
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--cs-bg)' }}>
+    <div style={{ minHeight: '100vh', background: 'transparent', position: 'relative', zIndex: 1 }}>
       <Header />
       <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px 20px' }}>
 

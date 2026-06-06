@@ -22,6 +22,16 @@ export default function RootLayout({
   return (
     <html lang="de">
       <body className={jakarta.className}>
+        <div
+          aria-hidden="true"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'radial-gradient(ellipse 700px 550px at 50% 38%, rgba(17, 85, 204, 0.18) 0%, transparent 68%)',
+            pointerEvents: 'none',
+            zIndex: 0,
+          }}
+        />
         {children}
         <BottomNav />
       </body>
