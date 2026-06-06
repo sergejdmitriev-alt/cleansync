@@ -5,9 +5,11 @@ import { usePathname } from 'next/navigation'
 import { LogoutButton } from './TaskActions'
 
 const NAV = [
-  { href: '/',          label: 'Aufträge'      },
-  { href: '/archive',   label: 'Archiv'        },
-  { href: '/settings',  label: 'Einstellungen' },
+  { href: '/',           label: 'Aufträge'      },
+  { href: '/archive',    label: 'Archiv'        },
+  { href: '/kalender',   label: 'Kalender'      },
+  { href: '/statistik',  label: 'Statistik'     },
+  { href: '/settings',   label: 'Einstellungen' },
 ]
 
 export default function Header() {
