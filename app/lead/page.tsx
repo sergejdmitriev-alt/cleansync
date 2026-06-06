@@ -12,11 +12,35 @@ const PROPERTIES_OPTIONS = [
 
 type FormState = 'idle' | 'loading' | 'success' | 'error';
 
+const FAQS = [
+  {
+    q: 'Was kostet CleanSync?',
+    a: 'Aktuell nehmen wir die ersten Nutzer kostenlos auf. Später ist ein monatliches Abo geplant — Sie werden rechtzeitig informiert.',
+  },
+  {
+    q: 'Braucht meine Reinigungskraft ein Smartphone?',
+    a: 'Ja, nur Telegram. Die App ist kostenlos und auf jedem Smartphone verfügbar. Keine Registrierung für die Reinigungskraft nötig.',
+  },
+  {
+    q: 'Funktioniert das auch ohne Airbnb?',
+    a: 'Ja. Sie können Aufgaben auch manuell erstellen — ohne Kalender-Sync. Airbnb macht es nur vollautomatisch.',
+  },
+  {
+    q: 'Was passiert wenn die Reinigungskraft ablehnt?',
+    a: 'Sie bekommen sofort eine Benachrichtigung und können die Aufgabe an jemand anderen senden oder Reinraum beauftragen.',
+  },
+  {
+    q: 'Sind meine Daten sicher?',
+    a: 'Ja. Alle Daten liegen in einer europäischen Datenbank (Supabase EU), Fotos werden automatisch nach 90 Tagen gelöscht.',
+  },
+];
+
 export default function LeadPage() {
   const [form, setForm] = useState({ name: '', email: '', phone: '', properties: '', message: '' });
   const [state, setState] = useState<FormState>('idle');
   const [turnstileToken, setTurnstileToken] = useState<string>('');
   const [objects, setObjects] = useState(5);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -101,6 +125,36 @@ export default function LeadPage() {
         </div>
       </div>
 
+      <div className="how-section">
+        <h2 className="how-title">So funktioniert CleanSync</h2>
+        <div className="how-steps">
+          <div className="how-step">
+            <div className="how-icon">🗓</div>
+            <div className="how-line" />
+            <div className="how-step-title">Kalender sync</div>
+            <div className="how-step-desc">Airbnb-Kalender verbindet sich automatisch — neue Buchungen erscheinen sofort als Aufgaben</div>
+          </div>
+          <div className="how-step">
+            <div className="how-icon">💬</div>
+            <div className="how-line" />
+            <div className="how-step-title">Bot sendet Aufgabe</div>
+            <div className="how-step-desc">Die Reinigungskraft bekommt eine Telegram-Nachricht mit Datum, Uhrzeit und Notizen</div>
+          </div>
+          <div className="how-step">
+            <div className="how-icon">✅</div>
+            <div className="how-line" />
+            <div className="how-step-title">Bestätigung</div>
+            <div className="how-step-desc">Die Reinigungskraft bestätigt oder lehnt ab — Sie sehen den Status live im Dashboard</div>
+          </div>
+          <div className="how-step">
+            <div className="how-icon">📸</div>
+            <div className="how-line last" />
+            <div className="how-step-title">Foto als Nachweis</div>
+            <div className="how-step-desc">Nach der Reinigung sendet die Kraft Fotos — automatisch gespeichert, jederzeit abrufbar</div>
+          </div>
+        </div>
+      </div>
+
       <div className="lead-card">
         <h2 className="form-title">Kostenlose Demo anfragen</h2>
         <form onSubmit={handleSubmit} className="lead-form" noValidate>
@@ -139,6 +193,19 @@ export default function LeadPage() {
           </button>
           <p className="form-note">Kein Spam. Keine Verpflichtung. Wir melden uns persönlich.</p>
         </form>
+      </div>
+
+      <div className="faq-section">
+        <h2 className="faq-title">Häufige Fragen</h2>
+        {FAQS.map((faq, i) => (
+          <div key={i} className="faq-item" onClick={() => setOpenFaq(openFaq === i ? null : i)}>
+            <div className="faq-question">
+              <span>{faq.q}</span>
+              <span className="faq-arrow">{openFaq === i ? '−' : '+'}</span>
+            </div>
+            {openFaq === i && <div className="faq-answer">{faq.a}</div>}
+          </div>
+        ))}
       </div>
 
       <div className="trust-row">
@@ -198,4 +265,21 @@ const styles = `
   .calc-number.green { color: #16a34a; }
   .calc-label { font-size: 11px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.4px; line-height: 1.3; }
   .calc-yearly { font-size: 13px; color: #555; text-align: center; font-weight: 500; }
+  .how-section { padding: 8px 0; }
+  .how-title { font-size: 18px; font-weight: 800; color: #111; margin-bottom: 24px; text-align: center; }
+  .how-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  @media (max-width: 520px) { .how-steps { grid-template-columns: repeat(2, 1fr); gap: 16px; } }
+  .how-step { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; }
+  .how-icon { width: 52px; height: 52px; background: #eff6ff; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+  .how-step-title { font-size: 13px; font-weight: 700; color: #111; }
+  .how-step-desc { font-size: 12px; color: #777; line-height: 1.5; }
+  .how-line { display: none; }
+  .faq-section { display: flex; flex-direction: column; gap: 0; }
+  .faq-title { font-size: 18px; font-weight: 800; color: #111; margin-bottom: 16px; }
+  .faq-item { border-bottom: 1px solid #eee; padding: 16px 0; cursor: pointer; }
+  .faq-item:first-of-type { border-top: 1px solid #eee; }
+  .faq-question { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .faq-question span:first-child { font-size: 14px; font-weight: 600; color: #111; line-height: 1.4; }
+  .faq-arrow { font-size: 20px; color: #2563eb; font-weight: 300; flex-shrink: 0; }
+  .faq-answer { font-size: 13px; color: #555; line-height: 1.7; margin-top: 10px; }
 `;
