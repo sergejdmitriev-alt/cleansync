@@ -125,25 +125,25 @@ export default function LeadPage() {
         <h2 className="how-title">So funktioniert CleanSync</h2>
         <div className="how-steps">
           <div className="how-step">
-            <div className="how-icon">🗓</div>
+            <div className="how-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
             <div className="how-line" />
             <div className="how-step-title">Kalender sync</div>
             <div className="how-step-desc">Airbnb-Kalender verbindet sich automatisch — neue Buchungen erscheinen sofort als Aufgaben</div>
           </div>
           <div className="how-step">
-            <div className="how-icon">💬</div>
+            <div className="how-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
             <div className="how-line" />
             <div className="how-step-title">Bot sendet Aufgabe</div>
             <div className="how-step-desc">Die Reinigungskraft bekommt eine Telegram-Nachricht mit Datum, Uhrzeit und Notizen</div>
           </div>
           <div className="how-step">
-            <div className="how-icon">✅</div>
+            <div className="how-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
             <div className="how-line" />
             <div className="how-step-title">Bestätigung</div>
             <div className="how-step-desc">Die Reinigungskraft bestätigt oder lehnt ab — Sie sehen den Status live im Dashboard</div>
           </div>
           <div className="how-step">
-            <div className="how-icon">📸</div>
+            <div className="how-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
             <div className="how-line last" />
             <div className="how-step-title">Foto als Nachweis</div>
             <div className="how-step-desc">Nach der Reinigung sendet die Kraft Fotos — automatisch gespeichert, jederzeit abrufbar</div>
@@ -205,9 +205,9 @@ export default function LeadPage() {
       </div>
 
       <div className="trust-row">
-        <div className="trust-item"><span>🗓</span><span>iCal-Sync mit Airbnb</span></div>
-        <div className="trust-item"><span>📸</span><span>Foto-Nachweis der Reinigung</span></div>
-        <div className="trust-item"><span>💬</span><span>Telegram-Bot für Reinigungskräfte</span></div>
+        <div className="trust-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>iCal-Sync mit Airbnb</span></div>
+        <div className="trust-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><span>Foto-Nachweis der Reinigung</span></div>
+        <div className="trust-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Telegram-Bot für Reinigungskräfte</span></div>
       </div>
 
       <style>{styles}</style>
