@@ -100,8 +100,22 @@ export default function KalenderPage() {
     }
   }
 
-  function prevMonth() { setCurrentDate(d => new Date(d.getFullYear(), d.getMonth() - 1, 1)); setSelectedDay(null) }
-  function nextMonth() { setCurrentDate(d => new Date(d.getFullYear(), d.getMonth() + 1, 1)); setSelectedDay(null) }
+  function prevMonth() {
+    if (view === 'week') {
+      setCurrentDate(d => { const n = new Date(d); n.setDate(n.getDate() - 7); return n })
+    } else {
+      setCurrentDate(d => new Date(d.getFullYear(), d.getMonth() - 1, 1))
+    }
+    setSelectedDay(null)
+  }
+  function nextMonth() {
+    if (view === 'week') {
+      setCurrentDate(d => { const n = new Date(d); n.setDate(n.getDate() + 7); return n })
+    } else {
+      setCurrentDate(d => new Date(d.getFullYear(), d.getMonth() + 1, 1))
+    }
+    setSelectedDay(null)
+  }
 
   function onTouchStart(e: React.TouchEvent) { touchStartX.current = e.touches[0].clientX }
   function onTouchEnd(e: React.TouchEvent) {
@@ -123,7 +137,7 @@ export default function KalenderPage() {
   while (gridCells.length % 7 !== 0) gridCells.push(null)
 
   // Build current week days
-  const weekStart = getMondayOfWeek(new Date())
+  const weekStart = getMondayOfWeek(currentDate)
   const weekDays  = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(weekStart)
     d.setDate(weekStart.getDate() + i)
@@ -131,7 +145,11 @@ export default function KalenderPage() {
   })
 
   const today        = toDateStr(new Date())
-  const monthLabel   = currentDate.toLocaleString('de-AT', { month: 'long', year: 'numeric' })
+  const weekEnd = new Date(weekStart)
+  weekEnd.setDate(weekStart.getDate() + 6)
+  const monthLabel = view === 'week'
+    ? `${weekStart.getDate()}. – ${weekEnd.getDate()}. ${weekEnd.toLocaleString('de-AT', { month: 'long', year: 'numeric' })}`
+    : currentDate.toLocaleString('de-AT', { month: 'long', year: 'numeric' })
   const selectedTasks = selectedDay ? (tasksByDate[selectedDay] ?? []) : []
 
   return (
