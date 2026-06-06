@@ -3,6 +3,7 @@ import {
   removeKeyboard, sendMessage, sendErledigtButton,
   getResponseMessages, sendHostNotification, getPhotoMessages,
 } from '@/lib/telegram'
+import { getHostTelegramIdForUser } from '@/lib/profile'
 import { NextRequest, NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
@@ -129,15 +130,18 @@ export async function POST(req: NextRequest) {
     if (session.mode === 'problem') {
       const { data: task } = await supabase
         .from('tasks')
-        .select('properties(name)')
+        .select('user_id, properties(name)')
         .eq('id', session.task_id)
         .single()
       const propertyName = (task?.properties as any)?.name ?? 'Wohnung'
       const caption      = message.caption ? `\n📝 ${message.caption}` : ''
       const { bot }      = await import('@/lib/telegram')
+      const hostChatId   = task?.user_id
+        ? await getHostTelegramIdForUser(task.user_id)
+        : '451676731'
 
       await bot.sendPhoto(
-        '451676731',
+        hostChatId,
         largest.file_id,
         { caption: `⚠️ Problem gemeldet — ${propertyName} (${cleanerName})${caption}` }
       )
@@ -257,7 +261,7 @@ export async function POST(req: NextRequest) {
 
   const { data: task } = await supabase
     .from('tasks')
-    .select('id, status, cleaners(telegram_chat_id, language, name), properties(name)')
+    .select('id, status, user_id, cleaners(telegram_chat_id, language, name), properties(name)')
     .eq('id', taskId)
     .single()
 
@@ -273,6 +277,9 @@ export async function POST(req: NextRequest) {
   const propertyName = (task.properties as any)?.name   ?? 'Wohnung'
   const resp         = getResponseMessages(lang)
   const pm           = getPhotoMessages(lang)
+  const hostChatId   = task.user_id
+    ? await getHostTelegramIdForUser(task.user_id)
+    : '451676731'
 
   if (action === 'accept') {
     await supabase
@@ -282,7 +289,7 @@ export async function POST(req: NextRequest) {
     await removeKeyboard(chatId, msgId)
     await sendMessage(chatId, resp.accepted)
     await sendErledigtButton(chatId, taskId, lang)
-    await sendHostNotification(`✅ ${cleanerName} hat den Auftrag angenommen — ${propertyName}`)
+    await sendHostNotification(`✅ ${cleanerName} hat den Auftrag angenommen — ${propertyName}`, hostChatId)
 
   } else if (action === 'decline') {
     await supabase
@@ -307,7 +314,7 @@ export async function POST(req: NextRequest) {
       photo_count: 0,
     })
     await sendMessage(chatId, pm.completionPrompt)
-    await sendHostNotification(`🎉 Reinigung abgeschlossen — ${propertyName}`)
+    await sendHostNotification(`🎉 Reinigung abgeschlossen — ${propertyName}`, hostChatId)
   }
 
   return NextResponse.json({ ok: true })

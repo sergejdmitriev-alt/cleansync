@@ -248,13 +248,11 @@ export async function sendMessage(chatId: string, text: string): Promise<void> {
   await bot.sendMessage(chatId, text)
 }
 
-const HOST_CHAT_ID = '451676731' // Telegram chat ID хоста
-
-export async function sendHostNotification(text: string): Promise<void> {
-  await bot.sendMessage(HOST_CHAT_ID, text)
+export async function sendHostNotification(text: string, hostChatId = '451676731'): Promise<void> {
+  await bot.sendMessage(hostChatId, text)
 }
 
-export async function sendAgencyNotification(task: any): Promise<number | null> {
+export async function sendAgencyNotification(task: any, hostChatId = '451676731'): Promise<number | null> {
   const propertyName = task.properties?.name ?? 'Wohnung'
   const checkout = task.checkout_time
     ? new Date(task.checkout_time).toLocaleString('de-AT', { dateStyle: 'short', timeStyle: 'short' })
@@ -273,7 +271,7 @@ export async function sendAgencyNotification(task: any): Promise<number | null> 
     `Bitte bestätigen oder ablehnen:`
 
   try {
-    const res = await bot.sendMessage('451676731', text, {
+    const res = await bot.sendMessage(hostChatId, text, {
       parse_mode: 'HTML',
       reply_markup: {
         inline_keyboard: [[

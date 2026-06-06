@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceSupabaseClient } from '@/lib/supabase/service'
 import { sendTaskNotification, sendAgencyNotification } from '@/lib/telegram'
+import { getHostTelegramIdForUser } from '@/lib/profile'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,7 +23,10 @@ export async function POST(
   }
 
   if (task.send_to_agency) {
-    const msgId = await sendAgencyNotification(task)
+    const hostChatId = task.user_id
+      ? await getHostTelegramIdForUser(task.user_id)
+      : '451676731'
+    const msgId = await sendAgencyNotification(task, hostChatId)
 
     const { error: updateError } = await supabase
       .from('tasks')

@@ -25,16 +25,32 @@ export default function SettingsPage() {
   const [newProperty, setNewProperty] = useState({ name: '', address: '', default_notes: '', ical_url: '' })
   const [editingCleaner,  setEditingCleaner]  = useState<Cleaner | null>(null)
   const [editingProperty, setEditingProperty] = useState<Property | null>(null)
+  const [telegramId,      setTelegramId]      = useState('')
+  const [telegramSaved,   setTelegramSaved]   = useState(false)
 
   async function load() {
-    const [c, p] = await Promise.all([
+    const [c, p, t] = await Promise.all([
       fetch('/api/cleaners').then(r => r.json()),
       fetch('/api/properties').then(r => r.json()),
+      fetch('/api/settings/telegram').then(r => r.json()),
     ])
     setCleaners(c)
     setProperties(p)
+    setTelegramId(t.telegramId ?? '')
   }
   useEffect(() => { load() }, [])
+
+  async function saveTelegramId() {
+    const res = await fetch('/api/settings/telegram', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ telegramId }),
+    })
+    if (res.ok) {
+      setTelegramSaved(true)
+      setTimeout(() => setTelegramSaved(false), 2000)
+    }
+  }
 
   async function addCleaner() {
     await fetch('/api/cleaners', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newCleaner) })
@@ -220,6 +236,36 @@ export default function SettingsPage() {
                 value={newCleaner.telegram_chat_id} onChange={e => setNewCleaner({ ...newCleaner, telegram_chat_id: e.target.value })} />
               <button onClick={addCleaner} className="cs-btn-primary" style={{ alignSelf: 'flex-start', fontSize: '13px' }}>
                 + Hinzufügen
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Telegram-Benachrichtigungen */}
+        <div style={sectionStyle}>
+          <div className="cs-card" style={{ overflow: 'hidden' }}>
+            <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--cs-border)' }}>
+              <h2 style={{ margin: 0, fontSize: '15px', fontWeight: '600' }}>💬 Telegram-Benachrichtigungen</h2>
+            </div>
+            <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div>
+                <label style={labelStyle}>Ihre Telegram-Chat-ID</label>
+                <input
+                  className="cs-input"
+                  placeholder="z.B. 123456789"
+                  value={telegramId}
+                  onChange={e => { setTelegramId(e.target.value); setTelegramSaved(false) }}
+                />
+                <p style={{ fontSize: '12px', color: 'var(--cs-text-3)', margin: '6px 0 0' }}>
+                  Schreiben Sie /start an @userinfobot um Ihre ID zu erhalten
+                </p>
+              </div>
+              <button
+                onClick={saveTelegramId}
+                className="cs-btn-primary"
+                style={{ alignSelf: 'flex-start', fontSize: '13px' }}
+              >
+                {telegramSaved ? '✓ Gespeichert' : 'Speichern'}
               </button>
             </div>
           </div>
