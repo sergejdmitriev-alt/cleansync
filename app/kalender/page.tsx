@@ -296,7 +296,7 @@ export default function KalenderPage() {
                     {t.properties?.name ?? '—'}
                   </p>
                   <p style={{ fontSize: '11px', color: 'var(--cs-text-3)', margin: 0 }}>
-                    {t.send_to_agency ? '🧹 Reinraum' : (t.cleaners?.name ?? '—')}
+                    {t.send_to_agency ? 'Reinraum' : (t.cleaners?.name ?? '—')}
                     {' · '}
                     {new Date(t.checkout_time).toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit' })} Uhr
                   </p>

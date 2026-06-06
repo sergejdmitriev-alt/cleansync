@@ -38,7 +38,7 @@ export default async function ArchivePage() {
 
         {!tasks || tasks.length === 0 ? (
           <div className="cs-card" style={{ padding: '64px 20px', textAlign: 'center' }}>
-            <p style={{ fontSize: '36px', margin: '0 0 12px' }}>📦</p>
+            <p style={{ fontSize: '36px', margin: '0 0 12px', color: 'var(--cs-text-3)' }}>—</p>
             <p style={{ fontSize: '15px', fontWeight: '500', color: 'var(--cs-text-2)', margin: 0 }}>
               Keine archivierten Aufträge
             </p>

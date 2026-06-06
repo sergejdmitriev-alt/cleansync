@@ -41,7 +41,7 @@ const FILTERS = [
   { key: 'accepted',  label: 'Angenommen'  },
   { key: 'declined',  label: 'Abgelehnt'   },
   { key: 'done',      label: 'Erledigt'    },
-  { key: 'reinraum',  label: '🧹 Reinraum' },
+  { key: 'reinraum',  label: 'Reinraum' },
 ]
 
 function fmt(dt: string) {
@@ -212,7 +212,7 @@ export default function TasksFilter({ tasks }: { tasks: any[] }) {
                       </td>
                       <td style={{ padding: '14px 20px', color: 'var(--cs-text-2)' }}>
                         {isReinraum
-                          ? <span style={{ fontWeight: '600', color: '#d97706' }}>🧹 Reinraum</span>
+                          ? <span style={{ fontWeight: '600', color: '#d97706' }}>Reinraum</span>
                           : task.cleaners?.name
                         }
                       </td>

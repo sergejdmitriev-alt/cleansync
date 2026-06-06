@@ -6,7 +6,7 @@ export function RefreshButton() {
       onClick={() => window.location.reload()}
       className="text-sm text-gray-400 hover:text-gray-600"
     >
-      🔄 Aktualisieren
+      Aktualisieren
     </button>
   )
 }
@@ -15,8 +15,8 @@ export function SendButton({ taskId, status }: { taskId: string; status: string 
   if (status === 'done' || status === 'cancelled') return null
 
   const label =
-    status === 'pending'  ? '📤 Senden' :
-    status === 'declined' ? '🔄 Erneut senden' : null
+    status === 'pending'  ? 'Senden' :
+    status === 'declined' ? 'Erneut senden' : null
 
   if (!label) return <span className="text-xs text-gray-400">—</span>
 
@@ -48,7 +48,12 @@ export function DeleteButton({ taskId }: { taskId: string }) {
       className="text-xs text-red-400 hover:text-red-600 transition-colors px-2 py-1.5"
       title="Löschen"
     >
-      🗑
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="3 6 5 6 21 6"/>
+        <path d="M19 6l-1 14H6L5 6"/>
+        <path d="M10 11v6"/><path d="M14 11v6"/>
+        <path d="M9 6V4h6v2"/>
+      </svg>
     </button>
   )
 }
@@ -70,7 +75,7 @@ export function ArchiveButton({ taskId }: { taskId: string }) {
       className="text-xs text-gray-400 hover:text-gray-600 transition-colors px-2 py-1.5"
       title="Archivieren"
     >
-      📦 Archiv
+      Archiv
     </button>
   )
 }

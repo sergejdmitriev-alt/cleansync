@@ -88,7 +88,7 @@ export default async function TaskDetailPage({
             <div>
               <p className="text-gray-400 text-xs mb-1">Reinigungskraft</p>
               <p className="font-medium">
-                {task.send_to_agency ? '🧹 Reinraum' : (task.cleaners?.name ?? '—')}
+                {task.send_to_agency ? 'Reinraum' : (task.cleaners?.name ?? '—')}
               </p>
             </div>
             <div>
@@ -147,7 +147,7 @@ export default async function TaskDetailPage({
         {/* Фото уборки */}
         {completionPhotos.length > 0 && (
           <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
-            <h2 className="font-semibold text-gray-900">📸 Reinigungsfotos ({completionPhotos.length})</h2>
+            <h2 className="font-semibold text-gray-900">Reinigungsfotos ({completionPhotos.length})</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {completionPhotos.map(photo => (
                 <div key={photo.id} className="space-y-1">

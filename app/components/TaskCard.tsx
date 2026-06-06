@@ -99,7 +99,7 @@ export default function TaskCard({ task }: { task: any }) {
             Reinigungskraft
           </p>
           <p style={{ fontSize: '13px', margin: 0, fontWeight: '500', color: isReinraum ? '#d97706' : 'var(--cs-text-1)' }}>
-            {isReinraum ? '🧹 Reinraum' : task.cleaners?.name}
+            {isReinraum ? 'Reinraum' : task.cleaners?.name}
           </p>
         </div>
         <div>

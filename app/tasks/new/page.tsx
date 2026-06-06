@@ -127,7 +127,7 @@ export default function NewTaskPage() {
               }}>
                 {[
                   { val: false, label: 'Eigene Reinigungskraft' },
-                  { val: true,  label: '🧹 Reinraum' },
+                  { val: true,  label: 'Reinraum' },
                 ].map(({ val, label }) => (
                   <button
                     key={String(val)}
