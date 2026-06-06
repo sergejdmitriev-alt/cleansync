@@ -36,11 +36,10 @@ export default function Header() {
           display: 'flex', alignItems: 'center', gap: '7px',
           textDecoration: 'none', flexShrink: 0, marginRight: '8px',
         }}>
-          <span style={{ fontSize: '20px' }}>🧹</span>
           <span style={{
             fontWeight: '600', fontSize: '15px',
             color: 'var(--cs-text-1)', letterSpacing: '-0.01em',
-          }}>CleanSync</span>
+          }}>✦ CleanSync</span>
         </Link>
 
         {/* Навигация — только desktop */}
