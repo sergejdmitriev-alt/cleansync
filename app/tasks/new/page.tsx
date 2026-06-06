@@ -85,10 +85,7 @@ export default function NewTaskPage() {
         <Link href="/" style={{ fontSize: '13px', color: 'var(--cs-text-3)', textDecoration: 'none' }}>
           ← Zurück
         </Link>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span>🧹</span>
-          <span style={{ fontWeight: '600', fontSize: '15px', letterSpacing: '-0.01em' }}>CleanSync</span>
-        </div>
+        <span style={{ fontWeight: '600', fontSize: '15px', letterSpacing: '-0.01em' }}>✦ CleanSync</span>
       </header>
 
       <main style={{ maxWidth: '560px', margin: '0 auto', padding: '32px 20px' }}>
