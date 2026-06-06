@@ -29,6 +29,9 @@ export default function NewTaskPage() {
   useEffect(() => {
     fetch('/api/properties').then(r => r.json()).then(setProperties)
     fetch('/api/cleaners').then(r => r.json()).then(setCleaners)
+    // Prefill checkout_time if ?date= is passed from calendar
+    const dateParam = new URLSearchParams(window.location.search).get('date')
+    if (dateParam) setForm(prev => ({ ...prev, checkout_time: `${dateParam}T11:00` }))
   }, [])
 
   async function handleSubmit(e: React.MouseEvent, sendNow: boolean) {

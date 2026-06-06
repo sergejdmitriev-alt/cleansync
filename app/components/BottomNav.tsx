@@ -4,11 +4,12 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 const ITEMS_LEFT  = [
-  { href: '/',        icon: '🏠', label: 'Start'   },
-  { href: '/archive', icon: '📦', label: 'Archiv'  },
+  { href: '/',         icon: '🏠', label: 'Start'    },
+  { href: '/kalender', icon: '📅', label: 'Kalender' },
 ]
 const ITEMS_RIGHT = [
-  { href: '/settings', icon: '⚙️', label: 'Einstell.' },
+  { href: '/statistik', icon: '📊', label: 'Statistik' },
+  { href: '/settings',  icon: '⚙️', label: 'Einstell.' },
 ]
 
 export default function BottomNav() {
@@ -50,7 +51,6 @@ export default function BottomNav() {
         paddingBottom: 'env(safe-area-inset-bottom)',
       }}
     >
-      {/* Левые пункты */}
       {ITEMS_LEFT.map(({ href, icon, label }) => {
         const active = pathname === href
         return (
@@ -61,7 +61,7 @@ export default function BottomNav() {
         )
       })}
 
-      {/* FAB — центральная кнопка */}
+      {/* FAB */}
       <div style={{
         flex:           1,
         display:        'flex',
@@ -88,7 +88,6 @@ export default function BottomNav() {
         </Link>
       </div>
 
-      {/* Правые пункты */}
       {ITEMS_RIGHT.map(({ href, icon, label }) => {
         const active = pathname === href
         return (
@@ -98,10 +97,6 @@ export default function BottomNav() {
           </Link>
         )
       })}
-
-      {/* Пустой слот для симметрии */}
-      <div style={{ flex: 1 }} />
-
     </nav>
   )
 }
