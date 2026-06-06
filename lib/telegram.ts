@@ -3,6 +3,8 @@ import TelegramBot from 'node-telegram-bot-api'
 const token = process.env.TELEGRAM_BOT_TOKEN!
 const bot = new TelegramBot(token)
 
+const REINRAUM_CHAT_ID = '451676731'
+
 export interface TaskForTelegram {
   id: string
   checkout_time: string
@@ -252,7 +254,7 @@ export async function sendHostNotification(text: string, hostChatId = '451676731
   await bot.sendMessage(hostChatId, text)
 }
 
-export async function sendAgencyNotification(task: any, hostChatId = '451676731'): Promise<number | null> {
+export async function sendAgencyNotification(task: any, hostChatId?: string): Promise<number | null> {
   const propertyName = task.properties?.name ?? 'Wohnung'
   const checkout = task.checkout_time
     ? new Date(task.checkout_time).toLocaleString('de-AT', { dateStyle: 'short', timeStyle: 'short' })
@@ -262,7 +264,7 @@ export async function sendAgencyNotification(task: any, hostChatId = '451676731'
     : '—'
   const notes = task.notes ? `\n📝 ${task.notes}` : ''
 
-  const text =
+  const reinraumText =
     `🏢 <b>Neue Reinraum-Anfrage</b>\n\n` +
     `🏠 Objekt: <b>${propertyName}</b>\n` +
     `🚪 Abreise: ${checkout}\n` +
@@ -271,7 +273,16 @@ export async function sendAgencyNotification(task: any, hostChatId = '451676731'
     `Bitte bestätigen oder ablehnen:`
 
   try {
-    const res = await bot.sendMessage(hostChatId, text, {
+    // Сообщение хосту — без кнопок, только информация
+    if (hostChatId && hostChatId !== REINRAUM_CHAT_ID) {
+      await bot.sendMessage(hostChatId,
+        `📋 Auftrag wurde an Reinraum weitergeleitet\n\n🏠 ${propertyName}\n🚪 Abreise: ${checkout}\n🔑 Anreise: ${checkin}`,
+        { parse_mode: 'HTML' }
+      )
+    }
+
+    // Сообщение владельцу Reinraum — с кнопками
+    const res = await bot.sendMessage(REINRAUM_CHAT_ID, reinraumText, {
       parse_mode: 'HTML',
       reply_markup: {
         inline_keyboard: [[
