@@ -7,9 +7,11 @@ export const dynamic = 'force-dynamic'
 export async function POST(request: NextRequest) {
   const { email, password, turnstileToken } = await request.json()
 
-  const isHuman = await verifyTurnstile(turnstileToken)
-  if (!isHuman) {
-    return NextResponse.json({ error: 'Bot detected' }, { status: 403 })
+  if (turnstileToken) {
+    const isHuman = await verifyTurnstile(turnstileToken)
+    if (!isHuman) {
+      return NextResponse.json({ error: 'Bot detected' }, { status: 403 })
+    }
   }
 
   const response = NextResponse.json({ success: true })

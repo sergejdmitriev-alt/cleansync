@@ -17,10 +17,6 @@ export default function LoginPage() {
       setError('Bitte E-Mail und Passwort eingeben.')
       return
     }
-    if (!turnstileToken) {
-      setError('Bitte die Sicherheitsüberprüfung abschließen.')
-      return
-    }
     setLoading(true)
     setError('')
 
@@ -44,8 +40,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
       <div className="bg-white rounded-xl border border-gray-200 p-8 w-full max-w-sm">
         <div className="flex items-center gap-2 mb-8">
-          <span className="text-2xl">🧹</span>
-          <span className="text-xl font-bold text-gray-900">CleanSync</span>
+          <span className="text-xl font-bold text-gray-900">✦ CleanSync</span>
         </div>
 
         <h1 className="text-lg font-semibold text-gray-900 mb-6">Anmelden</h1>
@@ -92,7 +87,7 @@ export default function LoginPage() {
 
           <button
             onClick={handleLogin}
-            disabled={loading || !turnstileToken}
+            disabled={loading}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2.5 rounded-lg transition-colors disabled:opacity-50"
           >
             {loading ? 'Wird angemeldet...' : 'Anmelden'}
