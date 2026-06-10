@@ -30,7 +30,9 @@ export async function proxy(request: NextRequest) {
   // Если не авторизован и пытается зайти не на /login — редирект
   if (!user && !request.nextUrl.pathname.startsWith('/login')) {
     const url = request.nextUrl.clone()
+    const next = request.nextUrl.pathname
     url.pathname = '/login'
+    url.searchParams.set('next', next)
     return NextResponse.redirect(url)
   }
 
