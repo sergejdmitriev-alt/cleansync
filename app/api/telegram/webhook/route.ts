@@ -9,6 +9,14 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 
+const FERTIG_BUTTON: Record<string, string> = {
+  de: '✅ Reinigung abgeschlossen',
+  ru: '✅ Завершить уборку',
+  uk: '✅ Завершити прибирання',
+  ro: '✅ Finalizează curățenia',
+  pl: '✅ Zakończ sprzątanie',
+}
+
 const WELCOME: Record<string, string> = {
   ru: '👋 Привет! Ты подключён к CleanSync.\n\nЗдесь ты будешь получать задания на уборку. Жди уведомлений! 🧹',
   uk: '👋 Привіт! Ти підключений до CleanSync.\n\nТут ти будеш отримувати завдання на прибирання. Чекай сповіщень! 🧹',
@@ -257,6 +265,31 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true })
   }
 
+  // fertig_{taskId} — уборщик завершил через кнопку
+  if (data.startsWith('fertig_')) {
+    const taskId = data.slice(7)
+    const { bot } = await import('@/lib/telegram')
+    await bot.answerCallbackQuery(callback.id)
+
+    const { data: session } = await supabase
+      .from('bot_sessions')
+      .select('task_id, mode')
+      .eq('chat_id', Number(chatId))
+      .single()
+
+    if (!session) return NextResponse.json({ ok: true })
+
+    const { lang } = await getCleanerLang(supabase, chatId)
+    const pm       = getPhotoMessages(lang)
+
+    await supabase.from('bot_sessions').delete().eq('chat_id', Number(chatId))
+    await sendMessage(chatId, pm.completionDone)
+    if (session.mode === 'completion_photos') {
+      await notifyHost(taskId, 'done')
+    }
+    return NextResponse.json({ ok: true })
+  }
+
   // accept / decline / done
   const underscoreIndex = data.indexOf('_')
   const action          = data.slice(0, underscoreIndex)
@@ -294,8 +327,8 @@ export async function POST(req: NextRequest) {
       .update({ status: 'accepted', accepted_at: new Date().toISOString() })
       .eq('id', taskId)
     await removeKeyboard(chatId, msgId)
-    await sendMessage(chatId, resp.accepted)
-    await sendErledigtButton(chatId, taskId, lang)
+    const { bot: _bot } = await import('@/lib/telegram')
+    await _bot.answerCallbackQuery(callback.id, { text: resp.accepted })
     await notifyHost(taskId, 'accepted')
 
   } else if (action === 'decline') {
@@ -320,7 +353,15 @@ export async function POST(req: NextRequest) {
       mode:        'completion_photos',
       photo_count: 0,
     })
-    await sendMessage(chatId, pm.completionPrompt)
+    const { bot: _botDone } = await import('@/lib/telegram')
+    await _botDone.sendMessage(chatId, pm.completionPrompt, {
+      reply_markup: {
+        inline_keyboard: [[{
+          text:          FERTIG_BUTTON[lang] ?? FERTIG_BUTTON['de'],
+          callback_data: `fertig_${taskId}`,
+        }]],
+      },
+    })
     await notifyHost(taskId, 'done')
   }
 
