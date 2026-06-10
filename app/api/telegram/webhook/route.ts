@@ -1,4 +1,5 @@
 import { createServiceSupabaseClient } from '@/lib/supabase/service'
+import { notifyHost } from '@/lib/notifications/host'
 import {
   removeKeyboard, sendMessage, sendErledigtButton,
   getResponseMessages, sendHostNotification, getPhotoMessages,
@@ -230,6 +231,8 @@ export async function POST(req: NextRequest) {
         .update({ status: 'reinraum_confirmed' })
         .eq('id', taskId)
 
+      await notifyHost(taskId, 'reinraum_confirmed')
+
       await bot.editMessageText(
         `✅ <b>Reinraum-Auftrag bestätigt</b>\n\n🏠 ${propertyName}\n\n✨ Danke, dass Sie Reinraum wählen! Wir kümmern uns darum.`,
         { chat_id: Number(chatId), message_id: Number(msgId), parse_mode: 'HTML' }
@@ -289,7 +292,7 @@ export async function POST(req: NextRequest) {
     await removeKeyboard(chatId, msgId)
     await sendMessage(chatId, resp.accepted)
     await sendErledigtButton(chatId, taskId, lang)
-    await sendHostNotification(`✅ ${cleanerName} hat den Auftrag angenommen — ${propertyName}`, hostChatId)
+    await notifyHost(taskId, 'accepted')
 
   } else if (action === 'decline') {
     await supabase
@@ -314,7 +317,7 @@ export async function POST(req: NextRequest) {
       photo_count: 0,
     })
     await sendMessage(chatId, pm.completionPrompt)
-    await sendHostNotification(`🎉 Reinigung abgeschlossen — ${propertyName}`, hostChatId)
+    await notifyHost(taskId, 'done')
   }
 
   return NextResponse.json({ ok: true })
