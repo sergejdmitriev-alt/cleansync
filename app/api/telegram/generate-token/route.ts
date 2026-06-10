@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createServerSupabaseClient } from '@/lib/supabase/server'
 import crypto from 'crypto'
 
 export const runtime = 'nodejs'
 
 export async function POST() {
-  const supabase = await createClient()
+  const supabase = await createServerSupabaseClient()
 
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   if (authError || !user) {
