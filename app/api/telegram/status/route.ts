@@ -1,0 +1,21 @@
+import { NextResponse } from 'next/server'
+import { createClient } from '@/utils/supabase/server'
+
+export async function GET() {
+  const supabase = await createClient()
+
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const { data } = await supabase
+    .from('profiles')
+    .select('telegram_chat_id')
+    .eq('id', user.id)
+    .single()
+
+  return NextResponse.json({
+    connected: !!data?.telegram_chat_id,
+  })
+}
