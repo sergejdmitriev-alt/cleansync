@@ -101,6 +101,9 @@ export async function POST(req: NextRequest) {
 
     await supabase.from('bot_sessions').delete().eq('chat_id', Number(chatId))
     await sendMessage(chatId, pm.completionDone)
+    if (session.mode === 'completion_photos') {
+      await notifyHost(session.task_id, 'done')
+    }
     return NextResponse.json({ ok: true })
   }
 
@@ -161,6 +164,7 @@ export async function POST(req: NextRequest) {
     if (newCount >= 10) {
       await supabase.from('bot_sessions').delete().eq('chat_id', Number(chatId))
       await sendMessage(chatId, pm.completionDone)
+      await notifyHost(session.task_id, 'done')
     } else {
       await sendMessage(chatId, `${pm.photoSaved} (${newCount}/10). ${pm.fertigHint}`)
     }
