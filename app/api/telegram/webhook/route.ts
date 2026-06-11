@@ -28,9 +28,12 @@ async function getCleanerLang(supabase: any, chatId: string) {
   const { data } = await supabase
     .from('cleaners')
     .select('language, name')
-    .eq('telegram_chat_id', Number(chatId))
+    .eq('telegram_chat_id', chatId)
     .single()
-  return { lang: data?.language ?? 'de', name: data?.name ?? 'Reinigungskraft' }
+  return {
+    lang: data?.language ?? 'de',
+    name: data?.name ?? '',
+  }
 }
 
 async function savePhoto(
