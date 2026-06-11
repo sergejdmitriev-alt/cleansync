@@ -29,6 +29,20 @@ async function sendTelegram(
   })
 }
 
+function fmtDate(iso: string | null): string {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleDateString('de-AT', {
+    day: '2-digit', month: '2-digit', year: 'numeric',
+  })
+}
+
+function fmtTime(iso: string | null): string {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleTimeString('de-AT', {
+    hour: '2-digit', minute: '2-digit',
+  })
+}
+
 // ── Главная функция — вызывай из любого места ────────────────
 export async function notifyHost(
   taskId: string,
@@ -36,15 +50,13 @@ export async function notifyHost(
 ): Promise<void> {
   const supabase = createServiceSupabaseClient()
 
-  // Задание + объект
   const { data: task } = await supabase
     .from('tasks')
     .select(`
       id,
-      host_id,
-      cleaning_date,
-      start_time,
-      end_time,
+      user_id,
+      checkin_time,
+      checkout_time,
       property:properties(name)
     `)
     .eq('id', taskId)
@@ -52,23 +64,20 @@ export async function notifyHost(
 
   if (!task) return
 
-  // Telegram ID хоста
   const { data: profile } = await supabase
     .from('profiles')
     .select('telegram_chat_id')
-    .eq('id', task.host_id)
+    .eq('id', task.user_id)
     .single()
 
   if (!profile?.telegram_chat_id) return
 
   const chatId   = Number(profile.telegram_chat_id)
   const propName = (task.property as { name?: string } | null)?.name ?? '—'
-  const timeStr  = task.end_time
-    ? `${task.start_time} – ${task.end_time}`
-    : (task.start_time ?? '—')
+  const dateStr  = fmtDate(task.checkin_time)
+  const timeStr  = `${fmtTime(task.checkin_time)} – ${fmtTime(task.checkout_time)}`
   const taskUrl  = `${process.env.NEXT_PUBLIC_APP_URL}/tasks/${taskId}`
 
-  // Кол-во фото (только для done)
   let photoCount = 0
   if (type === 'done') {
     const { count } = await supabase
@@ -78,25 +87,24 @@ export async function notifyHost(
     photoCount = count ?? 0
   }
 
-  // ── Тексты на немецком ───────────────────────────────────
   const messages: Record<HostNotifyType, string> = {
     accepted:
       `✅ <b>Auftrag angenommen</b>\n\n` +
       `🏠 <b>Objekt:</b> ${propName}\n` +
-      `📅 <b>Datum:</b> ${task.cleaning_date}\n` +
+      `📅 <b>Datum:</b> ${dateStr}\n` +
       `⏰ <b>Zeit:</b> ${timeStr}`,
 
     done:
       `🏁 <b>Reinigung abgeschlossen</b>\n\n` +
       `🏠 <b>Objekt:</b> ${propName}\n` +
-      `📅 <b>Datum:</b> ${task.cleaning_date}\n` +
+      `📅 <b>Datum:</b> ${dateStr}\n` +
       `⏰ <b>Abgeschlossen:</b> ${timeStr}` +
       (photoCount > 0 ? `\n📸 <b>Fotos:</b> ${photoCount} beigefügt` : ''),
 
     reinraum_confirmed:
       `🏢 <b>Reinraum: Auftrag bestätigt</b>\n\n` +
       `🏠 <b>Objekt:</b> ${propName}\n` +
-      `📅 <b>Datum:</b> ${task.cleaning_date}\n` +
+      `📅 <b>Datum:</b> ${dateStr}\n` +
       `⏰ <b>Zeit:</b> ${timeStr}`,
   }
 
