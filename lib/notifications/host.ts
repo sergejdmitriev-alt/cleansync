@@ -22,11 +22,13 @@ async function sendTelegram(
     })
   }
 
-  await fetch(`${BOT}/sendMessage`, {
+  const res = await fetch(`${BOT}/sendMessage`, {
     method:  'POST',
     headers: { 'Content-Type': 'application/json' },
     body:    JSON.stringify(body),
   })
+  const result = await res.json()
+  console.error('[sendTelegram] status:', res.status, 'body:', JSON.stringify(result))
 }
 
 function fmtDate(iso: string | null): string {
