@@ -70,13 +70,61 @@ html {
 }
 
 body {
-  background-color: var(--cs-bg);
-  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
-  background-size: 28px 28px;
-  background-attachment: fixed;
+  background: transparent;
   color: var(--cs-text-1);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Animated background ────────────────────────── */
+.cs-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: #0E1013;
+  overflow: hidden;
+}
+.cs-bg::before,
+.cs-bg::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  will-change: transform;
+}
+/* Слой 1 — основной синий, крупный, верх */
+.cs-bg::before {
+  width: 90vw; height: 70vh;
+  left: -10vw; top: -25vh;
+  background: radial-gradient(ellipse at center, rgba(64,118,235,0.20), transparent 65%);
+  animation: cs-drift-a 48s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate;
+}
+/* Слой 2 — глубинный indigo, низ-право, слабее */
+.cs-bg::after {
+  width: 70vw; height: 60vh;
+  right: -20vw; bottom: -25vh;
+  background: radial-gradient(ellipse at center, rgba(99,91,255,0.10), transparent 65%);
+  animation: cs-drift-b 64s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate;
+}
+@keyframes cs-drift-a {
+  from { transform: translate(0, 0) scale(1); }
+  to   { transform: translate(8vw, 6vh) scale(1.12); }
+}
+@keyframes cs-drift-b {
+  from { transform: translate(0, 0) scale(1.08); }
+  to   { transform: translate(-6vw, -5vh) scale(1); }
+}
+/* Мобилка — статичный top-glow */
+@media (max-width: 767px) {
+  .cs-bg::before {
+    width: 140vw; height: 50vh;
+    left: -20vw; top: -20vh;
+    background: radial-gradient(ellipse at center, rgba(64,118,235,0.22), transparent 70%);
+    animation: none;
+  }
+  .cs-bg::after { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cs-bg::before, .cs-bg::after { animation: none; }
 }
 
 /* ─── Utility classes ────────────────────────────── */
