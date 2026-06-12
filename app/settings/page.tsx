@@ -25,32 +25,19 @@ export default function SettingsPage() {
   const [newProperty, setNewProperty] = useState({ name: '', address: '', default_notes: '', ical_url: '' })
   const [editingCleaner,  setEditingCleaner]  = useState<Cleaner | null>(null)
   const [editingProperty, setEditingProperty] = useState<Property | null>(null)
-  const [telegramId,      setTelegramId]      = useState('')
-  const [telegramSaved,   setTelegramSaved]   = useState(false)
+  const [telegramConnected, setTelegramConnected] = useState<boolean | null>(null)
 
   async function load() {
     const [c, p, t] = await Promise.all([
       fetch('/api/cleaners').then(r => r.json()),
       fetch('/api/properties').then(r => r.json()),
-      fetch('/api/settings/telegram').then(r => r.json()),
+      fetch('/api/telegram/status').then(r => r.json()),
     ])
     setCleaners(c)
     setProperties(p)
-    setTelegramId(t.telegramId ?? '')
+    setTelegramConnected(t.connected ?? false)
   }
   useEffect(() => { load() }, [])
-
-  async function saveTelegramId() {
-    const res = await fetch('/api/settings/telegram', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ telegramId }),
-    })
-    if (res.ok) {
-      setTelegramSaved(true)
-      setTimeout(() => setTelegramSaved(false), 2000)
-    }
-  }
 
   async function addCleaner() {
     await fetch('/api/cleaners', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newCleaner) })
@@ -247,26 +234,45 @@ export default function SettingsPage() {
             <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--cs-border)' }}>
               <h2 style={{ margin: 0, fontSize: '15px', fontWeight: '600' }}>💬 Telegram-Benachrichtigungen</h2>
             </div>
-            <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <div>
-                <label style={labelStyle}>Ihre Telegram-Chat-ID</label>
-                <input
-                  className="cs-input"
-                  placeholder="z.B. 123456789"
-                  value={telegramId}
-                  onChange={e => { setTelegramId(e.target.value); setTelegramSaved(false) }}
-                />
-                <p style={{ fontSize: '12px', color: 'var(--cs-text-3)', margin: '6px 0 0' }}>
-                  Um Ihre Chat-ID zu erhalten: Öffnen Sie Telegram → suchen Sie @userinfobot → drücken Sie Start
-                </p>
+            <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                {telegramConnected === null ? (
+                  <span style={{ fontSize: '13px', color: 'var(--cs-text-3)' }}>Wird geladen…</span>
+                ) : telegramConnected ? (
+                  <>
+                    <span style={{
+                      display:      'inline-flex',
+                      alignItems:   'center',
+                      gap:          '5px',
+                      padding:      '3px 10px',
+                      borderRadius: 'var(--cs-radius-full)',
+                      background:   'rgba(21,128,61,0.18)',
+                      color:        '#86efac',
+                      fontSize:     '12px',
+                      fontWeight:   '500',
+                    }}>
+                      <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#86efac', display: 'inline-block' }} />
+                      Verbunden
+                    </span>
+                    <span style={{ fontSize: '13px', color: 'var(--cs-text-3)' }}>
+                      Sie erhalten Benachrichtigungen in Telegram.
+                    </span>
+                  </>
+                ) : (
+                  <span style={{ fontSize: '13px', color: 'var(--cs-text-2)' }}>
+                    Nicht verbunden
+                  </span>
+                )}
               </div>
-              <button
-                onClick={saveTelegramId}
-                className="cs-btn-primary"
-                style={{ alignSelf: 'flex-start', fontSize: '13px' }}
-              >
-                {telegramSaved ? '✓ Gespeichert' : 'Speichern'}
-              </button>
+              <div>
+                <Link
+                  href="/connect-telegram"
+                  className={telegramConnected ? 'cs-btn-secondary' : 'cs-btn-primary'}
+                  style={{ textDecoration: 'none', display: 'inline-flex', fontSize: '13px' }}
+                >
+                  {telegramConnected ? 'Erneut verbinden' : 'Verbinden'}
+                </Link>
+              </div>
             </div>
           </div>
         </div>

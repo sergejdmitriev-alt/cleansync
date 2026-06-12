@@ -9,6 +9,7 @@ const NAV = [
   { href: '/archive',    label: 'Archiv'        },
   { href: '/kalender',   label: 'Kalender'      },
   { href: '/statistik',  label: 'Statistik'     },
+  { href: '/hilfe',      label: 'Hilfe'         },
   { href: '/settings',   label: 'Einstellungen' },
 ]
 
