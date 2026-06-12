@@ -25,17 +25,30 @@ export default function SettingsPage() {
   const [newProperty, setNewProperty] = useState({ name: '', address: '', default_notes: '', ical_url: '' })
   const [editingCleaner,  setEditingCleaner]  = useState<Cleaner | null>(null)
   const [editingProperty, setEditingProperty] = useState<Property | null>(null)
-  const [telegramConnected, setTelegramConnected] = useState<boolean | null>(null)
+  const [telegramConnected,  setTelegramConnected]  = useState<boolean | null>(null)
+  const [autoBackup,         setAutoBackup]         = useState<boolean>(false)
+  const [escalationHours,    setEscalationHours]    = useState<number>(4)
 
   async function load() {
-    const [c, p, t] = await Promise.all([
+    const [c, p, t, b] = await Promise.all([
       fetch('/api/cleaners').then(r => r.json()),
       fetch('/api/properties').then(r => r.json()),
       fetch('/api/telegram/status').then(r => r.json()),
+      fetch('/api/settings/backup').then(r => r.json()),
     ])
     setCleaners(c)
     setProperties(p)
     setTelegramConnected(t.connected ?? false)
+    setAutoBackup(b.auto_backup_enabled ?? false)
+    setEscalationHours(b.escalation_hours ?? 4)
+  }
+
+  async function saveBackup(enabled: boolean, hours: number) {
+    await fetch('/api/settings/backup', {
+      method:  'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ auto_backup_enabled: enabled, escalation_hours: hours }),
+    })
   }
   useEffect(() => { load() }, [])
 
@@ -224,6 +237,81 @@ export default function SettingsPage() {
               <button onClick={addCleaner} className="cs-btn-primary" style={{ alignSelf: 'flex-start', fontSize: '13px' }}>
                 + Hinzufügen
               </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Reinigungs-Garantie */}
+        <div style={sectionStyle}>
+          <div className="cs-card" style={{ overflow: 'hidden' }}>
+            <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--cs-border)' }}>
+              <h2 style={{ margin: 0, fontSize: '15px', fontWeight: '600' }}>🛡️ Reinigungs-Garantie</h2>
+            </div>
+            <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+
+              {/* Toggle row */}
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                <div style={{ flex: 1 }}>
+                  <p style={{ ...labelStyle, marginBottom: '4px' }}>Auto-Backup aktivieren</p>
+                  <p style={{ fontSize: '12px', color: 'var(--cs-text-3)', margin: 0, lineHeight: '1.5' }}>
+                    {autoBackup
+                      ? `Wenn Ihre Reinigungskraft nicht innerhalb von ${escalationHours} Stunden reagiert, übernimmt Reinraum automatisch.`
+                      : 'Wenn Ihre Reinigungskraft nicht reagiert, erhalten Sie eine Warnung mit der Option, Reinraum zu beauftragen.'
+                    }
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    const next = !autoBackup
+                    setAutoBackup(next)
+                    saveBackup(next, escalationHours)
+                  }}
+                  aria-label="Auto-Backup"
+                  style={{
+                    flexShrink:   0,
+                    width:        '44px',
+                    height:       '24px',
+                    background:   autoBackup ? 'var(--cs-blue)' : 'var(--cs-border)',
+                    borderRadius: '12px',
+                    border:       'none',
+                    cursor:       'pointer',
+                    padding:      '2px',
+                    transition:   'background 0.2s ease',
+                    position:     'relative',
+                    marginTop:    '2px',
+                  }}
+                >
+                  <span style={{
+                    display:      'block',
+                    width:        '20px',
+                    height:       '20px',
+                    background:   'white',
+                    borderRadius: '50%',
+                    transform:    autoBackup ? 'translateX(20px)' : 'translateX(0)',
+                    transition:   'transform 0.2s ease',
+                  }} />
+                </button>
+              </div>
+
+              {/* Wartezeit select */}
+              <div>
+                <label style={labelStyle}>Wartezeit bis Benachrichtigung</label>
+                <select
+                  className="cs-input"
+                  value={escalationHours}
+                  onChange={e => {
+                    const h = Number(e.target.value)
+                    setEscalationHours(h)
+                    saveBackup(autoBackup, h)
+                  }}
+                  style={{ width: 'auto', minWidth: '140px' }}
+                >
+                  {[2, 4, 8, 12].map(h => (
+                    <option key={h} value={h}>{h} Stunden</option>
+                  ))}
+                </select>
+              </div>
+
             </div>
           </div>
         </div>
