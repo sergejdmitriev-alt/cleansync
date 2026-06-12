@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Header from '@/app/components/Header'
+import { motion, useReducedMotion } from 'framer-motion'
 
 const DAY_NAMES = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']
 
@@ -63,6 +64,7 @@ const navBtnStyle: React.CSSProperties = {
 
 export default function KalenderPage() {
   const router = useRouter()
+  const reduced = useReducedMotion()
   const [tasks, setTasks]         = useState<any[]>([])
   const [loading, setLoading]     = useState(true)
   const [view, setView]           = useState<'month' | 'week'>('month')
@@ -158,7 +160,12 @@ export default function KalenderPage() {
       <main style={{ maxWidth: '800px', margin: '0 auto', padding: '24px 20px 80px' }}>
 
         {/* Top row: nav + toggle */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+        <motion.div
+          initial={reduced ? {} : { opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 28 }}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}
+        >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <button onClick={prevMonth} style={navBtnStyle}>‹</button>
             <h1 style={{ fontSize: '17px', fontWeight: '600', color: 'var(--cs-text-1)', margin: 0, minWidth: '150px', textAlign: 'center' }}>
@@ -177,7 +184,7 @@ export default function KalenderPage() {
               </button>
             ))}
           </div>
-        </div>
+        </motion.div>
 
         {/* Month view */}
         {view === 'month' && (
