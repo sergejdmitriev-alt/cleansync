@@ -113,6 +113,10 @@ body {
   from { transform: translate(0, 0) scale(1.08); }
   to   { transform: translate(-6vw, -5vh) scale(1); }
 }
+@keyframes cs-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
 /* Мобилка — статичный top-glow */
 @media (max-width: 767px) {
   .cs-bg::before {
