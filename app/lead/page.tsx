@@ -58,21 +58,34 @@ export default function LeadPage() {
     }
   }
 
+  const bgLayer = (
+    <div aria-hidden="true" style={{
+      position: 'fixed', inset: 0,
+      background: '#f5f5f3',
+      zIndex: 0,
+    }} />
+  )
+
   if (state === 'success') {
     return (
-      <main className="lead-wrap">
+      <>
+        {bgLayer}
+        <main className="lead-wrap" style={{ position: 'relative', zIndex: 1 }}>
         <div className="lead-card success-card">
           <div className="success-icon">✓</div>
           <h2>Vielen Dank!</h2>
           <p>Wir melden uns innerhalb von 24 Stunden.<br />Schauen Sie in Ihren Posteingang: <strong>{form.email}</strong></p>
         </div>
         <style>{styles}</style>
-      </main>
+        </main>
+      </>
     );
   }
 
   return (
-    <main className="lead-wrap">
+    <>
+      {bgLayer}
+      <main className="lead-wrap" style={{ position: 'relative', zIndex: 1 }}>
       <header className="lead-header">
         <div className="lead-logo"><span className="logo-icon">✦</span><span>CleanSync</span></div>
         <span className="lead-badge">Für Airbnb-Hosts in Wien</span>
@@ -189,6 +202,13 @@ export default function LeadPage() {
           </button>
           <p className="form-note">Kein Spam. Keine Verpflichtung. Wir melden uns persönlich.</p>
         </form>
+        <div className="tg-alt">
+          <span>Oder direkt auf Telegram:</span>
+          <a href="https://t.me/Reinraumat" target="_blank" rel="noopener noreferrer" className="tg-alt-link">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="#2563eb"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+            @Reinraumat
+          </a>
+        </div>
       </div>
 
       <div className="faq-section">
@@ -211,7 +231,8 @@ export default function LeadPage() {
       </div>
 
       <style>{styles}</style>
-    </main>
+      </main>
+    </>
   );
 }
 
@@ -241,6 +262,9 @@ const styles = `
   .submit-btn:hover:not(:disabled) { background: #1d4ed8; }
   .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
   .form-note { text-align: center; font-size: 12px; color: #aaa; }
+  .tg-alt { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 16px; font-size: 13px; color: #888; flex-wrap: wrap; }
+  .tg-alt-link { display: inline-flex; align-items: center; gap: 6px; color: #2563eb; font-weight: 600; text-decoration: none; }
+  .tg-alt-link:hover { text-decoration: underline; }
   .trust-row { display: flex; flex-direction: column; gap: 10px; padding: 0 4px; }
   .trust-item { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #555; font-weight: 500; }
   .success-card { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px; padding: 40px 24px; margin-top: 60px; }
