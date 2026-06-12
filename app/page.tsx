@@ -3,6 +3,7 @@ import { createServiceSupabaseClient } from '@/lib/supabase/service'
 import Header from './components/Header'
 import TasksFilter from './components/TasksFilter'
 import { UpcomingWidget, ActivityWidget, MonthWidget } from './components/DashboardWidgets'
+import { FadeInItem } from '@/components/motion/FadeInItem'
 
 export const dynamic = 'force-dynamic'
 
@@ -128,15 +129,15 @@ export default async function Home() {
                 { label: 'In Bearbeitung', value: counts.active,   color: 'var(--cs-blue)'   },
                 { label: 'Erledigt',       value: counts.done,     color: '#059669'           },
                 { label: 'Reinraum',       value: counts.reinraum, color: '#d97706'           },
-              ].map(s => (
-                <div key={s.label} className="cs-card" style={{ padding: '16px 20px' }}>
+              ].map((s, i) => (
+                <FadeInItem key={s.label} index={i} className="cs-card" style={{ padding: '16px 20px' }}>
                   <p style={{ fontSize: '12px', color: 'var(--cs-text-3)', margin: '0 0 6px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                     {s.label}
                   </p>
                   <p style={{ fontSize: '34px', fontWeight: '600', color: s.color, margin: 0, letterSpacing: '-0.02em', lineHeight: 1 }}>
                     {s.value}
                   </p>
-                </div>
+                </FadeInItem>
               ))}
             </div>
             <TasksFilter tasks={tasks} />
@@ -144,14 +145,14 @@ export default async function Home() {
 
           {/* Right column — desktop only */}
           <div className="hidden md:flex" style={{ flexDirection: 'column', gap: '16px' }}>
-            <UpcomingWidget tasks={upcoming} />
-            <ActivityWidget tasks={recentActivity} />
-            <MonthWidget stats={{
+            <FadeInItem index={0}><UpcomingWidget tasks={upcoming} /></FadeInItem>
+            <FadeInItem index={1}><ActivityWidget tasks={recentActivity} /></FadeInItem>
+            <FadeInItem index={2}><MonthWidget stats={{
               done: monthDone,
               total: monthTasks.length,
               acceptedPct: monthAcceptedPct,
               avgMin,
-            }} />
+            }} /></FadeInItem>
           </div>
 
         </div>
