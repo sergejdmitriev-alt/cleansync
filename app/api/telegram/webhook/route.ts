@@ -358,7 +358,7 @@ export async function POST(req: NextRequest) {
       .eq('id', taskId)
     await removeKeyboard(chatId, msgId)
     const { bot: _bot } = await import('@/lib/telegram')
-    await _bot.answerCallbackQuery(callback.id, { text: resp.accepted })
+    try { await _bot.answerCallbackQuery(callback.id, { text: resp.accepted }) } catch (_) {}
     await notifyHost(taskId, 'accepted')
 
   } else if (action === 'decline') {
