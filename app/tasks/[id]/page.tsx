@@ -3,6 +3,7 @@ import { createServiceSupabaseClient } from '@/lib/supabase/service'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import Header from '@/app/components/Header'
+import { FadeInItem } from '@/components/motion/FadeInItem'
 
 const statusConfig: Record<string, { label: string; bg: string; color: string }> = {
   pending:            { label: 'Ausstehend',          bg: 'var(--cs-pending-bg)',  color: 'var(--cs-pending-text)'  },
@@ -73,7 +74,7 @@ export default async function TaskDetailPage({
         </Link>
 
         {/* Task details */}
-        <div className="cs-card" style={{ padding: '24px' }}>
+        <FadeInItem index={0} className="cs-card" style={{ padding: '24px' }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px', marginBottom: '20px' }}>
             <div>
               <h1 style={{ fontSize: '20px', fontWeight: '700', color: 'var(--cs-text-1)', margin: '0 0 4px' }}>
@@ -131,11 +132,11 @@ export default async function TaskDetailPage({
               </div>
             )}
           </div>
-        </div>
+        </FadeInItem>
 
         {/* Problem photos */}
         {problemPhotos.length > 0 && (
-          <div className="cs-card" style={{ padding: '24px', borderColor: 'var(--cs-danger-border)' }}>
+          <FadeInItem index={1} className="cs-card" style={{ padding: '24px', borderColor: 'var(--cs-danger-border)' }}>
             <h2 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--cs-danger-text)', margin: '0 0 16px' }}>
               ⚠️ Gemeldete Probleme ({problemPhotos.length})
             </h2>
@@ -164,12 +165,12 @@ export default async function TaskDetailPage({
                 </div>
               ))}
             </div>
-          </div>
+          </FadeInItem>
         )}
 
         {/* Completion photos */}
         {completionPhotos.length > 0 && (
-          <div className="cs-card" style={{ padding: '24px' }}>
+          <FadeInItem index={2} className="cs-card" style={{ padding: '24px' }}>
             <h2 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--cs-text-1)', margin: '0 0 16px' }}>
               Reinigungsfotos ({completionPhotos.length})
             </h2>
@@ -195,14 +196,14 @@ export default async function TaskDetailPage({
                 </div>
               ))}
             </div>
-          </div>
+          </FadeInItem>
         )}
 
         {/* No photos */}
         {photosWithUrls.length === 0 && (
-          <div className="cs-card" style={{ padding: '48px 24px', textAlign: 'center' }}>
+          <FadeInItem index={1} className="cs-card" style={{ padding: '48px 24px', textAlign: 'center' }}>
             <p style={{ fontSize: '13px', color: 'var(--cs-text-3)', margin: 0 }}>Noch keine Fotos für diesen Auftrag</p>
-          </div>
+          </FadeInItem>
         )}
 
       </main>
