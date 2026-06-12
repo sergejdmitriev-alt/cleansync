@@ -2,7 +2,7 @@ import { createServiceSupabaseClient } from '@/lib/supabase/service'
 
 const BOT = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}`
 
-export type HostNotifyType = 'accepted' | 'done' | 'reinraum_confirmed'
+export type HostNotifyType = 'accepted' | 'done' | 'reinraum_confirmed' | 'declined'
 
 function escapeHtml(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -122,6 +122,12 @@ export async function notifyHost(
       `🏠 <b>Objekt:</b> ${propName}\n` +
       `📅 <b>Datum:</b> ${dateStr}\n` +
       `⏰ <b>Zeit:</b> ${timeStr}`,
+
+    declined:
+      `❌ <b>Auftrag abgelehnt</b>\n\n` +
+      `🏠 <b>Objekt:</b> ${propName}\n` +
+      `📅 <b>Datum:</b> ${dateStr}\n\n` +
+      `Bitte weisen Sie den Auftrag neu zu oder übergeben Sie ihn an Reinraum.`,
 
     done:
       `🏁 <b>Reinigung abgeschlossen</b>\n\n` +
