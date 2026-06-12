@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Header from '@/app/components/Header'
+import { FadeInItem } from '@/components/motion/FadeInItem'
 
 interface Cleaner  { id: string; name: string; telegram_chat_id: number }
 interface Property { id: string; name: string; address: string; default_notes?: string | null; ical_url?: string | null }
@@ -110,7 +111,7 @@ export default function SettingsPage() {
         </h1>
 
         {/* Objekte */}
-        <div style={sectionStyle}>
+        <FadeInItem index={0} style={sectionStyle}>
           <div className="cs-card" style={{ overflow: 'hidden' }}>
             <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--cs-border)' }}>
               <h2 style={{ margin: 0, fontSize: '15px', fontWeight: '600' }}>🏠 Objekte</h2>
@@ -190,10 +191,10 @@ export default function SettingsPage() {
               </button>
             </div>
           </div>
-        </div>
+        </FadeInItem>
 
         {/* Reinigungskräfte */}
-        <div style={sectionStyle}>
+        <FadeInItem index={1} style={sectionStyle}>
           <div className="cs-card" style={{ overflow: 'hidden' }}>
             <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--cs-border)' }}>
               <h2 style={{ margin: 0, fontSize: '15px', fontWeight: '600' }}>🧹 Reinigungskräfte</h2>
@@ -239,10 +240,10 @@ export default function SettingsPage() {
               </button>
             </div>
           </div>
-        </div>
+        </FadeInItem>
 
         {/* Reinigungs-Garantie */}
-        <div style={sectionStyle}>
+        <FadeInItem index={2} style={sectionStyle}>
           <div className="cs-card" style={{ overflow: 'hidden' }}>
             <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--cs-border)' }}>
               <h2 style={{ margin: 0, fontSize: '15px', fontWeight: '600' }}>🛡️ Reinigungs-Garantie</h2>
@@ -314,10 +315,10 @@ export default function SettingsPage() {
 
             </div>
           </div>
-        </div>
+        </FadeInItem>
 
         {/* Telegram-Benachrichtigungen */}
-        <div style={sectionStyle}>
+        <FadeInItem index={3} style={sectionStyle}>
           <div className="cs-card" style={{ overflow: 'hidden' }}>
             <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--cs-border)' }}>
               <h2 style={{ margin: 0, fontSize: '15px', fontWeight: '600' }}>💬 Telegram-Benachrichtigungen</h2>
@@ -363,7 +364,7 @@ export default function SettingsPage() {
               </div>
             </div>
           </div>
-        </div>
+        </FadeInItem>
 
       </main>
     </div>
