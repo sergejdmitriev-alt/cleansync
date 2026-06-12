@@ -81,15 +81,26 @@ export default async function TaskDetailPage({
               </h1>
               <p style={{ fontSize: '13px', color: 'var(--cs-text-3)', margin: 0 }}>{task.properties?.address}</p>
             </div>
-            <span style={{
-              flexShrink: 0,
-              display: 'inline-flex', alignItems: 'center',
-              padding: '4px 12px', borderRadius: 'var(--cs-radius-full)',
-              fontSize: '12px', fontWeight: '500',
-              background: s.bg, color: s.color,
-            }}>
-              {s.label}
-            </span>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px', flexShrink: 0 }}>
+              <span style={{
+                display: 'inline-flex', alignItems: 'center',
+                padding: '4px 12px', borderRadius: 'var(--cs-radius-full)',
+                fontSize: '12px', fontWeight: '500',
+                background: s.bg, color: s.color,
+              }}>
+                {s.label}
+              </span>
+              {task.escalated_at && (
+                <span style={{
+                  fontSize: '11px', fontWeight: '600',
+                  padding: '3px 10px', borderRadius: 'var(--cs-radius-full)',
+                  background: 'rgba(245,158,11,0.15)', color: '#fbbf24',
+                  border: '1px solid rgba(245,158,11,0.3)',
+                }}>
+                  🛡️ Backup aktiv
+                </span>
+              )}
+            </div>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', paddingTop: '16px', borderTop: '1px solid var(--cs-border)', fontSize: '13px' }}>

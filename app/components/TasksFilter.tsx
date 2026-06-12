@@ -223,12 +223,24 @@ export default function TasksFilter({ tasks }: { tasks: any[] }) {
                         {fmt(task.checkin_time)}
                       </td>
                       <td style={{ padding: '14px 20px' }}>
-                        <span
-                          className={STATUS_BADGE[task.status] ?? 'cs-badge cs-badge-pending'}
-                          style={REINRAUM_BADGE_STYLE[task.status]}
-                        >
-                          {STATUS_LABEL[task.status] ?? task.status}
-                        </span>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
+                          <span
+                            className={STATUS_BADGE[task.status] ?? 'cs-badge cs-badge-pending'}
+                            style={REINRAUM_BADGE_STYLE[task.status]}
+                          >
+                            {STATUS_LABEL[task.status] ?? task.status}
+                          </span>
+                          {task.escalated_at && (
+                            <span style={{
+                              fontSize: '10px', fontWeight: '600',
+                              padding: '2px 7px', borderRadius: 'var(--cs-radius-full)',
+                              background: 'rgba(245,158,11,0.15)', color: '#fbbf24',
+                              border: '1px solid rgba(245,158,11,0.3)',
+                            }}>
+                              🛡️ Backup
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td style={{ padding: '14px 20px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>

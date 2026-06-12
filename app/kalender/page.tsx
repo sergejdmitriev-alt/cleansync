@@ -319,13 +319,25 @@ export default function KalenderPage() {
                     {new Date(t.checkout_time).toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit' })} Uhr
                   </p>
                 </div>
-                <span style={{
-                  flexShrink: 0, fontSize: '11px', fontWeight: '600', padding: '3px 8px', borderRadius: '20px',
-                  background: STATUS_COLOR[t.status] ? `${STATUS_COLOR[t.status]}20` : 'var(--cs-surface-2)',
-                  color: STATUS_COLOR[t.status] ?? 'var(--cs-text-2)',
-                }}>
-                  {STATUS_LABEL[t.status] ?? t.status}
-                </span>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px', flexShrink: 0 }}>
+                  <span style={{
+                    fontSize: '11px', fontWeight: '600', padding: '3px 8px', borderRadius: '20px',
+                    background: STATUS_COLOR[t.status] ? `${STATUS_COLOR[t.status]}20` : 'var(--cs-surface-2)',
+                    color: STATUS_COLOR[t.status] ?? 'var(--cs-text-2)',
+                  }}>
+                    {STATUS_LABEL[t.status] ?? t.status}
+                  </span>
+                  {t.escalated_at && (
+                    <span style={{
+                      fontSize: '10px', fontWeight: '600',
+                      padding: '2px 6px', borderRadius: '20px',
+                      background: 'rgba(245,158,11,0.15)', color: '#fbbf24',
+                      border: '1px solid rgba(245,158,11,0.3)',
+                    }}>
+                      🛡️ Backup
+                    </span>
+                  )}
+                </div>
               </div>
             ))}
           </div>

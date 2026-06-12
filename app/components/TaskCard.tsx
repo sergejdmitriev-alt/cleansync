@@ -85,12 +85,24 @@ export default function TaskCard({ task }: { task: any }) {
             {task.properties?.address}
           </p>
         </div>
-        <span
-          className={STATUS_BADGE[task.status] ?? 'cs-badge cs-badge-pending'}
-          style={REINRAUM_BADGE_STYLE[task.status]}
-        >
-          {STATUS_LABEL[task.status] ?? task.status}
-        </span>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px', flexShrink: 0 }}>
+          <span
+            className={STATUS_BADGE[task.status] ?? 'cs-badge cs-badge-pending'}
+            style={REINRAUM_BADGE_STYLE[task.status]}
+          >
+            {STATUS_LABEL[task.status] ?? task.status}
+          </span>
+          {task.escalated_at && (
+            <span style={{
+              fontSize: '10px', fontWeight: '600',
+              padding: '2px 7px', borderRadius: 'var(--cs-radius-full)',
+              background: 'rgba(245,158,11,0.15)', color: '#fbbf24',
+              border: '1px solid rgba(245,158,11,0.3)',
+            }}>
+              🛡️ Backup
+            </span>
+          )}
+        </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '12px' }}>
