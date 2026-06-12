@@ -4,7 +4,10 @@ const BOT = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}`
 
 export type HostNotifyType = 'accepted' | 'done' | 'reinraum_confirmed'
 
-// ── Отправка сообщения через Bot API ────────────────────────
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+}
+
 async function sendTelegram(
   chatId: number,
   text: string,
@@ -28,7 +31,11 @@ async function sendTelegram(
     body:    JSON.stringify(body),
   })
   const result = await res.json()
-  console.error('[sendTelegram] status:', res.status, 'body:', JSON.stringify(result))
+  if (!res.ok || !result.ok) {
+    console.error('[sendTelegram] ERROR status:', res.status, 'body:', JSON.stringify(result))
+  } else {
+    console.error('[sendTelegram] status:', res.status, 'body:', JSON.stringify(result))
+  }
 }
 
 function fmtDate(iso: string | null): string {
@@ -45,11 +52,12 @@ function fmtTime(iso: string | null): string {
   })
 }
 
-// ── Главная функция — вызывай из любого места ────────────────
 export async function notifyHost(
   taskId: string,
   type: HostNotifyType
 ): Promise<void> {
+  console.log('[notifyHost] v2 start', taskId, type)
+
   const supabase = createServiceSupabaseClient()
 
   const { data: task } = await supabase
@@ -64,7 +72,10 @@ export async function notifyHost(
     .eq('id', taskId)
     .single()
 
-  if (!task) return
+  if (!task) {
+    console.error('[notifyHost] task not found:', taskId)
+    return
+  }
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -72,13 +83,29 @@ export async function notifyHost(
     .eq('id', task.user_id)
     .single()
 
-  if (!profile?.telegram_chat_id) return
+  if (!profile) {
+    console.error('[notifyHost] profile not found for user_id:', task.user_id)
+    return
+  }
+
+  if (!profile.telegram_chat_id) {
+    console.error('[notifyHost] telegram_chat_id is empty for user_id:', task.user_id)
+    return
+  }
 
   const chatId   = Number(profile.telegram_chat_id)
-  const propName = (task.property as { name?: string } | null)?.name ?? '—'
+  const rawName  = (task.property as { name?: string } | null)?.name ?? '—'
+  const propName = escapeHtml(rawName)
   const dateStr  = fmtDate(task.checkin_time)
   const timeStr  = `${fmtTime(task.checkin_time)} – ${fmtTime(task.checkout_time)}`
-  const taskUrl  = `${process.env.NEXT_PUBLIC_APP_URL}/tasks/${taskId}`
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL
+  let taskUrl: string | undefined
+  if (appUrl) {
+    taskUrl = `${appUrl}/tasks/${taskId}`
+  } else {
+    console.error('[notifyHost] NEXT_PUBLIC_APP_URL is not set — sending without button')
+  }
 
   let photoCount = 0
   if (type === 'done') {
