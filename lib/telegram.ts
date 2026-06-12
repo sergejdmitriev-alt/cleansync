@@ -189,6 +189,30 @@ export function getResponseMessages(lang?: string | null) {
   return RESPONSE_MESSAGES[lang ?? 'de'] ?? RESPONSE_MESSAGES.de
 }
 
+const CANCEL_MESSAGES: Record<string, string> = {
+  ru: '⚠️ Твоя уборка отменена — бронирование было снято хозяином. Свяжись с заказчиком для уточнений.',
+  uk: '⚠️ Твоє прибирання скасовано — бронювання знято господарем. Зв\'яжись із замовником для уточнень.',
+  ro: '⚠️ Curățenia ta a fost anulată — rezervarea a fost retrasă de proprietar. Contactează clientul pentru detalii.',
+  pl: '⚠️ Twoje sprzątanie zostało anulowane — rezerwacja została odwołana przez właściciela. Skontaktuj się ze zleceniodawcą.',
+  de: '⚠️ Dein Reinigungsauftrag wurde storniert — die Buchung wurde vom Auftraggeber zurückgezogen. Bitte wende dich an den Auftraggeber.',
+}
+
+const RESCHEDULE_MESSAGES: Record<string, string> = {
+  ru: '📅 Даты твоей уборки изменились. Уточни новое время у хозяина.',
+  uk: '📅 Дати твого прибирання змінились. Уточни новий час у господаря.',
+  ro: '📅 Datele curățeniei tale s-au schimbat. Verifică noul program cu proprietarul.',
+  pl: '📅 Terminy twojego sprzątania zostały zmienione. Sprawdź nowy termin u zleceniodawcy.',
+  de: '📅 Der Termin deines Reinigungsauftrags hat sich geändert. Bitte prüfe die neuen Zeiten beim Auftraggeber.',
+}
+
+export function getCancelMessage(lang?: string | null): string {
+  return CANCEL_MESSAGES[lang ?? 'de'] ?? CANCEL_MESSAGES.de
+}
+
+export function getRescheduleMessage(lang?: string | null): string {
+  return RESCHEDULE_MESSAGES[lang ?? 'de'] ?? RESCHEDULE_MESSAGES.de
+}
+
 export async function sendTaskNotification(task: TaskForTelegram): Promise<string> {
   const chatId = task.cleaners?.telegram_chat_id
   if (!chatId) throw new Error('Kein Telegram Chat ID für diese Reinigungskraft')

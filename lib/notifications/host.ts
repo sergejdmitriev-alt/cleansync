@@ -2,7 +2,7 @@ import { createServiceSupabaseClient } from '@/lib/supabase/service'
 
 const BOT = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}`
 
-export type HostNotifyType = 'accepted' | 'done' | 'reinraum_confirmed' | 'declined'
+export type HostNotifyType = 'accepted' | 'done' | 'reinraum_confirmed' | 'declined' | 'ical_cancelled' | 'ical_rescheduled'
 
 function escapeHtml(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -141,6 +141,19 @@ export async function notifyHost(
       `🏠 <b>Objekt:</b> ${propName}\n` +
       `📅 <b>Datum:</b> ${dateStr}\n` +
       `⏰ <b>Zeit:</b> ${timeStr}`,
+
+    ical_cancelled:
+      `🚫 <b>Buchung storniert</b>\n\n` +
+      `🏠 <b>Objekt:</b> ${propName}\n` +
+      `📅 <b>Datum:</b> ${dateStr}\n\n` +
+      `Die Buchung wurde im iCal-Kalender entfernt. Bitte prüfen Sie Ihren Airbnb-Kalender.`,
+
+    ical_rescheduled:
+      `📅 <b>Buchungstermin geändert</b>\n\n` +
+      `🏠 <b>Objekt:</b> ${propName}\n` +
+      `📅 <b>Neues Datum:</b> ${dateStr}\n` +
+      `⏰ <b>Neue Zeit:</b> ${timeStr}\n\n` +
+      `Die Buchung wurde im iCal-Kalender verschoben.`,
   }
 
   await sendTelegram(chatId, messages[type], taskUrl)
