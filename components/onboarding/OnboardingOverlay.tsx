@@ -64,24 +64,51 @@ function getStepVariants(direction: number) {
   }
 }
 
-export default function OnboardingOverlay() {
-  const [visible,   setVisible]   = useState(false)
-  const [step,      setStep]      = useState(0)
-  const [direction, setDirection] = useState(1)
-  const router    = useRouter()
-  const reduced   = useReducedMotion()
+export default function OnboardingOverlay({ showOnboarding = false }: { showOnboarding?: boolean }) {
+  const [visible,    setVisible]    = useState(false)
+  const [step,       setStep]       = useState(0)
+  const [direction,  setDirection]  = useState(1)
+  const [isClosing,  setIsClosing]  = useState(false)
+  const [replayMode, setReplayMode] = useState(false)
+  const router  = useRouter()
+  const reduced = useReducedMotion()
 
+  // Show from server prop; localStorage is an optimistic cache to suppress flicker
   useEffect(() => {
+    if (!showOnboarding) return
     if (typeof window === 'undefined') return
     if (localStorage.getItem('cs_onboarding_done')) return
     const id = setTimeout(() => setVisible(true), 600)
     return () => clearTimeout(id)
+  }, [showOnboarding])
+
+  // Replay trigger from Hilfe page
+  useEffect(() => {
+    const handle = () => {
+      setStep(0)
+      setDirection(1)
+      setReplayMode(true)
+      setVisible(true)
+    }
+    window.addEventListener('cs:onboarding-replay', handle)
+    return () => window.removeEventListener('cs:onboarding-replay', handle)
   }, [])
 
-  const close = useCallback(() => {
+  const close = useCallback(async () => {
+    if (isClosing) return
+    if (replayMode) {
+      setVisible(false)
+      setReplayMode(false)
+      return
+    }
+    setIsClosing(true)
     localStorage.setItem('cs_onboarding_done', 'true')
+    try {
+      await fetch('/api/profile/onboarding', { method: 'POST' })
+    } catch {}
+    setIsClosing(false)
     setVisible(false)
-  }, [])
+  }, [isClosing, replayMode])
 
   const go = useCallback((delta: number) => {
     setDirection(delta)
@@ -100,8 +127,16 @@ export default function OnboardingOverlay() {
   const handleCta = useCallback(() => {
     const cta = STEPS[step].cta
     if (!cta) return
-    close()
-    if (cta.href) router.push(cta.href)
+    if (cta.href) {
+      // Navigating away: optimistic hide + background persist
+      localStorage.setItem('cs_onboarding_done', 'true')
+      setVisible(false)
+      fetch('/api/profile/onboarding', { method: 'POST' }).catch(() => {})
+      router.push(cta.href)
+    } else {
+      // Last step "Los geht's": full close with loading state
+      close()
+    }
   }, [step, close, router])
 
   const handleDragEnd = useCallback((_: unknown, info: PanInfo) => {
@@ -247,6 +282,7 @@ export default function OnboardingOverlay() {
                       <motion.div variants={staggerChild}>
                         <motion.button
                           onClick={handleCta}
+                          disabled={isClosing}
                           whileHover={reduced ? {} : { scale: 1.03 }}
                           whileTap={reduced ? {} : { scale: 0.97 }}
                           transition={SPRING_BTN}
@@ -304,17 +340,19 @@ export default function OnboardingOverlay() {
                 <div style={{ minWidth: '80px' }}>
                   {step < STEPS.length - 1 && (
                     <button
-                      onClick={close}
+                      onClick={() => close()}
+                      disabled={isClosing}
                       style={{
                         background:  'none',
                         border:      'none',
-                        cursor:      'pointer',
+                        cursor:      isClosing ? 'not-allowed' : 'pointer',
                         color:       'var(--cs-text-3)',
                         fontSize:    '13px',
                         padding:     '6px 0',
+                        opacity:     isClosing ? 0.5 : 1,
                       }}
                     >
-                      Überspringen
+                      {isClosing ? '…' : 'Überspringen'}
                     </button>
                   )}
                 </div>
@@ -351,14 +389,15 @@ export default function OnboardingOverlay() {
                     </motion.button>
                   ) : (
                     <motion.button
-                      onClick={close}
+                      onClick={() => close()}
+                      disabled={isClosing}
                       whileHover={reduced ? {} : { scale: 1.03 }}
                       whileTap={reduced ? {} : { scale: 0.97 }}
                       transition={SPRING_BTN}
                       className="cs-btn-primary"
-                      style={{ fontSize: '13px', padding: '6px 14px' }}
+                      style={{ fontSize: '13px', padding: '6px 14px', opacity: isClosing ? 0.7 : 1 }}
                     >
-                      Fertig
+                      {isClosing ? '…' : 'Fertig'}
                     </motion.button>
                   )}
                 </div>

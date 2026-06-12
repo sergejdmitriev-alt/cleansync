@@ -241,6 +241,41 @@ export default function HilfePage() {
         </h1>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {/* Tour replay */}
+          <motion.div
+            className="cs-card"
+            initial={reduced ? {} : { opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 28 }}
+          >
+            <button
+              onClick={() => window.dispatchEvent(new CustomEvent('cs:onboarding-replay'))}
+              style={{
+                width:       '100%',
+                display:     'flex',
+                alignItems:  'center',
+                gap:         '10px',
+                padding:     '14px 16px',
+                background:  'none',
+                border:      'none',
+                cursor:      'pointer',
+                color:       'var(--cs-text-1)',
+                textAlign:   'left',
+              }}
+            >
+              <span style={{ color: 'var(--cs-blue)', flexShrink: 0 }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                  <path d="M3 3v5h5"/>
+                </svg>
+              </span>
+              <span style={{ flex: 1, fontSize: '15px', fontWeight: '600' }}>Tour erneut ansehen</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--cs-text-3)' }}>
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </button>
+          </motion.div>
+
           {CATEGORIES.map((cat, ci) => {
             const isOpen = openId === cat.id
             return (
