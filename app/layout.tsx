@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { Plus_Jakarta_Sans } from 'next/font/google'
 import './globals.css'
 import BottomNav from './components/BottomNav'
-import OnboardingOverlay from '@/components/onboarding/OnboardingOverlay'
+import AuthOnboarding from '@/components/AuthOnboarding'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 
 const jakarta = Plus_Jakarta_Sans({
@@ -41,7 +41,7 @@ export default async function RootLayout({
         <div className="cs-bg" aria-hidden="true" />
         {children}
         <BottomNav />
-        <OnboardingOverlay showOnboarding={showOnboarding} />
+        <AuthOnboarding showOnboarding={showOnboarding} />
       </body>
     </html>
   )
