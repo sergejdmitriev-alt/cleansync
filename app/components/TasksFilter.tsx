@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { RefreshButton, SendButton, DeleteButton, ArchiveButton } from './TaskActions'
 import TaskCard from './TaskCard'
 import ExportButton from './ExportButton'
+import { FadeInItem } from '@/components/motion/FadeInItem'
 
 const STATUS_LABEL: Record<string, string> = {
   pending:            'Ausstehend',
@@ -258,8 +259,10 @@ export default function TasksFilter({ tasks }: { tasks: any[] }) {
 
           {/* Mobile карточки */}
           <div className="sm:hidden">
-            {filtered.map(task => (
-              <TaskCard key={task.id} task={task} />
+            {filtered.map((task, i) => (
+              <FadeInItem key={task.id} index={i}>
+                <TaskCard task={task} />
+              </FadeInItem>
             ))}
           </div>
         </>
