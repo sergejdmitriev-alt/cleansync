@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Plus_Jakarta_Sans } from 'next/font/google'
 import './globals.css'
 import BottomNav from './components/BottomNav'
+import OnboardingOverlay from '@/components/onboarding/OnboardingOverlay'
 
 const jakarta = Plus_Jakarta_Sans({
   subsets:  ['latin'],
@@ -25,6 +26,7 @@ export default function RootLayout({
         <div className="cs-bg" aria-hidden="true" />
         {children}
         <BottomNav />
+        <OnboardingOverlay />
       </body>
     </html>
   )
