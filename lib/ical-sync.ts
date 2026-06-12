@@ -1,5 +1,20 @@
 import { createServiceSupabaseClient } from '@/lib/supabase/service'
 
+function tzOffsetMs(ts: number, tz: string): number {
+  const dtf = new Intl.DateTimeFormat('en-US', {
+    timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
+  })
+  const p: Record<string, string> = {}
+  dtf.formatToParts(new Date(ts)).forEach(x => { p[x.type] = x.value })
+  return Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour % 24, +p.minute, +p.second) - ts
+}
+
+function viennaHourToUTC(dateOnly: Date, hour: number): Date {
+  const guess = Date.UTC(dateOnly.getUTCFullYear(), dateOnly.getUTCMonth(), dateOnly.getUTCDate(), hour)
+  return new Date(guess - tzOffsetMs(guess, 'Europe/Vienna'))
+}
+
 export interface SyncResult {
   property_id:   string
   property_name: string
@@ -94,11 +109,8 @@ export async function syncPropertyIcal(property: {
       const current = bookings[i]
       const next    = bookings[i + 1]
 
-      const checkoutTime = new Date(current.end)
-      checkoutTime.setHours(11, 0, 0, 0)
-
-      const checkinTime = new Date(next.start)
-      checkinTime.setHours(15, 0, 0, 0)
+      const checkoutTime = viennaHourToUTC(new Date(current.end), 11)
+      const checkinTime  = viennaHourToUTC(new Date(next.start), 15)
 
       if (checkoutTime >= checkinTime) {
         skipped++
