@@ -78,6 +78,33 @@ export async function POST(req: NextRequest) {
   const body    = await req.json()
   const message = body?.message
 
+  // ── /start TOKEN — deeplink хоста для подключения Telegram ──
+  if (message?.text?.startsWith('/start ')) {
+    const chatId = String(message.from.id)
+    const token  = message.text.split(' ')[1]?.trim()
+    if (token) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('connect_token', token)
+        .gt('connect_token_exp', new Date().toISOString())
+        .maybeSingle()
+
+      const { bot } = await import('@/lib/telegram')
+      if (profile) {
+        await supabase.from('profiles').update({
+          telegram_chat_id:  Number(chatId),
+          connect_token:     null,
+          connect_token_exp: null,
+        }).eq('id', profile.id)
+        await bot.sendMessage(chatId, '✅ Telegram erfolgreich verbunden!\n\nSie erhalten ab jetzt Benachrichtigungen zu Ihren Aufträgen.')
+      } else {
+        await bot.sendMessage(chatId, '⚠️ Der Link ist abgelaufen oder ungültig.\n\nBitte generieren Sie einen neuen Link unter cleansync.at/connect-telegram.')
+      }
+    }
+    return NextResponse.json({ ok: true })
+  }
+
   // ── /start ──────────────────────────────────────────────
   if (message?.text === '/start') {
     const chatId = String(message.from.id)
@@ -365,7 +392,6 @@ export async function POST(req: NextRequest) {
         }]],
       },
     })
-    await notifyHost(taskId, 'done')
   }
 
   return NextResponse.json({ ok: true })
