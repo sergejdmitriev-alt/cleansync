@@ -337,44 +337,61 @@ export async function POST(req: NextRequest) {
 
   if (!task) return NextResponse.json({ ok: true })
 
-  if (action === 'done' && task.status === 'done') return NextResponse.json({ ok: true })
-  if (action !== 'done' && (task.status === 'accepted' || task.status === 'done')) {
-    return NextResponse.json({ ok: true })
-  }
-
   const lang         = (task.cleaners as any)?.language ?? 'de'
-  const cleanerName  = (task.cleaners as any)?.name     ?? 'Reinigungskraft'
-  const propertyName = (task.properties as any)?.name   ?? 'Wohnung'
   const resp         = getResponseMessages(lang)
   const pm           = getPhotoMessages(lang)
-  const hostChatId   = task.user_id
-    ? await getHostTelegramIdForUser(task.user_id)
-    : '451676731'
+  const { bot: _bot } = await import('@/lib/telegram')
 
   if (action === 'accept') {
-    await supabase
+    const { data: updated } = await supabase
       .from('tasks')
       .update({ status: 'accepted', accepted_at: new Date().toISOString() })
+      .in('status', ['open', 'sent'])
       .eq('id', taskId)
+      .select('id')
+
+    if (!updated || updated.length === 0) {
+      try { await _bot.answerCallbackQuery(callback.id) } catch (_) {}
+      return NextResponse.json({ ok: true })
+    }
+
     await removeKeyboard(chatId, msgId)
-    const { bot: _bot } = await import('@/lib/telegram')
     try { await _bot.answerCallbackQuery(callback.id, { text: resp.accepted }) } catch (_) {}
     await notifyHost(taskId, 'accepted')
 
   } else if (action === 'decline') {
-    await supabase
+    const { data: updated } = await supabase
       .from('tasks')
       .update({ status: 'declined' })
+      .in('status', ['open', 'sent'])
       .eq('id', taskId)
+      .select('id')
+
+    if (!updated || updated.length === 0) {
+      try { await _bot.answerCallbackQuery(callback.id) } catch (_) {}
+      return NextResponse.json({ ok: true })
+    }
+
     await removeKeyboard(chatId, msgId)
+    try { await _bot.answerCallbackQuery(callback.id) } catch (_) {}
     await sendMessage(chatId, resp.declined)
+    await notifyHost(taskId, 'declined')
 
   } else if (action === 'done') {
-    await supabase
+    const { data: updated } = await supabase
       .from('tasks')
       .update({ status: 'done', done_at: new Date().toISOString() })
+      .eq('status', 'accepted')
       .eq('id', taskId)
+      .select('id')
+
+    if (!updated || updated.length === 0) {
+      try { await _bot.answerCallbackQuery(callback.id) } catch (_) {}
+      return NextResponse.json({ ok: true })
+    }
+
     await removeKeyboard(chatId, msgId)
+    try { await _bot.answerCallbackQuery(callback.id) } catch (_) {}
     await sendMessage(chatId, resp.done)
 
     await supabase.from('bot_sessions').upsert({
@@ -383,8 +400,7 @@ export async function POST(req: NextRequest) {
       mode:        'completion_photos',
       photo_count: 0,
     })
-    const { bot: _botDone } = await import('@/lib/telegram')
-    await _botDone.sendMessage(chatId, pm.completionPrompt, {
+    await _bot.sendMessage(chatId, pm.completionPrompt, {
       reply_markup: {
         inline_keyboard: [[{
           text:          FERTIG_BUTTON[lang] ?? FERTIG_BUTTON['de'],
