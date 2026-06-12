@@ -11,10 +11,11 @@ interface AccordionItem {
 }
 
 interface Category {
-  id:    string
-  icon:  React.ReactNode
-  title: string
-  items: AccordionItem[]
+  id:     string
+  icon:   React.ReactNode
+  title:  string
+  items:  AccordionItem[]
+  extra?: React.ReactNode
 }
 
 const HomeIcon = () => (

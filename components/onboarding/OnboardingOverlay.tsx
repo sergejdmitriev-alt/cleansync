@@ -59,7 +59,7 @@ function getStepVariants(direction: number) {
     exit:   {
       opacity: 0,
       x: direction > 0 ? -32 : 32,
-      transition: { duration: 0.18, ease: 'easeIn' },
+      transition: { duration: 0.18, ease: 'easeIn' as const },
     },
   }
 }
