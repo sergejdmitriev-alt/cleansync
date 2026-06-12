@@ -2,7 +2,7 @@ import { createServiceSupabaseClient } from '@/lib/supabase/service'
 import { notifyHost } from '@/lib/notifications/host'
 import {
   removeKeyboard, sendMessage, sendErledigtButton,
-  getResponseMessages, sendHostNotification, getPhotoMessages,
+  getResponseMessages, sendHostNotification, getPhotoMessages, sendAgencyNotification,
 } from '@/lib/telegram'
 import { getHostTelegramIdForUser } from '@/lib/profile'
 import { NextRequest, NextResponse } from 'next/server'
@@ -250,6 +250,44 @@ export async function POST(req: NextRequest) {
     })
 
     await sendMessage(chatId, pm.problemPrompt)
+    return NextResponse.json({ ok: true })
+  }
+
+  // ── escalate_ — хост вручную отправляет в Reinraum ──────────────────
+  if (data.startsWith('escalate_')) {
+    const taskId    = data.slice(9)
+    const { bot: _bot } = await import('@/lib/telegram')
+    try { await _bot.answerCallbackQuery(callback.id) } catch (_) {}
+
+    const { data: updated } = await supabase
+      .from('tasks')
+      .update({ status: 'reinraum_pending', send_to_agency: true, escalated_at: new Date().toISOString() })
+      .in('status', ['open', 'sent', 'declined'])
+      .eq('id', taskId)
+      .select('id')
+
+    if (!updated || updated.length === 0) {
+      return NextResponse.json({ ok: true })
+    }
+
+    const { data: task } = await supabase
+      .from('tasks')
+      .select('id, checkout_time, checkin_time, properties(name, address), cleaners(name, telegram_chat_id, language)')
+      .eq('id', taskId)
+      .single()
+
+    if (task) {
+      await sendAgencyNotification(task, undefined).catch(e =>
+        console.error('[webhook] escalate sendAgencyNotification failed:', e)
+      )
+    }
+
+    const propName = (task?.properties as any)?.name ?? 'Wohnung'
+    await _bot.editMessageText(
+      `✅ <b>An Reinraum übergeben</b>\n\n🏠 ${propName}\n\nReinraum wurde benachrichtigt und wird sich darum kümmern.`,
+      { chat_id: Number(chatId), message_id: Number(msgId), parse_mode: 'HTML' }
+    ).catch(() => {})
+
     return NextResponse.json({ ok: true })
   }
 
