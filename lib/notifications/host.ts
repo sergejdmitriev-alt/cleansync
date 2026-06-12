@@ -17,9 +17,9 @@ async function sendTelegram(
   }
 
   if (taskUrl) {
-    body.reply_markup = JSON.stringify({
+    body.reply_markup = {
       inline_keyboard: [[{ text: '🔗 Auftrag öffnen', url: taskUrl }]],
-    })
+    }
   }
 
   const res = await fetch(`${BOT}/sendMessage`, {
