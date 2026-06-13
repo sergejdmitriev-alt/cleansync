@@ -1,305 +1,889 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { Turnstile } from '@marsidev/react-turnstile';
+import { useState, useEffect, useRef } from 'react'
+import { Turnstile } from '@marsidev/react-turnstile'
+import {
+  motion, AnimatePresence, useReducedMotion,
+  useMotionValue, animate, type MotionValue,
+} from 'framer-motion'
 
+// ── Types ─────────────────────────────────────────────────────────
+type FormState = 'idle' | 'loading' | 'success' | 'error'
+
+// ── Shared config ─────────────────────────────────────────────────
+const SPRING = { type: 'spring', stiffness: 300, damping: 28 } as const
+const VP     = { once: true, amount: 0.2 }                    as const
+
+// ── Data ──────────────────────────────────────────────────────────
 const PROPERTIES_OPTIONS = [
-  { value: '1', label: '1 Objekt' },
-  { value: '2-5', label: '2–5 Objekte' },
+  { value: '1',    label: '1 Objekt'     },
+  { value: '2-5',  label: '2–5 Objekte'  },
   { value: '6-10', label: '6–10 Objekte' },
-  { value: '10+', label: 'Mehr als 10' },
-];
+  { value: '10+',  label: 'Mehr als 10'  },
+]
 
-type FormState = 'idle' | 'loading' | 'success' | 'error';
+const STEPS = [
+  { icon: '📅', title: 'Kalender sync',      desc: 'Airbnb-Kalender verbindet sich automatisch — neue Buchungen erscheinen sofort als Aufgaben' },
+  { icon: '💬', title: 'Bot sendet Aufgabe', desc: 'Die Reinigungskraft bekommt eine Telegram-Nachricht mit Datum, Uhrzeit und Notizen'          },
+  { icon: '✅', title: 'Bestätigung',         desc: 'Reinigungskraft bestätigt oder lehnt ab — Sie sehen den Status live im Dashboard'             },
+  { icon: '📷', title: 'Foto als Nachweis',  desc: 'Nach der Reinigung werden Fotos gesendet — automatisch gespeichert, jederzeit abrufbar'       },
+]
 
 const FAQS = [
-  {
-    q: 'Braucht meine Reinigungskraft ein Smartphone?',
-    a: 'Ja, nur Telegram. Die App ist kostenlos und auf jedem Smartphone verfügbar. Keine Registrierung für die Reinigungskraft nötig.',
-  },
-  {
-    q: 'Funktioniert das auch ohne Airbnb?',
-    a: 'Ja. Sie können Aufgaben auch manuell erstellen — ohne Kalender-Sync. Airbnb macht es nur vollautomatisch.',
-  },
-  {
-    q: 'Was passiert wenn die Reinigungskraft ablehnt?',
-    a: 'Sie bekommen sofort eine Benachrichtigung und können die Aufgabe an jemand anderen senden oder Reinraum beauftragen.',
-  },
-  {
-    q: 'Sind meine Daten sicher?',
-    a: 'Ja. Alle Daten liegen in einer europäischen Datenbank (Supabase EU), Fotos werden automatisch nach 90 Tagen gelöscht.',
-  },
-];
+  { q: 'Braucht meine Reinigungskraft ein Smartphone?',  a: 'Ja, nur Telegram. Die App ist kostenlos und auf jedem Smartphone verfügbar. Keine Registrierung nötig.'           },
+  { q: 'Funktioniert das auch ohne Airbnb?',             a: 'Ja. Aufgaben können auch manuell erstellt werden — ohne Kalender-Sync. Airbnb macht es vollautomatisch.'            },
+  { q: 'Was passiert wenn die Reinigungskraft ablehnt?', a: 'Sie bekommen sofort eine Benachrichtigung und können die Aufgabe an jemand anderen senden oder Reinraum beauftragen.' },
+  { q: 'Sind meine Daten sicher?',                       a: 'Ja. Alle Daten liegen in einer europäischen Datenbank (Supabase EU), Fotos werden automatisch nach 90 Tagen gelöscht.' },
+]
 
+const CHAT = [
+  { side: 'bot',  text: '🏠 Neue Reinigung\n📅 Mo 16.06 · 11:00–15:00\n📍 Bergstraße 12, Wien\n\n✅ Annehmen   ❌ Ablehnen', label: '' },
+  { side: 'user', text: '✅ Angenommen', label: '' },
+  { side: 'bot',  text: '🏁 Reinigung abgeschlossen\n📷 3 Fotos hochgeladen', label: '' },
+  { side: 'host', text: '✓ Erledigt — Fotos gespeichert', label: 'Sie (Host)' },
+]
+
+// ── Animated counter ──────────────────────────────────────────────
+function Counter({ mv, fmt = (v: number) => String(Math.round(v)) }: {
+  mv:   MotionValue<number>
+  fmt?: (v: number) => string
+}) {
+  const [val, setVal] = useState(mv.get())
+  useEffect(() => mv.on('change', v => setVal(v)), [mv])
+  return <>{fmt(val)}</>
+}
+
+// ── Telegram SVG icon ─────────────────────────────────────────────
+function TgIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="#3b7ef8" aria-hidden="true">
+      <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
+    </svg>
+  )
+}
+
+// ── Main component ────────────────────────────────────────────────
 export default function LeadPage() {
-  const [form, setForm] = useState({ name: '', email: '', phone: '', properties: '', message: '' });
-  const [state, setState] = useState<FormState>('idle');
-  const [turnstileToken, setTurnstileToken] = useState<string>('');
-  const [objects, setObjects] = useState(5);
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const reduced = useReducedMotion()
+  const formRef = useRef<HTMLDivElement>(null)
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  }
+  const [form, setForm]       = useState({ name: '', email: '', phone: '', properties: '', message: '' })
+  const [formState, setFormState] = useState<FormState>('idle')
+  const [turnstileToken, setTurnstileToken] = useState('')
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setState('loading');
-    try {
-      const res = await fetch('/api/lead', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, turnstileToken }),
-      });
-      if (!res.ok) throw new Error();
-      setState('success');
-    } catch {
-      setState('error');
+  const [objects, setObjects]       = useState(5)
+  const [didCountUp, setDidCountUp] = useState(false)
+  const [pulseKey, setPulseKey]     = useState(0)
+
+  const cleaningsMV = useMotionValue(0)
+  const hoursMV     = useMotionValue(0)
+  const savingsMV   = useMotionValue(0)
+
+  const [openFaq, setOpenFaq] = useState<number | null>(null)
+
+  function calcVals(n: number) {
+    return {
+      cleanings: n * 8,
+      hours:     Math.round(n * 8 * 20 / 60 * 10) / 10,
+      savings:   Math.round(n * 8 * 20 / 60 * 12),
     }
   }
 
-  const bgLayer = (
-    <div aria-hidden="true" style={{
-      position: 'fixed', inset: 0,
-      background: '#f5f5f3',
-      zIndex: 0,
-    }} />
-  )
-
-  if (state === 'success') {
-    return (
-      <>
-        {bgLayer}
-        <main className="lead-wrap" style={{ position: 'relative', zIndex: 1 }}>
-        <div className="lead-card success-card">
-          <div className="success-icon">✓</div>
-          <h2>Vielen Dank!</h2>
-          <p>Wir melden uns innerhalb von 24 Stunden.<br />Schauen Sie in Ihren Posteingang: <strong>{form.email}</strong></p>
-        </div>
-        <style>{styles}</style>
-        </main>
-      </>
-    );
+  function animateCalc(n: number, dur = 0.5) {
+    const { cleanings, hours, savings } = calcVals(n)
+    animate(cleaningsMV, cleanings, { duration: dur, ease: [0.25, 0.1, 0.25, 1] })
+    animate(hoursMV,     hours,     { duration: dur, ease: [0.25, 0.1, 0.25, 1] })
+    animate(savingsMV,   savings,   { duration: dur, ease: [0.25, 0.1, 0.25, 1] })
   }
 
+  function handleSlider(n: number) {
+    setObjects(n)
+    setPulseKey(k => k + 1)
+    animateCalc(n)
+  }
+
+  function handleViewportEnter() {
+    if (!didCountUp) {
+      setDidCountUp(true)
+      animateCalc(objects, 0.85)
+    }
+  }
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
+    setForm(p => ({ ...p, [e.target.name]: e.target.value }))
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setFormState('loading')
+    try {
+      const res = await fetch('/api/lead', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ ...form, turnstileToken }),
+      })
+      if (!res.ok) throw new Error()
+      setFormState('success')
+    } catch {
+      setFormState('error')
+    }
+  }
+
+  // Fade-up helper — respects reduced motion
+  function fy(delay = 0) {
+    if (reduced) return { initial: {}, whileInView: {}, viewport: VP, transition: {} }
+    return {
+      initial:     { opacity: 0, y: 20 },
+      whileInView: { opacity: 1, y: 0 },
+      viewport:    VP,
+      transition:  { ...SPRING, delay },
+    }
+  }
+
+  const { savings: savingsNow } = calcVals(objects)
+
+  // ── Success screen ─────────────────────────────────────────────
+  if (formState === 'success') {
+    return (
+      <main style={S.wrap}>
+        <motion.div
+          style={{ ...S.glass, textAlign: 'center', padding: '52px 32px', marginTop: 60 }}
+          initial={reduced ? {} : { opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={SPRING}
+        >
+          <motion.div
+            style={S.successIcon}
+            initial={reduced ? {} : { scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ ...SPRING, delay: 0.15 }}
+          >✓</motion.div>
+          <h2 style={{ color: '#e8eaf0', fontSize: 22, fontWeight: 700, marginBottom: 12 }}>Vielen Dank!</h2>
+          <p style={{ color: '#8892a4', fontSize: 15, lineHeight: 1.65 }}>
+            Wir melden uns innerhalb von 24 Stunden.<br />
+            Posteingang: <strong style={{ color: '#e8eaf0' }}>{form.email}</strong>
+          </p>
+        </motion.div>
+      </main>
+    )
+  }
+
+  // ── Main render ────────────────────────────────────────────────
   return (
-    <>
-      {bgLayer}
-      <main className="lead-wrap" style={{ position: 'relative', zIndex: 1 }}>
-      <header className="lead-header">
-        <div className="lead-logo"><span className="logo-icon">✦</span><span>CleanSync</span></div>
-        <span className="lead-badge">Für Airbnb-Hosts in Wien</span>
+    <main style={S.wrap}>
+
+      {/* Header */}
+      <header style={S.header}>
+        <div style={S.logo}>
+          <span style={{ color: '#3b7ef8', fontSize: 22, lineHeight: 1 }}>✦</span>
+          <span style={{ fontWeight: 700, fontSize: 17 }}>CleanSync</span>
+        </div>
+        <span style={S.badge}>Für Airbnb-Hosts in Wien</span>
       </header>
 
-      <section className="lead-hero">
-        <h1>Übergaben automatisch.<br />Fotos, Bestätigungen, alles.</h1>
-        <p className="lead-sub">CleanSync verbindet Ihre Reinigungskräfte mit Ihrem Kalender — kein WhatsApp-Chaos, keine verpassten Checkouts.</p>
+      {/* Hero */}
+      <section>
+        <motion.h1 style={S.h1} {...fy(0)}>
+          Übergaben automatisch.<br />Fotos, Bestätigungen, alles.
+        </motion.h1>
+        <motion.p style={S.sub} {...fy(0.06)}>
+          CleanSync verbindet Ihre Reinigungskräfte mit Ihrem Kalender —<br />
+          kein WhatsApp-Chaos, keine verpassten Checkouts.
+        </motion.p>
+        <motion.div {...fy(0.12)} style={{ marginTop: 28 }}>
+          <button
+            className="lead-cta"
+            style={S.ctaBtn}
+            onClick={() => formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+          >
+            Kostenlose Demo anfragen →
+          </button>
+        </motion.div>
       </section>
 
-      <div className="calc-card">
-        <div className="calc-title">Wie viel sparen Sie mit CleanSync?</div>
-        <div className="calc-sub">Ø 20 Min. Koordinationsaufwand pro Reinigung · 12 €/Std.</div>
-
-        <div className="slider-label">
-          <span>Anzahl der Objekte</span>
-          <span className="slider-value">{objects}</span>
+      {/* Telegram demo */}
+      <motion.div style={S.glass} {...fy(0)}>
+        <p style={S.sectionLabel}>So sieht es aus</p>
+        <h2 style={S.sectionH2}>Ihr Reinigungsbot in Aktion</h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {CHAT.map((msg, i) => (
+            <motion.div
+              key={i}
+              style={{
+                ...S.bubble,
+                ...(msg.side === 'bot'  ? S.bubbleBot  :
+                    msg.side === 'user' ? S.bubbleUser :
+                                          S.bubbleHost),
+              }}
+              initial={reduced ? {} : { opacity: 0, x: msg.side === 'bot' ? -14 : 14 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={VP}
+              transition={{ ...SPRING, delay: i * 0.11 }}
+            >
+              {msg.label && <span style={S.bubbleLabel}>{msg.label}</span>}
+              <span style={{ whiteSpace: 'pre-line', fontSize: 13, lineHeight: 1.55 }}>{msg.text}</span>
+            </motion.div>
+          ))}
         </div>
+      </motion.div>
 
+      {/* Vorher / Nachher */}
+      <motion.div style={S.glass} {...fy(0)}>
+        <p style={S.sectionLabel}>Vergleich</p>
+        <h2 style={S.sectionH2}>Vorher &amp; Nachher</h2>
+        <div className="lead-compare-grid" style={S.compareGrid}>
+          <div style={S.compareBefore}>
+            <p style={{ fontWeight: 700, fontSize: 13, color: '#fca5a5', marginBottom: 12 }}>❌ Ohne CleanSync</p>
+            {[
+              'WhatsApp-Chaos mit mehreren Gruppenchats',
+              'Reinigungskraft vergisst den Termin',
+              'Kein Foto-Nachweis bei Reklamationen',
+              'Manuelle Koordination — 20 Min. pro Tag',
+              'Verpasster Checkout → schlechte Bewertung',
+            ].map(t => (
+              <p key={t} style={S.compareRow}>
+                <span style={{ color: '#ef4444', flexShrink: 0 }}>✗</span>
+                {t}
+              </p>
+            ))}
+          </div>
+          <div style={S.compareAfter}>
+            <p style={{ fontWeight: 700, fontSize: 13, color: '#86efac', marginBottom: 12 }}>✅ Mit CleanSync</p>
+            {[
+              'Ein Dashboard für alle Aufträge',
+              'Automatische Telegram-Benachrichtigung',
+              'Fotos als Qualitätsnachweis gespeichert',
+              'Vollautomatisch — 0 Minuten pro Tag',
+              'Kalender-Sync, kein Checkout vergessen',
+            ].map(t => (
+              <p key={t} style={S.compareRow}>
+                <span style={{ color: '#86efac', flexShrink: 0 }}>✓</span>
+                {t}
+              </p>
+            ))}
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Calculator */}
+      <motion.div style={S.glass} {...fy(0)} onViewportEnter={handleViewportEnter}>
+        <p style={S.sectionLabel}>Rechner</p>
+        <h2 style={S.sectionH2}>Wie viel sparen Sie?</h2>
+        <p style={{ color: '#8892a4', fontSize: 13, marginBottom: 24 }}>
+          Ø 20 Min. Koordination pro Reinigung · 12 €/Std.
+        </p>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <span style={{ fontSize: 13, color: '#8892a4' }}>Anzahl der Objekte</span>
+          <span style={{ fontSize: 15, fontWeight: 700, color: '#e8eaf0' }}>{objects}</span>
+        </div>
         <input
-          type="range"
-          min={1}
-          max={20}
-          value={objects}
-          onChange={(e) => setObjects(parseInt(e.target.value))}
-          className="calc-slider"
+          type="range" min={1} max={20} value={objects}
+          onChange={e => handleSlider(parseInt(e.target.value))}
+          style={S.slider}
         />
 
-        <div className="calc-results">
-          <div className="calc-box">
-            <div className="calc-number">{objects * 8}</div>
-            <div className="calc-label">Reinigungen / Monat</div>
+        <motion.div
+          key={pulseKey}
+          className="lead-calc-grid"
+          style={S.calcGrid}
+          animate={pulseKey > 0 && !reduced ? { scale: [1, 1.018, 1] } : {}}
+          transition={{ duration: 0.22 }}
+        >
+          <div style={S.calcBox}>
+            <span style={S.calcNum}>
+              <Counter mv={cleaningsMV} />
+            </span>
+            <span style={S.calcSub}>Reinigungen / Monat</span>
           </div>
-          <div className="calc-box">
-            <div className="calc-number">{(objects * 8 * 20 / 60).toFixed(1)}h</div>
-            <div className="calc-label">Stunden gespart / Monat</div>
+          <div style={S.calcBox}>
+            <span style={S.calcNum}>
+              <Counter
+                mv={hoursMV}
+                fmt={v => {
+                  const r = Math.round(v * 10) / 10
+                  return (r % 1 === 0 ? Math.round(r) : r.toFixed(1)) + 'h'
+                }}
+              />
+            </span>
+            <span style={S.calcSub}>Stunden gespart / Mo.</span>
           </div>
-          <div className="calc-box">
-            <div className="calc-number green">{Math.round(objects * 8 * 20 / 60 * 12)} €</div>
-            <div className="calc-label">Kosten gespart / Monat</div>
+          <div style={S.calcBox}>
+            <span style={{ ...S.calcNum, color: '#86efac' }}>
+              <Counter mv={savingsMV} fmt={v => Math.round(v) + ' €'} />
+            </span>
+            <span style={S.calcSub}>Kosten gespart / Mo.</span>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="calc-yearly">
-          → Das sind {(Math.round(objects * 8 * 20 / 60 * 12) * 12).toLocaleString('de-AT')} € pro Jahr
+        <p style={{ textAlign: 'center', fontSize: 13, color: '#8892a4', marginTop: 16 }}>
+          → Das sind{' '}
+          <strong style={{ color: '#e8eaf0' }}>
+            {(savingsNow * 12).toLocaleString('de-AT')} €
+          </strong>{' '}
+          pro Jahr
+        </p>
+      </motion.div>
+
+      {/* Reinigungs-Garantie */}
+      <motion.div style={{ ...S.glass, textAlign: 'center', padding: '36px 28px' }} {...fy(0)}>
+        <motion.svg
+          width="52" height="52" viewBox="0 0 24 24"
+          fill="none" strokeLinecap="round" strokeLinejoin="round"
+          style={{ display: 'block', margin: '0 auto 18px' }}
+          aria-hidden="true"
+        >
+          <motion.path
+            d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"
+            stroke="#3b7ef8" strokeWidth="1.5" fill="none"
+            {...(reduced ? {} : {
+              initial:     { pathLength: 0, opacity: 0 },
+              whileInView: { pathLength: 1, opacity: 1 },
+              viewport:    VP,
+              transition:  { duration: 1.1, ease: 'easeOut', delay: 0.1 },
+            })}
+          />
+          <motion.polyline
+            points="9 12 11 14 15 10"
+            stroke="#86efac" strokeWidth="2" fill="none"
+            {...(reduced ? {} : {
+              initial:     { pathLength: 0, opacity: 0 },
+              whileInView: { pathLength: 1, opacity: 1 },
+              viewport:    VP,
+              transition:  { duration: 0.4, ease: 'easeOut', delay: 1.0 },
+            })}
+          />
+        </motion.svg>
+        <h2 style={{ color: '#e8eaf0', fontSize: 19, fontWeight: 700, marginBottom: 10 }}>
+          Reinigungs-Garantie
+        </h2>
+        <p style={{ color: '#8892a4', fontSize: 14, lineHeight: 1.7, maxWidth: 400, margin: '0 auto' }}>
+          Jede Reinigung wird mit Fotos dokumentiert. Bei Reklamationen liefern
+          Sie den Nachweis mit einem Klick — kein Streit, klare Fakten.
+        </p>
+      </motion.div>
+
+      {/* How-it-works */}
+      <div>
+        <motion.div style={{ textAlign: 'center', marginBottom: 20 }} {...fy(0)}>
+          <p style={S.sectionLabel}>Ablauf</p>
+          <h2 style={S.sectionH2}>So funktioniert CleanSync</h2>
+        </motion.div>
+        <div className="lead-steps-grid" style={S.stepsGrid}>
+          {STEPS.map((step, i) => (
+            <motion.div
+              key={step.title}
+              style={{ ...S.glass, padding: '20px 18px' }}
+              initial={reduced ? {} : { opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={VP}
+              transition={{ ...SPRING, delay: i * 0.07 }}
+            >
+              <div style={{ fontSize: 26, marginBottom: 10 }}>{step.icon}</div>
+              <p style={{ fontWeight: 600, color: '#e8eaf0', fontSize: 14, marginBottom: 6 }}>{step.title}</p>
+              <p style={{ color: '#8892a4', fontSize: 12.5, lineHeight: 1.6 }}>{step.desc}</p>
+            </motion.div>
+          ))}
         </div>
       </div>
 
-      <div className="how-section">
-        <h2 className="how-title">So funktioniert CleanSync</h2>
-        <div className="how-steps">
-          <div className="how-step">
-            <div className="how-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
-            <div className="how-line" />
-            <div className="how-step-title">Kalender sync</div>
-            <div className="how-step-desc">Airbnb-Kalender verbindet sich automatisch — neue Buchungen erscheinen sofort als Aufgaben</div>
-          </div>
-          <div className="how-step">
-            <div className="how-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
-            <div className="how-line" />
-            <div className="how-step-title">Bot sendet Aufgabe</div>
-            <div className="how-step-desc">Die Reinigungskraft bekommt eine Telegram-Nachricht mit Datum, Uhrzeit und Notizen</div>
-          </div>
-          <div className="how-step">
-            <div className="how-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
-            <div className="how-line" />
-            <div className="how-step-title">Bestätigung</div>
-            <div className="how-step-desc">Die Reinigungskraft bestätigt oder lehnt ab — Sie sehen den Status live im Dashboard</div>
-          </div>
-          <div className="how-step">
-            <div className="how-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
-            <div className="how-line last" />
-            <div className="how-step-title">Foto als Nachweis</div>
-            <div className="how-step-desc">Nach der Reinigung sendet die Kraft Fotos — automatisch gespeichert, jederzeit abrufbar</div>
-          </div>
+      {/* FAQ */}
+      <div>
+        <motion.div style={{ textAlign: 'center', marginBottom: 20 }} {...fy(0)}>
+          <p style={S.sectionLabel}>FAQ</p>
+          <h2 style={S.sectionH2}>Häufige Fragen</h2>
+        </motion.div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {FAQS.map((faq, i) => (
+            <motion.div
+              key={i}
+              style={{ ...S.glass, padding: 0, overflow: 'hidden' }}
+              initial={reduced ? {} : { opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={VP}
+              transition={{ ...SPRING, delay: i * 0.05 }}
+            >
+              <button
+                onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                style={S.faqBtn}
+                aria-expanded={openFaq === i}
+              >
+                <span style={{ textAlign: 'left', color: '#e8eaf0', fontSize: 14, fontWeight: 500 }}>
+                  {faq.q}
+                </span>
+                <motion.span
+                  animate={{ rotate: openFaq === i ? 45 : 0 }}
+                  transition={{ duration: 0.2 }}
+                  style={{ color: '#8892a4', fontSize: 20, flexShrink: 0, display: 'block', lineHeight: 1 }}
+                >+</motion.span>
+              </button>
+              <AnimatePresence initial={false}>
+                {openFaq === i && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+                    style={{ overflow: 'hidden' }}
+                  >
+                    <p style={{ padding: '0 20px 18px', color: '#8892a4', fontSize: 13, lineHeight: 1.7 }}>
+                      {faq.a}
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          ))}
         </div>
       </div>
 
-      <div className="lead-card">
-        <h2 className="form-title">Kostenlose Demo anfragen</h2>
-        <form onSubmit={handleSubmit} className="lead-form" noValidate>
-          <div className="field-group">
-            <label htmlFor="name">Ihr Name *</label>
-            <input id="name" name="name" type="text" placeholder="Max Mustermann" value={form.name} onChange={handleChange} required />
+      {/* Form */}
+      <motion.div ref={formRef} style={S.glass} {...fy(0)}>
+        <h2 style={{ fontSize: 19, fontWeight: 700, color: '#e8eaf0', marginBottom: 6 }}>
+          Kostenlose Demo anfragen
+        </h2>
+        <p style={{ color: '#8892a4', fontSize: 13, marginBottom: 24 }}>
+          Kein Spam. Keine Verpflichtung. Wir melden uns persönlich.
+        </p>
+        <form onSubmit={handleSubmit} style={S.form} noValidate>
+          <div style={S.fieldGroup}>
+            <label style={S.fieldLabel} htmlFor="name">Ihr Name *</label>
+            <input
+              id="name" name="name" type="text"
+              placeholder="Max Mustermann"
+              value={form.name} onChange={handleChange} required
+              className="lead-input" style={S.input}
+            />
           </div>
-          <div className="field-row">
-            <div className="field-group">
-              <label htmlFor="email">E-Mail *</label>
-              <input id="email" name="email" type="email" placeholder="max@beispiel.at" value={form.email} onChange={handleChange} required />
+          <div className="lead-field-row" style={S.fieldRow}>
+            <div style={S.fieldGroup}>
+              <label style={S.fieldLabel} htmlFor="email">E-Mail *</label>
+              <input
+                id="email" name="email" type="email" autoComplete="email"
+                placeholder="max@beispiel.at"
+                value={form.email} onChange={handleChange} required
+                className="lead-input" style={S.input}
+              />
             </div>
-            <div className="field-group">
-              <label htmlFor="phone">Telefon *</label>
-              <input id="phone" name="phone" type="tel" placeholder="+43 664 …" value={form.phone} onChange={handleChange} required />
+            <div style={S.fieldGroup}>
+              <label style={S.fieldLabel} htmlFor="phone">Telefon *</label>
+              <input
+                id="phone" name="phone" type="tel"
+                placeholder="+43 664 …"
+                value={form.phone} onChange={handleChange} required
+                className="lead-input" style={S.input}
+              />
             </div>
           </div>
-          <div className="field-group">
-            <label htmlFor="properties">Anzahl der Objekte *</label>
-            <select id="properties" name="properties" value={form.properties} onChange={handleChange} required>
+          <div style={S.fieldGroup}>
+            <label style={S.fieldLabel} htmlFor="properties">Anzahl der Objekte *</label>
+            <select
+              id="properties" name="properties"
+              value={form.properties} onChange={handleChange} required
+              className="lead-input" style={{ ...S.input, cursor: 'pointer' }}
+            >
               <option value="" disabled>Bitte wählen …</option>
-              {PROPERTIES_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+              {PROPERTIES_OPTIONS.map(o => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
             </select>
           </div>
-          <div className="field-group">
-            <label htmlFor="message">Ihre aktuelle Situation <span className="optional">(optional)</span></label>
-            <textarea id="message" name="message" rows={3} placeholder="Wie koordinieren Sie Ihre Reinigungen gerade?" value={form.message} onChange={handleChange} />
+          <div style={S.fieldGroup}>
+            <label style={S.fieldLabel} htmlFor="message">
+              Ihre aktuelle Situation{' '}
+              <span style={{ color: '#4a5568', fontWeight: 400 }}>(optional)</span>
+            </label>
+            <textarea
+              id="message" name="message" rows={3}
+              placeholder="Wie koordinieren Sie Ihre Reinigungen gerade?"
+              value={form.message} onChange={handleChange}
+              className="lead-input" style={{ ...S.input, resize: 'vertical', minHeight: 72 }}
+            />
           </div>
-          {state === 'error' && <p className="form-error">Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.</p>}
+
+          {formState === 'error' && (
+            <p style={S.formError}>Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.</p>
+          )}
+
           <Turnstile
             siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
-            onSuccess={(token) => setTurnstileToken(token)}
+            onSuccess={t => setTurnstileToken(t)}
+            options={{ theme: 'dark' }}
           />
-          <button type="submit" className="submit-btn" disabled={state === 'loading' || !turnstileToken}>
-            {state === 'loading' ? 'Wird gesendet …' : 'Demo anfragen →'}
+
+          <button
+            type="submit"
+            disabled={formState === 'loading' || !turnstileToken}
+            className="lead-submit"
+            style={{
+              ...S.submitBtn,
+              opacity: formState === 'loading' || !turnstileToken ? 0.6 : 1,
+              cursor:  formState === 'loading' || !turnstileToken ? 'not-allowed' : 'pointer',
+            }}
+          >
+            {formState === 'loading'
+              ? <><span style={S.spinner} />Wird gesendet …</>
+              : 'Demo anfragen →'
+            }
           </button>
-          <p className="form-note">Kein Spam. Keine Verpflichtung. Wir melden uns persönlich.</p>
         </form>
-        <div className="tg-alt">
+
+        {/* Telegram alternative */}
+        <div style={S.tgAlt}>
           <span>Oder direkt auf Telegram:</span>
-          <a href="https://t.me/Reinraumat" target="_blank" rel="noopener noreferrer" className="tg-alt-link">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="#2563eb"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+          <a
+            href="https://t.me/Reinraumat"
+            target="_blank" rel="noopener noreferrer"
+            className="lead-tglink"
+            style={S.tgLink}
+          >
+            <TgIcon />
             @Reinraumat
           </a>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="faq-section">
-        <h2 className="faq-title">Häufige Fragen</h2>
-        {FAQS.map((faq, i) => (
-          <div key={i} className="faq-item" onClick={() => setOpenFaq(openFaq === i ? null : i)}>
-            <div className="faq-question">
-              <span>{faq.q}</span>
-              <span className="faq-arrow">{openFaq === i ? '−' : '+'}</span>
-            </div>
-            {openFaq === i && <div className="faq-answer">{faq.a}</div>}
+      {/* Trust strip */}
+      <motion.div className="lead-trust-row" style={S.trustRow} {...fy(0)}>
+        {[
+          ['📅', 'iCal-Sync mit Airbnb'],
+          ['📷', 'Foto-Nachweis der Reinigung'],
+          ['💬', 'Telegram-Bot für Reinigungskräfte'],
+          ['🔒', 'Daten in der EU (Supabase)'],
+        ].map(([icon, text]) => (
+          <div key={text} style={S.trustItem}>
+            <span style={{ fontSize: 14 }}>{icon}</span>
+            <span style={{ fontSize: 12, color: '#4a5568' }}>{text}</span>
           </div>
         ))}
-      </div>
+      </motion.div>
 
-      <div className="trust-row">
-        <div className="trust-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>iCal-Sync mit Airbnb</span></div>
-        <div className="trust-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><span>Foto-Nachweis der Reinigung</span></div>
-        <div className="trust-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Telegram-Bot für Reinigungskräfte</span></div>
-      </div>
-
-      <style>{styles}</style>
-      </main>
-    </>
-  );
+      <style>{css}</style>
+    </main>
+  )
 }
 
-const styles = `
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background: #f8f8f6; color: #1a1a1a; -webkit-font-smoothing: antialiased; }
-  .lead-wrap { min-height: 100vh; max-width: 640px; margin: 0 auto; padding: 24px 16px 60px; display: flex; flex-direction: column; gap: 24px; }
-  .lead-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
-  .lead-logo { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 18px; }
-  .logo-icon { color: #2563eb; font-size: 20px; }
-  .lead-badge { font-size: 12px; font-weight: 600; color: #2563eb; background: #eff6ff; border: 1px solid #bfdbfe; padding: 4px 10px; border-radius: 20px; }
-  .lead-hero h1 { font-size: clamp(24px, 5vw, 32px); font-weight: 800; line-height: 1.2; letter-spacing: -0.5px; margin-bottom: 12px; }
-  .lead-sub { font-size: 15px; color: #555; line-height: 1.6; }
-  .lead-card { background: #fff; border-radius: 16px; padding: 28px 24px; border: 1px solid #e5e5e5; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
-  .form-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
-  .lead-form { display: flex; flex-direction: column; gap: 16px; }
-  .field-group { display: flex; flex-direction: column; gap: 6px; flex: 1; }
-  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  @media (max-width: 400px) { .field-row { grid-template-columns: 1fr; } }
-  label { font-size: 13px; font-weight: 600; color: #444; }
-  .optional { font-weight: 400; color: #999; }
-  input, select, textarea { width: 100%; padding: 10px 12px; border: 1.5px solid #e0e0e0; border-radius: 8px; font-size: 14px; font-family: inherit; color: #1a1a1a; background: #fafafa; transition: border-color 0.15s; outline: none; }
-  input:focus, select:focus, textarea:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); background: #fff; }
-  textarea { resize: vertical; min-height: 72px; }
-  .form-error { font-size: 13px; color: #dc2626; background: #fef2f2; border: 1px solid #fecaca; padding: 8px 12px; border-radius: 8px; }
-  .submit-btn { width: 100%; padding: 13px; background: #2563eb; color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; font-family: inherit; cursor: pointer; transition: background 0.15s; }
-  .submit-btn:hover:not(:disabled) { background: #1d4ed8; }
-  .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-  .form-note { text-align: center; font-size: 12px; color: #aaa; }
-  .tg-alt { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 16px; font-size: 13px; color: #888; flex-wrap: wrap; }
-  .tg-alt-link { display: inline-flex; align-items: center; gap: 6px; color: #2563eb; font-weight: 600; text-decoration: none; }
-  .tg-alt-link:hover { text-decoration: underline; }
-  .trust-row { display: flex; flex-direction: column; gap: 10px; padding: 0 4px; }
-  .trust-item { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #555; font-weight: 500; }
-  .success-card { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px; padding: 40px 24px; margin-top: 60px; }
-  .success-icon { width: 56px; height: 56px; background: #dcfce7; color: #16a34a; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; }
-  .success-card h2 { font-size: 22px; font-weight: 800; }
-  .success-card p { font-size: 15px; color: #555; line-height: 1.6; }
-  .calc-card { background: #fff; border-radius: 16px; padding: 28px 24px; border: 1px solid #e5e5e5; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
-  .calc-title { font-size: 16px; font-weight: 700; color: #111; margin-bottom: 4px; }
-  .calc-sub { font-size: 13px; color: #888; margin-bottom: 24px; }
-  .slider-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-  .slider-label span:first-child { font-size: 14px; font-weight: 600; color: #444; }
-  .slider-value { font-size: 20px; font-weight: 800; color: #2563eb; }
-  .calc-slider { width: 100%; height: 6px; border-radius: 3px; background: #e0e0e0; outline: none; -webkit-appearance: none; appearance: none; margin-bottom: 24px; cursor: pointer; }
-  .calc-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: #2563eb; cursor: pointer; box-shadow: 0 2px 6px rgba(37,99,235,0.3); }
-  .calc-results { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
-  .calc-box { background: #f4f4f2; border-radius: 12px; padding: 16px 12px; text-align: center; }
-  .calc-number { font-size: 24px; font-weight: 800; color: #111; margin-bottom: 6px; line-height: 1; }
-  .calc-number.green { color: #16a34a; }
-  .calc-label { font-size: 11px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.4px; line-height: 1.3; }
-  .calc-yearly { font-size: 13px; color: #555; text-align: center; font-weight: 500; }
-  .how-section { padding: 8px 0; }
-  .how-title { font-size: 18px; font-weight: 800; color: #111; margin-bottom: 24px; text-align: center; }
-  .how-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-  @media (max-width: 520px) { .how-steps { grid-template-columns: repeat(2, 1fr); gap: 16px; } }
-  .how-step { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; }
-  .how-icon { width: 52px; height: 52px; background: #eff6ff; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
-  .how-step-title { font-size: 13px; font-weight: 700; color: #111; }
-  .how-step-desc { font-size: 12px; color: #777; line-height: 1.5; }
-  .how-line { display: none; }
-  .faq-section { display: flex; flex-direction: column; gap: 0; }
-  .faq-title { font-size: 18px; font-weight: 800; color: #111; margin-bottom: 16px; }
-  .faq-item { border-bottom: 1px solid #eee; padding: 16px 0; cursor: pointer; }
-  .faq-item:first-of-type { border-top: 1px solid #eee; }
-  .faq-question { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-  .faq-question span:first-child { font-size: 14px; font-weight: 600; color: #111; line-height: 1.4; }
-  .faq-arrow { font-size: 20px; color: #2563eb; font-weight: 300; flex-shrink: 0; }
-  .faq-answer { font-size: 13px; color: #555; line-height: 1.7; margin-top: 10px; }
-`;
+// ── Styles ────────────────────────────────────────────────────────
+const glass = {
+  background:           'rgba(255,255,255,0.045)',
+  backdropFilter:       'blur(14px)',
+  WebkitBackdropFilter: 'blur(14px)',
+  border:               '1px solid rgba(255,255,255,0.08)',
+  borderRadius:         16,
+  padding:              24,
+} as const
+
+const S = {
+  wrap: {
+    minHeight:     '100vh',
+    maxWidth:      680,
+    margin:        '0 auto',
+    padding:       '24px 16px 80px',
+    display:       'flex',
+    flexDirection: 'column' as const,
+    gap:           24,
+    color:         '#e8eaf0',
+  },
+  glass,
+  header: {
+    display:        'flex',
+    alignItems:     'center',
+    justifyContent: 'space-between',
+    flexWrap:       'wrap' as const,
+    gap:            8,
+  },
+  logo:  { display: 'flex', alignItems: 'center', gap: 8 },
+  badge: {
+    fontSize:     12,
+    fontWeight:   600,
+    color:        '#3b7ef8',
+    background:   'rgba(59,126,248,0.12)',
+    border:       '1px solid rgba(59,126,248,0.25)',
+    padding:      '4px 10px',
+    borderRadius: 20,
+  },
+  h1: {
+    fontSize:      'clamp(26px, 6vw, 38px)',
+    fontWeight:    800,
+    lineHeight:    1.2,
+    letterSpacing: '-0.5px',
+    marginBottom:  14,
+  },
+  sub: {
+    fontSize:   15,
+    color:      '#8892a4',
+    lineHeight: 1.65,
+    maxWidth:   480,
+  },
+  ctaBtn: {
+    padding:      '14px 28px',
+    background:   '#3b7ef8',
+    color:        '#fff',
+    border:       'none',
+    borderRadius: 12,
+    fontSize:     15,
+    fontWeight:   700,
+    cursor:       'pointer',
+    fontFamily:   'inherit',
+    transition:   'opacity 0.15s',
+  } as React.CSSProperties,
+  sectionLabel: {
+    fontSize:      11,
+    fontWeight:    600,
+    color:         '#3b7ef8',
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.1em',
+    marginBottom:  6,
+  },
+  sectionH2: {
+    fontSize:     20,
+    fontWeight:   700,
+    color:        '#e8eaf0',
+    marginBottom: 20,
+  },
+  bubble: {
+    maxWidth:      '76%',
+    padding:       '10px 14px',
+    display:       'flex',
+    flexDirection: 'column' as const,
+    gap:           3,
+  },
+  bubbleBot: {
+    alignSelf:    'flex-start' as const,
+    background:   'rgba(59,126,248,0.13)',
+    border:       '1px solid rgba(59,126,248,0.2)',
+    color:        '#e8eaf0',
+    borderRadius: '4px 12px 12px 12px',
+  },
+  bubbleUser: {
+    alignSelf:    'flex-end' as const,
+    background:   'rgba(21,128,61,0.18)',
+    border:       '1px solid rgba(134,239,172,0.18)',
+    color:        '#86efac',
+    borderRadius: '12px 4px 12px 12px',
+  },
+  bubbleHost: {
+    alignSelf:    'flex-end' as const,
+    background:   'rgba(255,255,255,0.05)',
+    border:       '1px solid rgba(255,255,255,0.09)',
+    color:        '#8892a4',
+    borderRadius: '12px 4px 12px 12px',
+    fontSize:     12,
+  },
+  bubbleLabel: {
+    fontSize:      10,
+    fontWeight:    600,
+    color:         '#4a5568',
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.05em',
+  },
+  compareGrid: {
+    display:             'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap:                 12,
+  },
+  compareBefore: {
+    background:   'rgba(239,68,68,0.06)',
+    border:       '1px solid rgba(239,68,68,0.15)',
+    borderRadius: 12,
+    padding:      16,
+  },
+  compareAfter: {
+    background:   'rgba(21,128,61,0.06)',
+    border:       '1px solid rgba(134,239,172,0.15)',
+    borderRadius: 12,
+    padding:      16,
+  },
+  compareRow: {
+    fontSize:     12.5,
+    color:        '#8892a4',
+    marginBottom: 8,
+    display:      'flex',
+    gap:          8,
+    alignItems:   'flex-start' as const,
+    lineHeight:   1.45,
+  },
+  slider: {
+    width:        '100%',
+    accentColor:  '#3b7ef8',
+    marginBottom: 24,
+    cursor:       'pointer',
+    display:      'block',
+    height:       4,
+  } as React.CSSProperties,
+  calcGrid: {
+    display:             'grid',
+    gridTemplateColumns: '1fr 1fr 1fr',
+    gap:                 10,
+  },
+  calcBox: {
+    background:    'rgba(255,255,255,0.04)',
+    border:        '1px solid rgba(255,255,255,0.07)',
+    borderRadius:  10,
+    padding:       '14px 10px',
+    textAlign:     'center' as const,
+    display:       'flex',
+    flexDirection: 'column' as const,
+    gap:           4,
+  },
+  calcNum: {
+    fontSize:   24,
+    fontWeight: 800,
+    color:      '#e8eaf0',
+    display:    'block',
+  },
+  calcSub: {
+    fontSize:   11,
+    color:      '#4a5568',
+    lineHeight: 1.4,
+    display:    'block',
+  },
+  stepsGrid: {
+    display:             'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap:                 12,
+  },
+  faqBtn: {
+    width:          '100%',
+    background:     'none',
+    border:         'none',
+    padding:        '16px 20px',
+    display:        'flex',
+    justifyContent: 'space-between' as const,
+    alignItems:     'center',
+    gap:            16,
+    cursor:         'pointer',
+    fontFamily:     'inherit',
+    textAlign:      'left' as const,
+  },
+  form: {
+    display:       'flex',
+    flexDirection: 'column' as const,
+    gap:           16,
+  },
+  fieldGroup: {
+    display:       'flex',
+    flexDirection: 'column' as const,
+    gap:           6,
+    flex:          1,
+  },
+  fieldRow: {
+    display:             'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap:                 12,
+  },
+  fieldLabel: {
+    fontSize:   13,
+    fontWeight: 600,
+    color:      '#8892a4',
+  },
+  input: {
+    width:        '100%',
+    padding:      '10px 14px',
+    border:       '1px solid rgba(255,255,255,0.1)',
+    borderRadius: 10,
+    fontSize:     14,
+    color:        '#e8eaf0',
+    background:   'rgba(255,255,255,0.05)',
+    outline:      'none',
+    fontFamily:   'inherit',
+    transition:   'border-color 0.15s, box-shadow 0.15s',
+  } as React.CSSProperties,
+  formError: {
+    fontSize:     13,
+    color:        '#fca5a5',
+    background:   'rgba(239,68,68,0.1)',
+    border:       '1px solid rgba(239,68,68,0.28)',
+    padding:      '8px 12px',
+    borderRadius: 8,
+  },
+  submitBtn: {
+    width:          '100%',
+    padding:        14,
+    background:     '#3b7ef8',
+    color:          '#fff',
+    border:         'none',
+    borderRadius:   12,
+    fontSize:       15,
+    fontWeight:     700,
+    fontFamily:     'inherit',
+    transition:     'opacity 0.15s',
+    display:        'flex',
+    alignItems:     'center',
+    justifyContent: 'center',
+    gap:            8,
+  } as React.CSSProperties,
+  spinner: {
+    width:          16,
+    height:         16,
+    border:         '2px solid rgba(255,255,255,0.3)',
+    borderTopColor: '#fff',
+    borderRadius:   '50%',
+    animation:      'cs-spin 0.8s linear infinite',
+    display:        'inline-block',
+    flexShrink:     0,
+  } as React.CSSProperties,
+  tgAlt: {
+    display:        'flex',
+    alignItems:     'center',
+    justifyContent: 'center',
+    gap:            10,
+    marginTop:      20,
+    fontSize:       13,
+    color:          '#4a5568',
+    flexWrap:       'wrap' as const,
+  },
+  tgLink: {
+    display:        'inline-flex',
+    alignItems:     'center',
+    gap:            6,
+    color:          '#3b7ef8',
+    fontWeight:     600,
+    textDecoration: 'none',
+  } as React.CSSProperties,
+  successIcon: {
+    width:          52,
+    height:         52,
+    borderRadius:   '50%',
+    background:     'rgba(21,128,61,0.18)',
+    border:         '1px solid rgba(134,239,172,0.25)',
+    display:        'flex',
+    alignItems:     'center',
+    justifyContent: 'center',
+    margin:         '0 auto 20px',
+    fontSize:       26,
+    color:          '#86efac',
+  },
+  trustRow: {
+    display:             'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap:                 10,
+    paddingBottom:       8,
+  },
+  trustItem: {
+    display:    'flex',
+    alignItems: 'center',
+    gap:        8,
+  },
+}
+
+// Interactive + responsive rules (can't be done with inline styles)
+const css = `
+  .lead-input:focus {
+    border-color: #3b7ef8 !important;
+    box-shadow: 0 0 0 3px rgba(59,126,248,0.15) !important;
+    background: rgba(255,255,255,0.07) !important;
+  }
+  .lead-input::placeholder { color: #4a5568; }
+  .lead-input option { background: #161c28; color: #e8eaf0; }
+  .lead-cta:hover    { opacity: 0.85; }
+  .lead-submit:hover:not(:disabled) { opacity: 0.88; }
+  .lead-tglink:hover { text-decoration: underline; }
+  @media (max-width: 480px) {
+    .lead-field-row   { grid-template-columns: 1fr !important; }
+    .lead-compare-grid { grid-template-columns: 1fr !important; }
+    .lead-steps-grid  { grid-template-columns: 1fr !important; }
+    .lead-trust-row   { grid-template-columns: 1fr !important; }
+    .lead-calc-grid   { grid-template-columns: 1fr !important; }
+  }
+`
