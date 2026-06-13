@@ -6,6 +6,7 @@ import Sidebar from './components/Sidebar'
 import { ContentWrapper } from './components/ContentWrapper'
 import { CommandPaletteDesktop } from './components/CommandPalette'
 import AuthOnboarding from '@/components/AuthOnboarding'
+import { TimeOfDayTheme } from '@/components/TimeOfDayTheme'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 
 const jakarta = Plus_Jakarta_Sans({
@@ -44,6 +45,7 @@ export default async function RootLayout({
     <html lang="de">
       <body className={jakarta.className}>
         <div className="cs-bg" aria-hidden="true" />
+        <TimeOfDayTheme />
         <Sidebar email={userEmail} />
         <CommandPaletteDesktop />
         <ContentWrapper>

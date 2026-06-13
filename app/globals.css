@@ -2,6 +2,9 @@
 
 /* ─── Design Tokens ─────────────────────────────── */
 :root {
+  /* Time-of-day hue shift — set by TimeOfDayTheme.tsx at page load */
+  --cs-hue-shift: 0;
+
   /* Surfaces */
   --cs-bg:        #10141c;
   --cs-surface:   #161c28;
@@ -95,14 +98,14 @@ body {
 .cs-bg::before {
   width: 90vw; height: 70vh;
   left: -10vw; top: -25vh;
-  background: radial-gradient(ellipse at center, rgba(64,118,235,0.20), transparent 65%);
+  background: radial-gradient(ellipse at center, hsl(calc(221 + var(--cs-hue-shift)) 81% 59% / 0.20), transparent 65%);
   animation: cs-drift-a 48s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate;
 }
 /* Слой 2 — глубинный indigo, низ-право, слабее */
 .cs-bg::after {
   width: 70vw; height: 60vh;
   right: -20vw; bottom: -25vh;
-  background: radial-gradient(ellipse at center, rgba(99,91,255,0.10), transparent 65%);
+  background: radial-gradient(ellipse at center, hsl(calc(243 + var(--cs-hue-shift)) 100% 68% / 0.10), transparent 65%);
   animation: cs-drift-b 64s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate;
 }
 @keyframes cs-drift-a {
@@ -122,7 +125,7 @@ body {
   .cs-bg::before {
     width: 140vw; height: 50vh;
     left: -20vw; top: -20vh;
-    background: radial-gradient(ellipse at center, rgba(64,118,235,0.22), transparent 70%);
+    background: radial-gradient(ellipse at center, hsl(calc(221 + var(--cs-hue-shift)) 81% 59% / 0.22), transparent 70%);
     animation: none;
   }
   .cs-bg::after { display: none; }
