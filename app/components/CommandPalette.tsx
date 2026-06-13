@@ -32,10 +32,11 @@ function useDebounce<T>(value: T, delay: number): T {
 }
 
 export function CommandPalette() {
-  const [open, setOpen]       = useState(false)
-  const [query, setQuery]     = useState('')
-  const [results, setResults] = useState<SearchResult[]>([])
-  const [active, setActive]   = useState(0)
+  const [open, setOpen]           = useState(false)
+  const [query, setQuery]         = useState('')
+  const [results, setResults]     = useState<SearchResult[]>([])
+  const [active, setActive]       = useState(0)
+  const [isSearching, setSearching] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const listRef  = useRef<HTMLDivElement>(null)
   const router   = useRouter()
@@ -81,9 +82,11 @@ export function CommandPalette() {
       a => a.label.toLowerCase().includes(q) || (a.sub?.toLowerCase().includes(q) ?? false)
     )
 
+    setSearching(true)
     fetch(`/api/search?q=${encodeURIComponent(debouncedQ)}`)
       .then(r => r.json())
       .then(data => {
+        setSearching(false)
         const taskResults: SearchResult[] = (data.tasks ?? []).map((t: any) => ({
           id:    `task-${t.id}`,
           label: t.properties?.name ?? 'Auftrag',
@@ -108,6 +111,7 @@ export function CommandPalette() {
         setActive(0)
       })
       .catch(() => {
+        setSearching(false)
         setResults(staticMatches)
         setActive(0)
       })
@@ -224,12 +228,22 @@ export function CommandPalette() {
               ref={listRef}
               style={{ maxHeight: 380, overflowY: 'auto', padding: '6px 0' }}
             >
-              {results.length === 0 && (
+              {isSearching && (
+                <div style={{ padding: '8px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {[140, 180, 160].map((w, i) => (
+                    <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      <div className="cs-skeleton" style={{ width: w, height: 14, borderRadius: 4 }} />
+                      <div className="cs-skeleton" style={{ width: w * 0.7, height: 11, borderRadius: 3 }} />
+                    </div>
+                  ))}
+                </div>
+              )}
+              {!isSearching && results.length === 0 && (
                 <p style={{ textAlign: 'center', color: 'var(--cs-text-3)', fontSize: 13, padding: '24px 0' }}>
                   Keine Ergebnisse
                 </p>
               )}
-              {Object.entries(groups).map(([group, items]) => (
+              {!isSearching && Object.entries(groups).map(([group, items]) => (
                 <div key={group}>
                   <p style={{
                     fontSize: 10, fontWeight: 600, letterSpacing: '0.06em',

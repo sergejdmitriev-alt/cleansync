@@ -131,6 +131,29 @@ body {
   .cs-bg::before, .cs-bg::after { animation: none; }
 }
 
+/* ─── Skeleton shimmer ────────────────────────────── */
+@keyframes cs-shimmer {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
+}
+.cs-skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.04) 25%,
+    rgba(255,255,255,0.09) 50%,
+    rgba(255,255,255,0.04) 75%
+  );
+  background-size: 200% 100%;
+  animation: cs-shimmer 1.4s linear infinite;
+  flex-shrink: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cs-skeleton {
+    animation: none;
+    background: rgba(255,255,255,0.06);
+  }
+}
+
 /* ─── Utility classes ────────────────────────────── */
 
 /* Status badges */
