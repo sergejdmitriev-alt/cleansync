@@ -55,10 +55,14 @@ export default async function TaskDetailPage({
 
   const photosWithUrls = await Promise.all(
     (photos ?? []).map(async (photo) => {
-      const { data } = await supabase.storage
-        .from('task-photos')
-        .createSignedUrl(photo.storage_path, 3600)
-      return { ...photo, url: data?.signedUrl ?? null }
+      try {
+        const { data } = await supabase.storage
+          .from('task-photos')
+          .createSignedUrl(photo.storage_path, 3600)
+        return { ...photo, url: data?.signedUrl ?? null }
+      } catch {
+        return { ...photo, url: null }
+      }
     })
   )
 
@@ -154,14 +158,13 @@ export default async function TaskDetailPage({
                       <img
                         src={photo.url}
                         alt="Problem"
-                        style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 'var(--cs-radius-md)', border: '1px solid var(--cs-danger-border)', opacity: 1, transition: 'opacity 0.15s' }}
-                        onMouseOver={e => (e.currentTarget.style.opacity = '0.85')}
-                        onMouseOut={e => (e.currentTarget.style.opacity = '1')}
+                        className="cs-photo-thumb"
+                        style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 'var(--cs-radius-md)', border: '1px solid var(--cs-danger-border)' }}
                       />
                     </a>
                   ) : (
                     <div style={{ width: '100%', aspectRatio: '1', background: 'var(--cs-surface-2)', borderRadius: 'var(--cs-radius-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', color: 'var(--cs-text-3)' }}>
-                      Nicht verfügbar
+                      Foto konnte nicht geladen werden
                     </div>
                   )}
                   {photo.caption && (
@@ -188,14 +191,13 @@ export default async function TaskDetailPage({
                       <img
                         src={photo.url}
                         alt="Reinigung"
-                        style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 'var(--cs-radius-md)', border: '1px solid var(--cs-border)', opacity: 1, transition: 'opacity 0.15s' }}
-                        onMouseOver={e => (e.currentTarget.style.opacity = '0.85')}
-                        onMouseOut={e => (e.currentTarget.style.opacity = '1')}
+                        className="cs-photo-thumb"
+                        style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 'var(--cs-radius-md)', border: '1px solid var(--cs-border)' }}
                       />
                     </a>
                   ) : (
                     <div style={{ width: '100%', aspectRatio: '1', background: 'var(--cs-surface-2)', borderRadius: 'var(--cs-radius-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', color: 'var(--cs-text-3)' }}>
-                      Nicht verfügbar
+                      Foto konnte nicht geladen werden
                     </div>
                   )}
                   <p style={{ fontSize: '11px', color: 'var(--cs-text-3)', margin: 0 }}>{fmt(photo.created_at)}</p>

@@ -322,6 +322,14 @@ body {
 }
 .cs-input::placeholder { color: var(--cs-text-3); }
 
+/* Photo thumbnail hover — server-component safe (no JS event handlers) */
+.cs-photo-thumb {
+  display: block;
+  opacity: 1;
+  transition: opacity 0.15s;
+}
+.cs-photo-thumb:hover { opacity: 0.85; }
+
 /* Problem border accent */
 .cs-problem-row {
   border-left: 3px solid var(--cs-danger);
