@@ -2,6 +2,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { createServiceSupabaseClient } from '@/lib/supabase/service'
 import Header from '@/app/components/Header'
 import { FadeInItem } from '@/components/motion/FadeInItem'
+import { StatistikMetrics } from './StatistikMetrics'
 
 export const dynamic = 'force-dynamic'
 
@@ -66,24 +67,13 @@ export default async function StatistikPage() {
         </h1>
         <p style={{ fontSize: '13px', color: 'var(--cs-text-3)', margin: '0 0 24px' }}>{monthLabel}</p>
 
-        {/* 4 stat cards */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', marginBottom: '24px' }}>
-          {[
-            { label: 'Aufträge gesamt',  value: String(total),                            color: 'var(--cs-text-1)' },
-            { label: 'Akzeptiert',       value: `${acceptedPct}%`,                        color: '#2563eb'          },
-            { label: 'Abgelehnt',        value: String(declined),                         color: 'var(--cs-danger)' },
-            { label: 'Ø Antwortzeit',    value: avgMin !== null ? `${avgMin} min` : '—', color: '#059669'          },
-          ].map((s, i) => (
-            <FadeInItem key={s.label} index={i} className="cs-card" style={{ padding: '16px 20px' }}>
-              <p style={{ fontSize: '11px', color: 'var(--cs-text-3)', margin: '0 0 6px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                {s.label}
-              </p>
-              <p style={{ fontSize: '30px', fontWeight: '700', color: s.color, margin: 0, letterSpacing: '-0.02em', lineHeight: 1 }}>
-                {s.value}
-              </p>
-            </FadeInItem>
-          ))}
-        </div>
+        {/* 4 stat cards — animated */}
+        <StatistikMetrics
+          total={total}
+          acceptedPct={acceptedPct}
+          declined={declined}
+          avgMin={avgMin}
+        />
 
         {/* Bar chart by week */}
         <div className="cs-card" style={{ padding: '20px', marginBottom: '24px' }}>
