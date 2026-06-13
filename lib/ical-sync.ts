@@ -12,7 +12,7 @@ function tzOffsetMs(ts: number, tz: string): number {
   return Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour % 24, +p.minute, +p.second) - ts
 }
 
-function viennaHourToUTC(dateOnly: Date, hour: number): Date {
+export function viennaHourToUTC(dateOnly: Date, hour: number): Date {
   const guess = Date.UTC(dateOnly.getUTCFullYear(), dateOnly.getUTCMonth(), dateOnly.getUTCDate(), hour)
   return new Date(guess - tzOffsetMs(guess, 'Europe/Vienna'))
 }

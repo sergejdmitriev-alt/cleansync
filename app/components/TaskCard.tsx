@@ -92,6 +92,9 @@ export default function TaskCard({ task }: { task: any }) {
           >
             {STATUS_LABEL[task.status] ?? task.status}
           </span>
+          {task.recurring_rule_id && (
+            <span title="Wiederkehrende Reinigung" style={{ fontSize: '11px', color: 'var(--cs-text-3)' }}>↻</span>
+          )}
           {task.escalated_at && (
             <span style={{
               fontSize: '10px', fontWeight: '600',

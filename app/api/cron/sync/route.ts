@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceSupabaseClient } from '@/lib/supabase/service'
 import { syncPropertyIcal } from '@/lib/ical-sync'
+import { generateRecurringTasks } from '@/lib/recurring-sync'
 
 export const dynamic = 'force-dynamic'
 export const runtime  = 'nodejs'
@@ -35,5 +36,8 @@ export async function GET(req: NextRequest) {
   const total = results.reduce((s, r) => s + r.created, 0)
   console.log(`iCal sync: ${total} neue Aufträge erstellt`)
 
-  return NextResponse.json({ results, total_created: total })
+  const recurring = await generateRecurringTasks()
+  console.log(`Recurring: ${recurring.created} erstellt, ${recurring.skipped} übersprungen`)
+
+  return NextResponse.json({ results, total_created: total, recurring })
 }

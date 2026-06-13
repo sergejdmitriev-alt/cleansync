@@ -7,6 +7,18 @@ import { AnimatePresence, motion } from 'framer-motion'
 
 interface Cleaner  { id: string; name: string; telegram_chat_id: number | null }
 interface Property { id: string; name: string; address: string; default_notes?: string | null; ical_url?: string | null }
+interface RecurringRule {
+  id: string; property_id: string; cleaner_id: string | null
+  frequency: 'weekly' | 'biweekly' | 'monthly'; weekday: number
+  checkout_hour: number; notes: string | null; active: boolean
+  cleaners: { id: string; name: string } | null
+}
+
+const FREQ_LABELS: Record<string, string> = { weekly: 'Wöchentlich', biweekly: 'Alle 2 Wochen', monthly: 'Alle 4 Wochen' }
+const WEEKDAY_LABELS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']
+
+type RuleForm = { frequency: 'weekly' | 'biweekly' | 'monthly'; weekday: number; checkout_hour: number; cleaner_id: string; notes: string }
+const EMPTY_RULE: RuleForm = { frequency: 'weekly', weekday: 0, checkout_hour: 11, cleaner_id: '', notes: '' }
 
 const sectionStyle: React.CSSProperties = {
   marginBottom: '24px',
@@ -30,22 +42,67 @@ export default function SettingsPage() {
   const [telegramConnected,  setTelegramConnected]  = useState<boolean | null>(null)
   const [autoBackup,         setAutoBackup]         = useState<boolean>(false)
   const [escalationHours,    setEscalationHours]    = useState<number>(4)
-  const [expandedInvite, setExpandedInvite] = useState<string | null>(null)
-  const [inviteLinks,    setInviteLinks]    = useState<Record<string, string>>({})
-  const [copyDone,       setCopyDone]       = useState<string | null>(null)
+  const [expandedInvite,    setExpandedInvite]    = useState<string | null>(null)
+  const [inviteLinks,       setInviteLinks]       = useState<Record<string, string>>({})
+  const [copyDone,          setCopyDone]          = useState<string | null>(null)
+  const [recurringRules,    setRecurringRules]    = useState<RecurringRule[]>([])
+  const [expandedRecurring, setExpandedRecurring] = useState<string | null>(null)
+  const [newRuleForms,      setNewRuleForms]      = useState<Record<string, RuleForm>>({})
 
   async function load() {
-    const [c, p, t, b] = await Promise.all([
+    const [c, p, t, b, r] = await Promise.all([
       fetch('/api/cleaners').then(r => r.json()),
       fetch('/api/properties').then(r => r.json()),
       fetch('/api/telegram/status').then(r => r.json()),
       fetch('/api/settings/backup').then(r => r.json()),
+      fetch('/api/recurring').then(r => r.json()),
     ])
     setCleaners(c)
     setProperties(p)
     setTelegramConnected(t.connected ?? false)
     setAutoBackup(b.auto_backup_enabled ?? false)
     setEscalationHours(b.escalation_hours ?? 4)
+    setRecurringRules(Array.isArray(r) ? r : [])
+  }
+
+  async function addRecurringRule(propertyId: string) {
+    const form = newRuleForms[propertyId] ?? EMPTY_RULE
+    const res = await fetch('/api/recurring', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        property_id:   propertyId,
+        cleaner_id:    form.cleaner_id || null,
+        frequency:     form.frequency,
+        weekday:       Number(form.weekday),
+        checkout_hour: Number(form.checkout_hour),
+        notes:         form.notes || null,
+      }),
+    })
+    if (res.ok) {
+      const rule = await res.json()
+      setRecurringRules(prev => [...prev, rule])
+      setNewRuleForms(prev => ({ ...prev, [propertyId]: EMPTY_RULE }))
+      setExpandedRecurring(null)
+    }
+  }
+
+  async function toggleRuleActive(rule: RecurringRule) {
+    const res = await fetch(`/api/recurring/${rule.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ active: !rule.active }),
+    })
+    if (res.ok) {
+      const updated = await res.json()
+      setRecurringRules(prev => prev.map(r => r.id === rule.id ? updated : r))
+    }
+  }
+
+  async function deleteRecurringRule(id: string) {
+    if (!confirm('Regel löschen?')) return
+    await fetch(`/api/recurring/${id}`, { method: 'DELETE' })
+    setRecurringRules(prev => prev.filter(r => r.id !== id))
   }
 
   async function saveBackup(enabled: boolean, hours: number) {
@@ -160,6 +217,7 @@ export default function SettingsPage() {
                     </div>
                   </div>
                 ) : (
+                  <>
                   <div style={rowStyle}>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <p style={{ fontWeight: '500', fontSize: '14px', margin: '0 0 2px', color: 'var(--cs-text-1)' }}>{p.name}</p>
@@ -179,9 +237,125 @@ export default function SettingsPage() {
                         🔄 Sync
                       </button>
                     )}
+                    <button
+                      onClick={() => setExpandedRecurring(expandedRecurring === p.id ? null : p.id)}
+                      className="cs-btn-secondary"
+                      style={{ fontSize: '12px', padding: '5px 10px' }}
+                      title="Wiederkehrende Reinigungen"
+                    >
+                      ↻ Regeln
+                    </button>
                     <button onClick={() => setEditingProperty(p)} className="cs-btn-secondary" style={{ fontSize: '12px', padding: '5px 12px' }}>Bearbeiten</button>
                     <button onClick={() => deleteProperty(p.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--cs-text-3)', fontSize: '16px', padding: '4px' }}>🗑</button>
                   </div>
+
+                  {/* Recurring rules accordion */}
+                  <AnimatePresence>
+                    {expandedRecurring === p.id && (() => {
+                      const rules   = recurringRules.filter(r => r.property_id === p.id)
+                      const form    = newRuleForms[p.id] ?? EMPTY_RULE
+                      const setForm = (upd: Partial<typeof EMPTY_RULE>) =>
+                        setNewRuleForms(prev => ({ ...prev, [p.id]: { ...(prev[p.id] ?? EMPTY_RULE), ...upd } }))
+                      return (
+                        <motion.div
+                          key="recurring"
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                          style={{ overflow: 'hidden', borderBottom: '1px solid var(--cs-border)', background: 'var(--cs-surface-2)' }}
+                        >
+                          <div style={{ padding: '14px 20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <p style={{ fontSize: '12px', fontWeight: '600', color: 'var(--cs-text-3)', textTransform: 'uppercase', letterSpacing: '0.04em', margin: 0 }}>
+                              ↻ Wiederkehrende Reinigung
+                            </p>
+
+                            {/* Existing rules */}
+                            {rules.map(rule => (
+                              <div key={rule.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', background: 'var(--cs-surface)', borderRadius: 'var(--cs-radius-md)', border: '1px solid var(--cs-border)' }}>
+                                <div style={{ flex: 1, fontSize: '13px', color: 'var(--cs-text-1)' }}>
+                                  {FREQ_LABELS[rule.frequency]} · {WEEKDAY_LABELS[rule.weekday]} · {String(rule.checkout_hour).padStart(2, '0')}:00 Uhr
+                                  {rule.cleaners && <span style={{ color: 'var(--cs-text-3)', marginLeft: '6px' }}>· {rule.cleaners.name}</span>}
+                                  {rule.notes   && <span style={{ color: 'var(--cs-text-3)', marginLeft: '6px' }}>· {rule.notes}</span>}
+                                </div>
+                                {/* Active toggle */}
+                                <button
+                                  onClick={() => toggleRuleActive(rule)}
+                                  style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', padding: '2px 4px', opacity: rule.active ? 1 : 0.4 }}
+                                  title={rule.active ? 'Aktiv — klicken zum Deaktivieren' : 'Inaktiv — klicken zum Aktivieren'}
+                                >
+                                  {rule.active ? '🟢' : '⚪'}
+                                </button>
+                                <button
+                                  onClick={() => deleteRecurringRule(rule.id)}
+                                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--cs-text-3)', fontSize: '15px', padding: '2px 4px' }}
+                                >🗑</button>
+                              </div>
+                            ))}
+
+                            {/* New rule form */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingTop: rules.length > 0 ? '8px' : 0 }}>
+                              <p style={{ fontSize: '11px', color: 'var(--cs-text-3)', margin: 0, fontWeight: '500' }}>Neue Regel</p>
+                              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                <select
+                                  className="cs-input"
+                                  style={{ flex: '1', minWidth: '120px' }}
+                                  value={form.frequency}
+                                  onChange={e => setForm({ frequency: e.target.value as 'weekly' | 'biweekly' | 'monthly' })}
+                                >
+                                  <option value="weekly">Wöchentlich</option>
+                                  <option value="biweekly">Alle 2 Wochen</option>
+                                  <option value="monthly">Alle 4 Wochen</option>
+                                </select>
+                                <select
+                                  className="cs-input"
+                                  style={{ flex: '1', minWidth: '80px' }}
+                                  value={form.weekday}
+                                  onChange={e => setForm({ weekday: Number(e.target.value) })}
+                                >
+                                  {WEEKDAY_LABELS.map((d, i) => (
+                                    <option key={i} value={i}>{d}</option>
+                                  ))}
+                                </select>
+                                <input
+                                  type="number"
+                                  className="cs-input"
+                                  style={{ flex: '1', minWidth: '70px' }}
+                                  min={6} max={22}
+                                  value={form.checkout_hour}
+                                  onChange={e => setForm({ checkout_hour: Number(e.target.value) })}
+                                  placeholder="Uhr Check-out"
+                                />
+                                <select
+                                  className="cs-input"
+                                  style={{ flex: '1', minWidth: '120px' }}
+                                  value={form.cleaner_id}
+                                  onChange={e => setForm({ cleaner_id: e.target.value })}
+                                >
+                                  <option value="">Reinigungskraft (optional)</option>
+                                  {cleaners.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                </select>
+                              </div>
+                              <input
+                                className="cs-input"
+                                placeholder="Notizen (optional)"
+                                value={form.notes}
+                                onChange={e => setForm({ notes: e.target.value })}
+                              />
+                              <button
+                                onClick={() => addRecurringRule(p.id)}
+                                className="cs-btn-primary"
+                                style={{ fontSize: '13px', padding: '7px 16px', alignSelf: 'flex-start' }}
+                              >
+                                Regel hinzufügen
+                              </button>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )
+                    })()}
+                  </AnimatePresence>
+                  </>
                 )}
               </div>
             ))}
