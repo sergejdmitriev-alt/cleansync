@@ -3,8 +3,9 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Header from '@/app/components/Header'
 import { FadeInItem } from '@/components/motion/FadeInItem'
+import { AnimatePresence, motion } from 'framer-motion'
 
-interface Cleaner  { id: string; name: string; telegram_chat_id: number }
+interface Cleaner  { id: string; name: string; telegram_chat_id: number | null }
 interface Property { id: string; name: string; address: string; default_notes?: string | null; ical_url?: string | null }
 
 const sectionStyle: React.CSSProperties = {
@@ -29,6 +30,9 @@ export default function SettingsPage() {
   const [telegramConnected,  setTelegramConnected]  = useState<boolean | null>(null)
   const [autoBackup,         setAutoBackup]         = useState<boolean>(false)
   const [escalationHours,    setEscalationHours]    = useState<number>(4)
+  const [expandedInvite, setExpandedInvite] = useState<string | null>(null)
+  const [inviteLinks,    setInviteLinks]    = useState<Record<string, string>>({})
+  const [copyDone,       setCopyDone]       = useState<string | null>(null)
 
   async function load() {
     const [c, p, t, b] = await Promise.all([
@@ -94,6 +98,21 @@ export default function SettingsPage() {
       load()
     }
   }
+  async function createInvite(id: string) {
+    const res = await fetch(`/api/cleaners/${id}/invite`, { method: 'POST' })
+    const { deeplink } = await res.json()
+    setInviteLinks(prev => ({ ...prev, [id]: deeplink }))
+    setExpandedInvite(id)
+    setCopyDone(null)
+  }
+  function copyInviteLink(id: string) {
+    const link = inviteLinks[id]
+    if (!link) return
+    navigator.clipboard.writeText(link)
+    setCopyDone(id)
+    setTimeout(() => setCopyDone(c => c === id ? null : c), 1500)
+  }
+
   async function saveProperty() {
     if (!editingProperty) return
     await fetch(`/api/properties/${editingProperty.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(editingProperty) })
@@ -214,14 +233,83 @@ export default function SettingsPage() {
                     </div>
                   </div>
                 ) : (
-                  <div style={rowStyle}>
-                    <div style={{ flex: 1 }}>
-                      <p style={{ fontWeight: '500', fontSize: '14px', margin: '0 0 2px', color: 'var(--cs-text-1)' }}>{c.name}</p>
-                      <p style={{ fontSize: '12px', color: 'var(--cs-text-3)', margin: 0 }}>Chat ID: {c.telegram_chat_id}</p>
+                  <>
+                    <div style={rowStyle}>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ fontWeight: '500', fontSize: '14px', margin: '0 0 4px', color: 'var(--cs-text-1)' }}>{c.name}</p>
+                        {c.telegram_chat_id ? (
+                          <span style={{
+                            display: 'inline-flex', alignItems: 'center', gap: 5,
+                            padding: '2px 8px', borderRadius: 99,
+                            background: 'rgba(21,128,61,0.18)', color: '#86efac',
+                            fontSize: 11, fontWeight: 500,
+                          }}>
+                            ✅ Telegram verbunden
+                          </span>
+                        ) : (
+                          <span style={{ fontSize: 12, color: 'var(--cs-text-3)' }}>Kein Telegram verbunden</span>
+                        )}
+                      </div>
+                      {c.telegram_chat_id ? (
+                        <button onClick={() => createInvite(c.id)} className="cs-btn-secondary" style={{ fontSize: '12px', padding: '5px 12px', flexShrink: 0 }}>
+                          Neu verbinden
+                        </button>
+                      ) : (
+                        <button onClick={() => createInvite(c.id)} className="cs-btn-primary" style={{ fontSize: '12px', padding: '5px 12px', flexShrink: 0 }}>
+                          Einladungslink erstellen
+                        </button>
+                      )}
+                      <button onClick={() => setEditingCleaner(c)} className="cs-btn-secondary" style={{ fontSize: '12px', padding: '5px 12px' }}>Bearbeiten</button>
+                      <button onClick={() => deleteCleaner(c.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--cs-text-3)', fontSize: '16px', padding: '4px' }}>🗑</button>
                     </div>
-                    <button onClick={() => setEditingCleaner(c)} className="cs-btn-secondary" style={{ fontSize: '12px', padding: '5px 12px' }}>Bearbeiten</button>
-                    <button onClick={() => deleteCleaner(c.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--cs-text-3)', fontSize: '16px', padding: '4px' }}>🗑</button>
-                  </div>
+                    <AnimatePresence initial={false}>
+                      {expandedInvite === c.id && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
+                          style={{ overflow: 'hidden' }}
+                        >
+                          <div style={{
+                            padding: '12px 20px 16px',
+                            background: 'var(--cs-surface-2)',
+                            borderTop: '1px solid var(--cs-border)',
+                          }}>
+                            <div style={{
+                              fontFamily: 'monospace', fontSize: 12,
+                              color: 'var(--cs-text-2)', lineHeight: 1.6,
+                              wordBreak: 'break-all', marginBottom: 10,
+                              background: 'var(--cs-surface)',
+                              border: '1px solid var(--cs-border)',
+                              borderRadius: 8, padding: '8px 12px',
+                            }}>
+                              {inviteLinks[c.id]}
+                            </div>
+                            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                              <button
+                                onClick={() => copyInviteLink(c.id)}
+                                className="cs-btn-primary"
+                                style={{ fontSize: 12, padding: '5px 12px' }}
+                              >
+                                {copyDone === c.id ? '✅ Kopiert!' : '📋 Kopieren'}
+                              </button>
+                              <button
+                                onClick={() => setExpandedInvite(null)}
+                                className="cs-btn-secondary"
+                                style={{ fontSize: 12, padding: '5px 10px' }}
+                              >
+                                Schließen
+                              </button>
+                              <span style={{ fontSize: 11, color: 'var(--cs-text-3)' }}>
+                                Senden Sie diesen Link Ihrer Reinigungskraft — gültig 72 Stunden.
+                              </span>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </>
                 )}
               </div>
             ))}
@@ -367,6 +455,7 @@ export default function SettingsPage() {
         </FadeInItem>
 
       </main>
+
     </div>
   )
 }

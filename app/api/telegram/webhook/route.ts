@@ -99,7 +99,34 @@ export async function POST(req: NextRequest) {
         }).eq('id', profile.id)
         await bot.sendMessage(chatId, '✅ Telegram erfolgreich verbunden!\n\nSie erhalten ab jetzt Benachrichtigungen zu Ihren Aufträgen.')
       } else {
-        await bot.sendMessage(chatId, '⚠️ Der Link ist abgelaufen oder ungültig.\n\nBitte generieren Sie einen neuen Link unter cleansync.at/connect-telegram.')
+        // Check cleaner invite token (host flow takes priority above)
+        const { data: cleaner } = await supabase
+          .from('cleaners')
+          .select('id')
+          .eq('invite_token', token)
+          .gt('invite_token_exp', new Date().toISOString())
+          .maybeSingle()
+
+        if (cleaner) {
+          await supabase.from('cleaners').update({
+            telegram_chat_id: Number(chatId),
+            invite_token:     null,
+            invite_token_exp: null,
+          }).eq('id', cleaner.id)
+          await bot.sendMessage(chatId,
+            '👋 Willkommen bei CleanSync!\n\nBitte wähle deine Sprache / Выбери язык / Вибери мову / Alege limba / Wybierz język:',
+            {
+              reply_markup: {
+                inline_keyboard: [
+                  [{ text: '🇷🇺 Русский', callback_data: 'lang_ru' }, { text: '🇺🇦 Українська', callback_data: 'lang_uk' }],
+                  [{ text: '🇷🇴 Română',  callback_data: 'lang_ro' }, { text: '🇵🇱 Polski',     callback_data: 'lang_pl' }],
+                ],
+              },
+            }
+          )
+        } else {
+          await bot.sendMessage(chatId, '⚠️ Der Link ist abgelaufen oder ungültig.\n\nBitte generieren Sie einen neuen Link unter cleansync.at/connect-telegram.')
+        }
       }
     }
     return NextResponse.json({ ok: true })
