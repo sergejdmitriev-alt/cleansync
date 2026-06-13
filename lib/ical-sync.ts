@@ -33,7 +33,17 @@ interface ICalEvent {
 
 function parseIcal(content: string): ICalEvent[] {
   const events: ICalEvent[] = []
-  const lines = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n')
+
+  // RFC 5545 §3.1: unfold continuation lines (space/tab prefix → append to previous)
+  const rawLines = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n')
+  const lines: string[] = []
+  for (const raw of rawLines) {
+    if ((raw.startsWith(' ') || raw.startsWith('\t')) && lines.length > 0) {
+      lines[lines.length - 1] += raw.slice(1)
+    } else {
+      lines.push(raw)
+    }
+  }
 
   let inEvent  = false
   let current: Partial<ICalEvent> = {}
