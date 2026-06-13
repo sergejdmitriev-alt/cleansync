@@ -5,6 +5,7 @@ import TasksFilter from './components/TasksFilter'
 import { UpcomingWidget, ActivityWidget, MonthWidget, HeuteWidget } from './components/DashboardWidgets'
 import { FadeInItem } from '@/components/motion/FadeInItem'
 import { PullToRefresh } from '@/components/PullToRefresh'
+import { NewTaskButton } from './components/NewTaskButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -142,13 +143,18 @@ export default async function Home() {
       <PullToRefresh>
       <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px 20px' }}>
 
-        {/* Greeting — desktop only */}
-        <h1 className="hidden md:block" style={{
-          fontSize: '22px', fontWeight: '600', color: 'var(--cs-text-1)',
-          margin: '0 0 20px', letterSpacing: '-0.02em',
+        {/* Greeting + new task button — desktop only (lg = 1024px+) */}
+        <div className="hidden lg:flex" style={{
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: '20px',
+          gap: '16px',
         }}>
-          {greeting}
-        </h1>
+          <h1 style={{ fontSize: '22px', fontWeight: '600', color: 'var(--cs-text-1)', margin: 0, letterSpacing: '-0.02em' }}>
+            {greeting}
+          </h1>
+          <NewTaskButton />
+        </div>
 
         <FadeInItem index={0} style={{ marginBottom: '16px' }}>
           <HeuteWidget stats={heuteStats} />
