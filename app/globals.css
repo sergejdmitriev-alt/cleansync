@@ -357,6 +357,26 @@ body {
   border-radius: var(--cs-radius-lg);
 }
 
+/* ─── Empty state ─────────────────────────────────── */
+@keyframes cs-float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-4px); }
+}
+@keyframes cs-empty-fade {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.cs-empty-wrapper {
+  animation: cs-empty-fade 0.4s ease 0.1s both;
+}
+.cs-empty-icon {
+  animation: cs-float 3s ease-in-out 0.5s infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cs-empty-wrapper { animation: none; opacity: 1; }
+  .cs-empty-icon    { animation: none; }
+}
+
 /* Two-column dashboard grid */
 .dashboard-grid {
   display: grid;

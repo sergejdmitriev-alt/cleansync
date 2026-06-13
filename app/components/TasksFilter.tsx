@@ -6,6 +6,7 @@ import { RefreshButton, SendButton, DeleteButton, ArchiveButton } from './TaskAc
 import TaskCard from './TaskCard'
 import ExportButton from './ExportButton'
 import { FadeInItem } from '@/components/motion/FadeInItem'
+import { EmptyState, HouseIcon, SearchEmptyIcon } from '@/components/EmptyState'
 
 const STATUS_LABEL: Record<string, string> = {
   pending:            'Ausstehend',
@@ -117,22 +118,24 @@ export default function TasksFilter({ tasks }: { tasks: any[] }) {
 
       {/* Пусто — нет задач вообще */}
       {tasks.length === 0 && (
-        <div style={{ textAlign: 'center', padding: '64px 20px' }}>
-          <p style={{ fontSize: '36px', margin: '0 0 12px' }}>📋</p>
-          <p style={{ fontSize: '15px', fontWeight: '500', color: 'var(--cs-text-2)', margin: '0 0 8px' }}>
-            Noch keine Aufträge
-          </p>
-          <Link href="/tasks/new" style={{ fontSize: '13px', color: 'var(--cs-blue)', textDecoration: 'none' }}>
-            Ersten Auftrag erstellen →
-          </Link>
-        </div>
+        <EmptyState
+          icon={<HouseIcon />}
+          title="Noch keine Aufträge"
+          subtitle="Erstellen Sie Ihren ersten Auftrag"
+          action={
+            <Link href="/tasks/new" style={{ fontSize: '13px', color: 'var(--cs-blue)', textDecoration: 'none', fontWeight: '500' }}>
+              Auftrag erstellen →
+            </Link>
+          }
+        />
       )}
 
       {/* Пусто — фильтр не дал результатов */}
       {tasks.length > 0 && filtered.length === 0 && (
-        <div style={{ textAlign: 'center', padding: '48px 20px', color: 'var(--cs-text-3)' }}>
-          <p style={{ fontSize: '13px', margin: 0 }}>Keine Aufträge mit diesem Status</p>
-        </div>
+        <EmptyState
+          icon={<SearchEmptyIcon />}
+          title="Keine Aufträge mit diesem Status"
+        />
       )}
 
       {filtered.length > 0 && (

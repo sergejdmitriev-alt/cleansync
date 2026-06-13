@@ -240,7 +240,7 @@ export function CommandPalette() {
               )}
               {!isSearching && results.length === 0 && (
                 <p style={{ textAlign: 'center', color: 'var(--cs-text-3)', fontSize: 13, padding: '24px 0' }}>
-                  Keine Ergebnisse
+                  {debouncedQ ? `Keine Ergebnisse für „${debouncedQ}"` : 'Keine Ergebnisse'}
                 </p>
               )}
               {!isSearching && Object.entries(groups).map(([group, items]) => (

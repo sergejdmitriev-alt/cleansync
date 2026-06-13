@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import Header from '@/app/components/Header'
 import RestoreButton from '@/app/components/RestoreButton'
+import { EmptyState, BoxIcon } from '@/components/EmptyState'
 
 export default async function ArchivePage() {
   const supabase = await createServerSupabaseClient()
@@ -37,11 +38,12 @@ export default async function ArchivePage() {
         </div>
 
         {!tasks || tasks.length === 0 ? (
-          <div className="cs-card" style={{ padding: '64px 20px', textAlign: 'center' }}>
-            <p style={{ fontSize: '36px', margin: '0 0 12px', color: 'var(--cs-text-3)' }}>—</p>
-            <p style={{ fontSize: '15px', fontWeight: '500', color: 'var(--cs-text-2)', margin: 0 }}>
-              Keine archivierten Aufträge
-            </p>
+          <div className="cs-card">
+            <EmptyState
+              icon={<BoxIcon />}
+              title="Archiv ist leer"
+              subtitle="Erledigte Aufträge erscheinen hier"
+            />
           </div>
         ) : (
           <div className="cs-card" style={{ overflow: 'hidden' }}>
