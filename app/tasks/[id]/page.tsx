@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import Header from '@/app/components/Header'
 import { FadeInItem } from '@/components/motion/FadeInItem'
+import { ProtocolButton } from '@/app/components/ProtocolButton'
 
 const statusConfig: Record<string, { label: string; bg: string; color: string }> = {
   pending:            { label: 'Ausstehend',          bg: 'var(--cs-pending-bg)',  color: 'var(--cs-pending-text)'  },
@@ -83,6 +84,9 @@ export default async function TaskDetailPage({
               <p style={{ fontSize: '13px', color: 'var(--cs-text-3)', margin: 0 }}>{task.properties?.address}</p>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px', flexShrink: 0 }}>
+              {task.status === 'done' && photosWithUrls.length > 0 && (
+                <ProtocolButton taskId={task.id} />
+              )}
               <span style={{
                 display: 'inline-flex', alignItems: 'center',
                 padding: '4px 12px', borderRadius: 'var(--cs-radius-full)',
