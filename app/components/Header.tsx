@@ -17,7 +17,7 @@ export default function Header() {
   const pathname = usePathname()
 
   return (
-    <header style={{
+    <header className="lg:hidden" style={{
       background:   'var(--cs-surface)',
       borderBottom: '1px solid var(--cs-border)',
       position:     'sticky',

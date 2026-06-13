@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Plus_Jakarta_Sans } from 'next/font/google'
 import './globals.css'
 import BottomNav from './components/BottomNav'
+import Sidebar from './components/Sidebar'
 import AuthOnboarding from '@/components/AuthOnboarding'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 
@@ -22,10 +23,12 @@ export default async function RootLayout({
   children: React.ReactNode
 }) {
   let showOnboarding = false
+  let userEmail: string | undefined
   try {
     const supabase = await createServerSupabaseClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
+      userEmail = user.email
       const { data: profile } = await supabase
         .from('profiles')
         .select('onboarding_done')
@@ -39,7 +42,10 @@ export default async function RootLayout({
     <html lang="de">
       <body className={jakarta.className}>
         <div className="cs-bg" aria-hidden="true" />
-        {children}
+        <Sidebar email={userEmail} />
+        <div className="lg:pl-[240px]">
+          {children}
+        </div>
         <BottomNav />
         <AuthOnboarding showOnboarding={showOnboarding} />
       </body>
