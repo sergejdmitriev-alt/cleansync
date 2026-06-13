@@ -33,6 +33,27 @@ export async function POST(req: NextRequest) {
   }
 
   const supabase = createServiceSupabaseClient()
+
+  // Verify property belongs to this user
+  const { data: prop } = await supabase
+    .from('properties')
+    .select('id')
+    .eq('id', property_id)
+    .eq('user_id', user.id)
+    .single()
+  if (!prop) return NextResponse.json({ error: 'Property not found' }, { status: 404 })
+
+  // Verify cleaner belongs to this user (if provided)
+  if (cleaner_id) {
+    const { data: cleaner } = await supabase
+      .from('cleaners')
+      .select('id')
+      .eq('id', cleaner_id)
+      .eq('user_id', user.id)
+      .single()
+    if (!cleaner) return NextResponse.json({ error: 'Cleaner not found' }, { status: 404 })
+  }
+
   const { data, error } = await supabase
     .from('recurring_rules')
     .insert({
