@@ -18,7 +18,7 @@ const STATUS_BADGE: Record<string, string> = {
   accepted:           'cs-badge cs-badge-accepted',
   declined:           'cs-badge cs-badge-declined',
   done:               'cs-badge cs-badge-done',
-  reinraum_pending:   'cs-badge',
+  reinraum_pending:   'cs-badge cs-badge-reinraum-pending',
   reinraum_confirmed: 'cs-badge',
   reinraum_declined:  'cs-badge',
 }

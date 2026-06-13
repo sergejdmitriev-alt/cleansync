@@ -172,6 +172,70 @@ body {
 .cs-badge-declined { background: var(--cs-declined-bg); color: var(--cs-declined-text); }
 .cs-badge-done     { background: var(--cs-done-bg);     color: var(--cs-done-text); }
 
+/* ─── Breathing badge dots ────────────────────────── */
+/* Dot keyframes — ring grows and fades, opacity dips */
+@keyframes cs-dot-green {
+  0%, 100% { opacity: 1;   box-shadow: 0 0 0 0   rgba(134, 239, 172, 0.55); }
+  50%       { opacity: 0.5; box-shadow: 0 0 0 4px rgba(134, 239, 172, 0); }
+}
+@keyframes cs-dot-amber {
+  0%, 100% { opacity: 1;   box-shadow: 0 0 0 0   rgba(252, 211, 77, 0.55); }
+  50%       { opacity: 0.5; box-shadow: 0 0 0 4px rgba(252, 211, 77, 0); }
+}
+@keyframes cs-dot-blue {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.35; }
+}
+
+/* Dot base — inline-block before the label text */
+.cs-badge-accepted::before,
+.cs-badge-sent::before,
+.cs-badge-pending::before,
+.cs-badge-reinraum-pending::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-right: 5px;
+  flex-shrink: 0;
+}
+
+/* accepted — green glow pulse, 2.4 s */
+.cs-badge-accepted::before {
+  background: var(--cs-accepted-text);
+  animation: cs-dot-green 2.4s ease infinite;
+}
+/* sent — subtle blue pulse, 3 s */
+.cs-badge-sent::before {
+  background: var(--cs-sent-text);
+  animation: cs-dot-blue 3s ease infinite;
+}
+/* pending — static blue-grey dot, no animation */
+.cs-badge-pending::before {
+  background: var(--cs-pending-text);
+}
+/* reinraum_pending — amber glow pulse, 1.8 s */
+.cs-badge-reinraum-pending {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fcd34d;
+}
+.cs-badge-reinraum-pending::before {
+  background: #fcd34d;
+  animation: cs-dot-amber 1.8s ease infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cs-badge-accepted::before,
+  .cs-badge-sent::before,
+  .cs-badge-reinraum-pending::before {
+    animation: none;
+    opacity: 1;
+    box-shadow: none;
+  }
+}
+
 /* Card */
 .cs-card {
   background: var(--cs-surface);
