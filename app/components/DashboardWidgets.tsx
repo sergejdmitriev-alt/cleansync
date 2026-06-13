@@ -1,3 +1,62 @@
+import { CountUp } from '@/components/motion/CountUp'
+
+type HeuteStats = {
+  dateLabel:   string
+  total:       number
+  done:        number
+  open:        number
+  nextCheckin: { time: string; property: string } | null
+}
+
+export function HeuteWidget({ stats }: { stats: HeuteStats }) {
+  const { dateLabel, total, done, open, nextCheckin } = stats
+
+  return (
+    <div className="cs-card" style={{ padding: '20px' }}>
+      <h2 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--cs-text-1)', margin: '0 0 16px' }}>
+        Heute, {dateLabel}
+      </h2>
+      {total === 0 ? (
+        <p style={{ fontSize: '13px', color: 'var(--cs-text-3)', margin: 0 }}>
+          Heute keine Reinigungen 🎉
+        </p>
+      ) : (
+        <>
+          <div style={{ display: 'flex', gap: '10px', marginBottom: '14px' }}>
+            {([
+              { label: 'Reinigungen heute', value: total, color: 'var(--cs-text-1)' },
+              { label: 'Davon erledigt',    value: done,  color: '#059669'           },
+              { label: 'Offen / läuft',     value: open,  color: 'var(--cs-blue)'   },
+            ] as const).map(tile => (
+              <a key={tile.label} href="/" style={{
+                flex: 1, background: 'var(--cs-surface-2)', borderRadius: '10px',
+                padding: '12px 14px', textDecoration: 'none', display: 'block',
+              }}>
+                <p style={{ fontSize: '10px', color: 'var(--cs-text-3)', margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: '500' }}>
+                  {tile.label}
+                </p>
+                <p style={{ fontSize: '26px', fontWeight: '700', color: tile.color, margin: 0, lineHeight: 1 }}>
+                  <CountUp value={tile.value} />
+                </p>
+              </a>
+            ))}
+          </div>
+          <p style={{ fontSize: '12px', color: 'var(--cs-text-3)', margin: 0 }}>
+            {nextCheckin ? (
+              <>
+                {'Nächster Check-in: '}
+                <span style={{ color: 'var(--cs-text-2)', fontWeight: '500' }}>{nextCheckin.time}</span>
+                {' — '}
+                {nextCheckin.property}
+              </>
+            ) : 'Keine Check-ins heute'}
+          </p>
+        </>
+      )}
+    </div>
+  )
+}
+
 const STATUS_COLOR: Record<string, string> = {
   declined:           '#ef4444',
   reinraum_declined:  '#ef4444',

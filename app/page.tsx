@@ -2,7 +2,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { createServiceSupabaseClient } from '@/lib/supabase/service'
 import Header from './components/Header'
 import TasksFilter from './components/TasksFilter'
-import { UpcomingWidget, ActivityWidget, MonthWidget } from './components/DashboardWidgets'
+import { UpcomingWidget, ActivityWidget, MonthWidget, HeuteWidget } from './components/DashboardWidgets'
 import { FadeInItem } from '@/components/motion/FadeInItem'
 
 export const dynamic = 'force-dynamic'
@@ -72,6 +72,36 @@ export default async function Home() {
 
   // Upcoming tasks: next 3 non-done, future checkout_time
   const now = new Date()
+
+  // Today in Vienna — for Heute widget
+  const viennaTodayStr = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/Vienna', year: 'numeric', month: '2-digit', day: '2-digit',
+  }).format(now)
+  const todayTasks = tasks.filter(t =>
+    !t.archived &&
+    new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Europe/Vienna', year: 'numeric', month: '2-digit', day: '2-digit',
+    }).format(new Date(t.checkout_time)) === viennaTodayStr
+  )
+  const heuteDone = todayTasks.filter(t => t.status === 'done').length
+  const heuteDateLabel = new Intl.DateTimeFormat('de-AT', {
+    timeZone: 'Europe/Vienna', weekday: 'long', day: 'numeric', month: 'long',
+  }).format(now)
+  const nextCheckinTask = todayTasks
+    .filter(t => t.checkin_time && new Date(t.checkin_time) >= now)
+    .sort((a, b) => new Date(a.checkin_time).getTime() - new Date(b.checkin_time).getTime())[0] ?? null
+  const heuteStats = {
+    dateLabel: heuteDateLabel,
+    total:     todayTasks.length,
+    done:      heuteDone,
+    open:      todayTasks.length - heuteDone,
+    nextCheckin: nextCheckinTask ? {
+      time: new Intl.DateTimeFormat('de-AT', {
+        timeZone: 'Europe/Vienna', hour: '2-digit', minute: '2-digit', hour12: false,
+      }).format(new Date(nextCheckinTask.checkin_time)),
+      property: (nextCheckinTask.properties as any)?.name ?? '—',
+    } : null,
+  }
   const upcoming = tasks
     .filter(t => !t.archived && t.status !== 'done' && new Date(t.checkout_time) >= now)
     .sort((a, b) => new Date(a.checkout_time).getTime() - new Date(b.checkout_time).getTime())
@@ -117,6 +147,10 @@ export default async function Home() {
         }}>
           {greeting}
         </h1>
+
+        <FadeInItem index={0} style={{ marginBottom: '16px' }}>
+          <HeuteWidget stats={heuteStats} />
+        </FadeInItem>
 
         <div className="dashboard-grid">
 
