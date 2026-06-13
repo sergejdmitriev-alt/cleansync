@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Header from '@/app/components/Header'
 import { FadeInItem } from '@/components/motion/FadeInItem'
 import { ProtocolButton } from '@/app/components/ProtocolButton'
+import { CompletionBurst } from '@/components/motion/CompletionBurst'
 
 const statusConfig: Record<string, { label: string; bg: string; color: string }> = {
   pending:            { label: 'Ausstehend',          bg: 'var(--cs-pending-bg)',  color: 'var(--cs-pending-text)'  },
@@ -67,6 +68,7 @@ export default async function TaskDetailPage({
 
   return (
     <div style={{ minHeight: '100vh', background: 'transparent', position: 'relative', zIndex: 1 }}>
+      {task.status === 'done' && <CompletionBurst taskId={task.id} />}
       <Header />
       <main style={{ maxWidth: '768px', margin: '0 auto', padding: '24px 20px 80px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
