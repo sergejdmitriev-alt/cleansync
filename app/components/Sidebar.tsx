@@ -162,6 +162,29 @@ export default function Sidebar({ email }: { email?: string }) {
 
         {/* Bottom: Einstellungen + profile */}
         <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 2, paddingTop: 8 }}>
+          <button
+            onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true, bubbles: true }))}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              height: 36, padding: '0 12px', borderRadius: 8,
+              background: 'transparent', border: 'none', cursor: 'pointer',
+              color: 'var(--cs-text-3)', fontSize: 12, width: '100%',
+              justifyContent: 'space-between',
+            }}
+          >
+            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              Suche
+            </span>
+            <kbd style={{
+              fontSize: 10,
+              background: 'rgba(255,255,255,0.06)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              borderRadius: 4, padding: '1px 5px',
+            }}>⌘K</kbd>
+          </button>
           <Link
             href="/settings"
             className={settingsActive ? undefined : 'sb-link'}

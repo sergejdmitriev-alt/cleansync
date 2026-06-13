@@ -4,6 +4,7 @@ import './globals.css'
 import BottomNav from './components/BottomNav'
 import Sidebar from './components/Sidebar'
 import { ContentWrapper } from './components/ContentWrapper'
+import { CommandPaletteDesktop } from './components/CommandPalette'
 import AuthOnboarding from '@/components/AuthOnboarding'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 
@@ -44,6 +45,7 @@ export default async function RootLayout({
       <body className={jakarta.className}>
         <div className="cs-bg" aria-hidden="true" />
         <Sidebar email={userEmail} />
+        <CommandPaletteDesktop />
         <ContentWrapper>
           {children}
         </ContentWrapper>
