@@ -70,7 +70,7 @@ const NAV: NavItem[] = [
   { href: '/hilfe',     label: 'Hilfe',    active: p => p.startsWith('/hilfe'),                  icon: <HelpIcon /> },
 ]
 
-const PUBLIC_PATHS = ['/login', '/lead', '/connect-telegram']
+export const PUBLIC_PATHS = ['/login', '/lead', '/connect-telegram']
 const ACTIVE_SPRING = { type: 'spring' as const, stiffness: 380, damping: 32 }
 
 const itemStyle = (isActive: boolean): React.CSSProperties => ({

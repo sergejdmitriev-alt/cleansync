@@ -3,6 +3,7 @@ import { Plus_Jakarta_Sans } from 'next/font/google'
 import './globals.css'
 import BottomNav from './components/BottomNav'
 import Sidebar from './components/Sidebar'
+import { ContentWrapper } from './components/ContentWrapper'
 import AuthOnboarding from '@/components/AuthOnboarding'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 
@@ -43,9 +44,9 @@ export default async function RootLayout({
       <body className={jakarta.className}>
         <div className="cs-bg" aria-hidden="true" />
         <Sidebar email={userEmail} />
-        <div className="lg:pl-[240px]">
+        <ContentWrapper>
           {children}
-        </div>
+        </ContentWrapper>
         <BottomNav />
         <AuthOnboarding showOnboarding={showOnboarding} />
       </body>
