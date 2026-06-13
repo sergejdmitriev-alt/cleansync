@@ -4,6 +4,7 @@ import Header from './components/Header'
 import TasksFilter from './components/TasksFilter'
 import { UpcomingWidget, ActivityWidget, MonthWidget, HeuteWidget } from './components/DashboardWidgets'
 import { FadeInItem } from '@/components/motion/FadeInItem'
+import { PullToRefresh } from '@/components/PullToRefresh'
 
 export const dynamic = 'force-dynamic'
 
@@ -138,6 +139,7 @@ export default async function Home() {
   return (
     <div style={{ minHeight: '100vh', background: 'transparent', position: 'relative', zIndex: 1 }}>
       <Header />
+      <PullToRefresh>
       <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px 20px' }}>
 
         {/* Greeting — desktop only */}
@@ -191,6 +193,7 @@ export default async function Home() {
 
         </div>
       </main>
+      </PullToRefresh>
     </div>
   )
 }
