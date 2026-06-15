@@ -43,6 +43,14 @@ const CHAT = [
   { side: 'host', text: '✓ Erledigt — Fotos gespeichert', label: 'Sie (Host)' },
 ]
 
+// TODO: Replace/extend with reviews from real STR hosts once available — current reviews are about cleaning quality (Reinraum private clients)
+const REVIEWS = [
+  { text: 'Reinraum hat tolle Arbeit geleistet — alles perfekt sauber, professionell und pünktlich. Absolut empfehlenswert.', author: '' },
+  { text: 'Profis in ihrem Bereich. Alles sauber und ordentlich, pünktlich und angenehm im Umgang. Ich werde auf jeden Fall wieder buchen.', author: 'Maria' },
+  { text: 'Meine Wohnung war noch nie so makellos. Das Team achtet auf jedes Detail — selbst die kleinsten Ecken. Professionell, freundlich und immer pünktlich.', author: '' },
+  { text: 'Vielen Dank für die tolle Arbeit! Pünktlich, angenehm in der Kommunikation und eine wunderbar geputzte Wohnung.', author: '' },
+]
+
 // ── Animated counter ──────────────────────────────────────────────
 function Counter({ mv, fmt = (v: number) => String(Math.round(v)) }: {
   mv:   MotionValue<number>
@@ -196,10 +204,22 @@ export default function LeadPage() {
             style={S.ctaBtn}
             onClick={() => formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
           >
-            Kostenlose Demo anfragen →
+            Unverbindlich ansehen →
           </button>
         </motion.div>
       </section>
+
+      {/* Trust-bar — 4 Reinraum facts */}
+      <motion.div className="lead-trust-bar" style={S.trustBarGrid} {...fy(0.04)}>
+        {[
+          '✦ über 20 Wohnungen in Wien betreut',
+          '✦ seit über 3 Jahren im Einsatz',
+          '✦ Antwort meist in Minuten',
+          '✦ fast jeder Auftrag wird angenommen',
+        ].map(text => (
+          <div key={text} style={S.trustBarItem}>{text}</div>
+        ))}
+      </motion.div>
 
       {/* Telegram demo */}
       <motion.div style={S.glass} {...fy(0)}>
@@ -323,6 +343,33 @@ export default function LeadPage() {
           </strong>{' '}
           pro Jahr
         </p>
+
+        {/* Loss-aversion block */}
+        <div style={S.chaosBlock}>
+          <p style={S.chaosTitle}>Was Sie das Reinigungs-Chaos im Monat kostet:</p>
+          {[
+            'Gast checkt ein, die Wohnung ist noch nicht sauber → schlechte Bewertung',
+            'Eine Bewertung unter 4,8 ★ kostet Sie Sichtbarkeit und Buchungen',
+            'Abende voller Nachrichten und Anrufe statt Vermietung',
+          ].map(text => (
+            <p key={text} style={S.chaosRow}>
+              <span style={{ flexShrink: 0, opacity: 0.5 }}>·</span>
+              {text}
+            </p>
+          ))}
+          <p style={S.calcBridge}>
+            Genau das nimmt Ihnen CleanSync ab: Ein Tipp — die Reinigung ist vergeben,
+            bestätigt und mit Foto belegt. Falls keine eigene Kraft frei ist, übernimmt
+            das Reinraum-Team — über 20 Wohnungen in Wien, Antwort meist in Minuten.
+          </p>
+          <button
+            style={S.softCta}
+            onClick={() => formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+            className="lead-soft-cta"
+          >
+            Unverbindlich ansehen →
+          </button>
+        </div>
       </motion.div>
 
       {/* Reinigungs-Garantie */}
@@ -382,6 +429,30 @@ export default function LeadPage() {
               <div style={{ fontSize: 26, marginBottom: 10 }}>{step.icon}</div>
               <p style={{ fontWeight: 600, color: '#e8eaf0', fontSize: 14, marginBottom: 6 }}>{step.title}</p>
               <p style={{ color: '#8892a4', fontSize: 12.5, lineHeight: 1.6 }}>{step.desc}</p>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+
+      {/* Reviews */}
+      <div>
+        <motion.div style={{ textAlign: 'center', marginBottom: 20 }} {...fy(0)}>
+          <p style={S.sectionLabel}>Bewertungen</p>
+          <h2 style={S.sectionH2}>Das sagen unsere Reinigungskunden in Wien</h2>
+          <p style={S.reviewsNote}>Bewertungen zur Reinigungsqualität von Reinraum.</p>
+        </motion.div>
+        <div className="lead-reviews-grid" style={S.reviewsGrid}>
+          {REVIEWS.map((review, i) => (
+            <motion.div
+              key={i}
+              style={{ ...S.glass, padding: '20px 18px' }}
+              initial={reduced ? {} : { opacity: 0, y: 14 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={VP}
+              transition={{ ...SPRING, delay: i * 0.07 }}
+            >
+              <p style={S.reviewText}>„{review.text}"</p>
+              <p style={S.reviewAuthor}>{review.author ? `— ${review.author}, Wien` : '— Wien'}</p>
             </motion.div>
           ))}
         </div>
@@ -865,6 +936,92 @@ const S = {
     alignItems: 'center',
     gap:        8,
   },
+
+  // Trust-bar (Block 2)
+  trustBarGrid: {
+    display:             'grid',
+    gridTemplateColumns: '1fr 1fr 1fr 1fr',
+    gap:                 8,
+    padding:             '14px 18px',
+    background:          'rgba(255,255,255,0.03)',
+    border:              '1px solid rgba(255,255,255,0.07)',
+    borderRadius:        12,
+  },
+  trustBarItem: {
+    fontSize:   12.5,
+    color:      '#8892a4',
+    fontWeight: 500,
+    lineHeight: 1.4,
+    textAlign:  'center' as const,
+  },
+
+  // Calculator chaos block (Block 1)
+  chaosBlock: {
+    marginTop:  20,
+    paddingTop: 16,
+    borderTop:  '1px solid rgba(255,255,255,0.07)',
+  },
+  chaosTitle: {
+    fontSize:      11,
+    fontWeight:    600,
+    color:         '#8892a4',
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.06em',
+    marginBottom:  10,
+  },
+  chaosRow: {
+    fontSize:     13,
+    color:        'rgba(255,255,255,0.50)' as const,
+    marginBottom: 6,
+    display:      'flex',
+    gap:          8,
+    alignItems:   'flex-start' as const,
+    lineHeight:   1.5,
+  },
+  calcBridge: {
+    marginTop:  14,
+    fontSize:   13,
+    color:      '#8892a4',
+    lineHeight: 1.65,
+  },
+  softCta: {
+    marginTop:    14,
+    padding:      '10px 20px',
+    background:   'rgba(59,126,248,0.10)',
+    border:       '1px solid rgba(59,126,248,0.22)',
+    borderRadius: 10,
+    color:        '#3b7ef8',
+    fontSize:     13,
+    fontWeight:   600,
+    cursor:       'pointer',
+    fontFamily:   'inherit',
+    transition:   'opacity 0.15s',
+    display:      'block',
+  } as React.CSSProperties,
+
+  // Reviews section (Block 2)
+  reviewsNote: {
+    fontSize:   12,
+    color:      '#4a5568',
+    marginTop:  -12,
+  },
+  reviewsGrid: {
+    display:             'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap:                 12,
+  },
+  reviewText: {
+    fontSize:     13,
+    color:        '#8892a4',
+    lineHeight:   1.65,
+    marginBottom: 12,
+    fontStyle:    'italic' as const,
+  },
+  reviewAuthor: {
+    fontSize:   12,
+    color:      '#4a5568',
+    fontWeight: 500,
+  },
 }
 
 // Interactive + responsive rules (can't be done with inline styles)
@@ -879,11 +1036,18 @@ const css = `
   .lead-cta:hover    { opacity: 0.85; }
   .lead-submit:hover:not(:disabled) { opacity: 0.88; }
   .lead-tglink:hover { text-decoration: underline; }
+  .lead-soft-cta:hover { opacity: 0.80; }
+  @media (max-width: 600px) {
+    .lead-trust-bar   { grid-template-columns: 1fr 1fr !important; }
+    .lead-reviews-grid { grid-template-columns: 1fr !important; }
+  }
   @media (max-width: 480px) {
-    .lead-field-row   { grid-template-columns: 1fr !important; }
+    .lead-field-row    { grid-template-columns: 1fr !important; }
     .lead-compare-grid { grid-template-columns: 1fr !important; }
-    .lead-steps-grid  { grid-template-columns: 1fr !important; }
-    .lead-trust-row   { grid-template-columns: 1fr !important; }
-    .lead-calc-grid   { grid-template-columns: 1fr !important; }
+    .lead-steps-grid   { grid-template-columns: 1fr !important; }
+    .lead-trust-row    { grid-template-columns: 1fr !important; }
+    .lead-calc-grid    { grid-template-columns: 1fr !important; }
+    .lead-trust-bar    { grid-template-columns: 1fr 1fr !important; }
+    .lead-reviews-grid { grid-template-columns: 1fr !important; }
   }
 `
