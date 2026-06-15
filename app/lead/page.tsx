@@ -166,10 +166,23 @@ export default function LeadPage() {
             animate={{ scale: 1 }}
             transition={{ ...SPRING, delay: 0.15 }}
           >✓</motion.div>
-          <h2 style={{ color: '#e8eaf0', fontSize: 22, fontWeight: 700, marginBottom: 12 }}>Vielen Dank!</h2>
-          <p style={{ color: '#8892a4', fontSize: 15, lineHeight: 1.65 }}>
-            Wir melden uns innerhalb von 24 Stunden.<br />
-            Posteingang: <strong style={{ color: '#e8eaf0' }}>{form.email}</strong>
+          <h2 style={{ color: '#e8eaf0', fontSize: 22, fontWeight: 700, marginBottom: 12 }}>
+            Ihr Leitfaden ist bereit.
+          </h2>
+          <p style={{ color: '#8892a4', fontSize: 14, lineHeight: 1.65, marginBottom: 24 }}>
+            Wir haben Ihnen auch eine E-Mail an{' '}
+            <strong style={{ color: '#e8eaf0' }}>{form.email}</strong> geschickt.
+          </p>
+          <a
+            href="/api/guide/turnover"
+            download
+            style={S.guideDownloadBtn}
+            className="lead-guide-dl"
+          >
+            ↓ Leitfaden herunterladen (PDF)
+          </a>
+          <p style={{ color: '#4a5568', fontSize: 12, marginTop: 20 }}>
+            Wir melden uns auch persönlich innerhalb von 24 Stunden.
           </p>
         </motion.div>
       </main>
@@ -508,14 +521,23 @@ export default function LeadPage() {
         </div>
       </div>
 
-      {/* Form */}
+      {/* Guide opt-in form */}
       <motion.div ref={formRef} style={S.glass} {...fy(0)}>
-        <h2 style={{ fontSize: 19, fontWeight: 700, color: '#e8eaf0', marginBottom: 6 }}>
-          Kostenlose Demo anfragen
-        </h2>
-        <p style={{ color: '#8892a4', fontSize: 13, marginBottom: 24 }}>
-          Kein Spam. Keine Verpflichtung. Wir melden uns persönlich.
-        </p>
+        {/* Guide offer header */}
+        <div style={S.guideOffer}>
+          <p style={S.guideBadge}>Gratis-Leitfaden</p>
+          <h2 style={{ fontSize: 19, fontWeight: 700, color: '#e8eaf0', margin: '6px 0 10px' }}>
+            Der perfekte Gästewechsel in 7 Schritten
+          </h2>
+          <p style={S.guideOfferDesc}>
+            Inklusive druckbarer Reinigungs-Checkliste, die Sie Ihrer Reinigungskraft direkt mitgeben können.
+            Kein Verkaufsgespräch — nur das System, das den Wechsel reibungslos macht.
+          </p>
+          <p style={{ fontSize: 13, color: '#4a5568', marginTop: 10 }}>
+            → E-Mail eintragen und Leitfaden sofort als PDF erhalten.
+          </p>
+        </div>
+        <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', margin: '20px 0' }} />
         <form onSubmit={handleSubmit} style={S.form} noValidate>
           <div style={S.fieldGroup}>
             <label style={S.fieldLabel} htmlFor="name">Ihr Name *</label>
@@ -594,7 +616,7 @@ export default function LeadPage() {
           >
             {formState === 'loading'
               ? <><span style={S.spinner} />Wird gesendet …</>
-              : 'Demo anfragen →'
+              : 'Leitfaden erhalten →'
             }
           </button>
         </form>
@@ -999,6 +1021,43 @@ const S = {
     display:      'block',
   } as React.CSSProperties,
 
+  // Guide opt-in form (Block 3)
+  guideOffer: {
+    background:   'rgba(59,126,248,0.05)',
+    border:       '1px solid rgba(59,126,248,0.14)',
+    borderRadius: 10,
+    padding:      '16px 18px',
+  },
+  guideBadge: {
+    display:      'inline-block',
+    fontSize:     11,
+    fontWeight:   700,
+    color:        '#3b7ef8',
+    background:   'rgba(59,126,248,0.12)',
+    border:       '1px solid rgba(59,126,248,0.22)',
+    padding:      '3px 10px',
+    borderRadius: 20,
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.07em',
+    marginBottom: 0,
+  },
+  guideOfferDesc: {
+    fontSize:   13.5,
+    color:      '#8892a4',
+    lineHeight: 1.65,
+  },
+  guideDownloadBtn: {
+    display:        'inline-block',
+    padding:        '12px 24px',
+    background:     '#3b7ef8',
+    color:          '#fff',
+    fontWeight:     700,
+    fontSize:       14,
+    borderRadius:   10,
+    textDecoration: 'none',
+    transition:     'opacity 0.15s',
+  } as React.CSSProperties,
+
   // Reviews section (Block 2)
   reviewsNote: {
     fontSize:   12,
@@ -1036,7 +1095,8 @@ const css = `
   .lead-cta:hover    { opacity: 0.85; }
   .lead-submit:hover:not(:disabled) { opacity: 0.88; }
   .lead-tglink:hover { text-decoration: underline; }
-  .lead-soft-cta:hover { opacity: 0.80; }
+  .lead-soft-cta:hover  { opacity: 0.80; }
+  .lead-guide-dl:hover  { opacity: 0.85; }
   @media (max-width: 600px) {
     .lead-trust-bar   { grid-template-columns: 1fr 1fr !important; }
     .lead-reviews-grid { grid-template-columns: 1fr !important; }
