@@ -9,40 +9,13 @@ import {
 
 // ── Types ─────────────────────────────────────────────────────────
 type FormState = 'idle' | 'loading' | 'success' | 'error'
+type Lang      = 'de' | 'en'
 
 // ── Shared config ─────────────────────────────────────────────────
 const SPRING = { type: 'spring', stiffness: 300, damping: 28 } as const
 const VP     = { once: true, amount: 0.2 }                    as const
 
-// ── Data ──────────────────────────────────────────────────────────
-const PROPERTIES_OPTIONS = [
-  { value: '1',    label: '1 Objekt'     },
-  { value: '2-5',  label: '2–5 Objekte'  },
-  { value: '6-10', label: '6–10 Objekte' },
-  { value: '10+',  label: 'Mehr als 10'  },
-]
-
-const STEPS = [
-  { icon: '📅', title: 'Kalender sync',      desc: 'Airbnb-Kalender verbindet sich automatisch — neue Buchungen erscheinen sofort als Aufgaben' },
-  { icon: '💬', title: 'Bot sendet Aufgabe', desc: 'Die Reinigungskraft bekommt eine Telegram-Nachricht mit Datum, Uhrzeit und Notizen'          },
-  { icon: '✅', title: 'Bestätigung',         desc: 'Reinigungskraft bestätigt oder lehnt ab — Sie sehen den Status live im Dashboard'             },
-  { icon: '📷', title: 'Foto als Nachweis',  desc: 'Nach der Reinigung werden Fotos gesendet — automatisch gespeichert, jederzeit abrufbar'       },
-]
-
-const FAQS = [
-  { q: 'Braucht meine Reinigungskraft ein Smartphone?',  a: 'Ja, nur Telegram. Die App ist kostenlos und auf jedem Smartphone verfügbar. Keine Registrierung nötig.'           },
-  { q: 'Funktioniert das auch ohne Airbnb?',             a: 'Ja. Aufgaben können auch manuell erstellt werden — ohne Kalender-Sync. Airbnb macht es vollautomatisch.'            },
-  { q: 'Was passiert wenn die Reinigungskraft ablehnt?', a: 'Sie bekommen sofort eine Benachrichtigung und können die Aufgabe an jemand anderen senden oder Reinraum beauftragen.' },
-  { q: 'Sind meine Daten sicher?',                       a: 'Ja. Alle Daten liegen in einer europäischen Datenbank (Supabase EU), Fotos werden automatisch nach 90 Tagen gelöscht.' },
-]
-
-const CHAT = [
-  { side: 'bot',  text: '🏠 Neue Reinigung\n📅 Mo 16.06 · 11:00–15:00\n📍 Bergstraße 12, Wien\n\n✅ Annehmen   ❌ Ablehnen', label: '' },
-  { side: 'user', text: '✅ Angenommen', label: '' },
-  { side: 'bot',  text: '🏁 Reinigung abgeschlossen\n📷 3 Fotos hochgeladen', label: '' },
-  { side: 'host', text: '✓ Erledigt — Fotos gespeichert', label: 'Sie (Host)' },
-]
-
+// ── i18n dictionary ───────────────────────────────────────────────
 // TODO: Replace/extend with reviews from real STR hosts once available — current reviews are about cleaning quality (Reinraum private clients)
 const REVIEWS = [
   { text: 'Reinraum hat tolle Arbeit geleistet — alles perfekt sauber, professionell und pünktlich. Absolut empfehlenswert.', author: '' },
@@ -50,6 +23,274 @@ const REVIEWS = [
   { text: 'Meine Wohnung war noch nie so makellos. Das Team achtet auf jedes Detail — selbst die kleinsten Ecken. Professionell, freundlich und immer pünktlich.', author: '' },
   { text: 'Vielen Dank für die tolle Arbeit! Pünktlich, angenehm in der Kommunikation und eine wunderbar geputzte Wohnung.', author: '' },
 ]
+
+const T = {
+  de: {
+    headerBadge: 'Für Airbnb-Hosts in Wien',
+    // Hero
+    heroTitle:   'Übergaben automatisch.\nFotos, Bestätigungen, alles.',
+    heroSub:     'CleanSync verbindet Ihre Reinigungskräfte mit Ihrem Kalender —\nkein WhatsApp-Chaos, keine verpassten Checkouts.',
+    heroCta:     'Unverbindlich ansehen →',
+    // Trust-bar
+    trustBar: [
+      '✦ über 20 Wohnungen in Wien betreut',
+      '✦ seit über 3 Jahren im Einsatz',
+      '✦ Antwort meist in Minuten',
+      '✦ fast jeder Auftrag wird angenommen',
+    ],
+    // Telegram demo
+    demoLabel: 'So sieht es aus',
+    demoTitle: 'Ihr Reinigungsbot in Aktion',
+    chatMessages: [
+      { side: 'bot',  text: '🏠 Neue Reinigung\n📅 Mo 16.06 · 11:00–15:00\n📍 Bergstraße 12, Wien\n\n✅ Annehmen   ❌ Ablehnen', label: '' },
+      { side: 'user', text: '✅ Angenommen', label: '' },
+      { side: 'bot',  text: '🏁 Reinigung abgeschlossen\n📷 3 Fotos hochgeladen', label: '' },
+      { side: 'host', text: '✓ Erledigt — Fotos gespeichert', label: 'Sie (Host)' },
+    ],
+    // Compare
+    compareLabel:  'Vergleich',
+    compareTitle:  'Vorher & Nachher',
+    beforeLabel:   '❌ Ohne CleanSync',
+    afterLabel:    '✅ Mit CleanSync',
+    beforeItems: [
+      'WhatsApp-Chaos mit mehreren Gruppenchats',
+      'Reinigungskraft vergisst den Termin',
+      'Kein Foto-Nachweis bei Reklamationen',
+      'Manuelle Koordination — 20 Min. pro Tag',
+      'Verpasster Checkout → schlechte Bewertung',
+    ],
+    afterItems: [
+      'Ein Dashboard für alle Aufträge',
+      'Automatische Telegram-Benachrichtigung',
+      'Fotos als Qualitätsnachweis gespeichert',
+      'Vollautomatisch — 0 Minuten pro Tag',
+      'Kalender-Sync, kein Checkout vergessen',
+    ],
+    // Calculator
+    calcLabel:        'Rechner',
+    calcTitle:        'Wie viel sparen Sie?',
+    calcNote:         'Ø 20 Min. Koordination pro Reinigung · 12 €/Std.',
+    calcObjectsLabel: 'Anzahl der Objekte',
+    calcSubs:         ['Reinigungen / Monat', 'Stunden gespart / Mo.', 'Kosten gespart / Mo.'] as [string, string, string],
+    calcLocale:       'de-AT',
+    calcYearPre:      '→ Das sind',
+    calcYearPost:     '€ pro Jahr',
+    calcRiskTitle:    'Was Sie das Reinigungs-Chaos im Monat kostet:',
+    calcRisks: [
+      'Gast checkt ein, die Wohnung ist noch nicht sauber → schlechte Bewertung',
+      'Eine Bewertung unter 4,8 ★ kostet Sie Sichtbarkeit und Buchungen',
+      'Abende voller Nachrichten und Anrufe statt Vermietung',
+    ],
+    calcBridge: 'Genau das nimmt Ihnen CleanSync ab: Ein Tipp — die Reinigung ist vergeben, bestätigt und mit Foto belegt. Falls keine eigene Kraft frei ist, übernimmt das Reinraum-Team — über 20 Wohnungen in Wien, Antwort meist in Minuten.',
+    calcCta:    'Unverbindlich ansehen →',
+    // Garantie
+    garantieTitle: 'Reinigungs-Garantie',
+    garantieDesc:  'Jede Reinigung wird mit Fotos dokumentiert. Bei Reklamationen liefern Sie den Nachweis mit einem Klick — kein Streit, klare Fakten.',
+    // How-it-works
+    howLabel: 'Ablauf',
+    howTitle: 'So funktioniert CleanSync',
+    steps: [
+      { icon: '📅', title: 'Kalender sync',      desc: 'Airbnb-Kalender verbindet sich automatisch — neue Buchungen erscheinen sofort als Aufgaben' },
+      { icon: '💬', title: 'Bot sendet Aufgabe', desc: 'Die Reinigungskraft bekommt eine Telegram-Nachricht mit Datum, Uhrzeit und Notizen'          },
+      { icon: '✅', title: 'Bestätigung',         desc: 'Reinigungskraft bestätigt oder lehnt ab — Sie sehen den Status live im Dashboard'             },
+      { icon: '📷', title: 'Foto als Nachweis',  desc: 'Nach der Reinigung werden Fotos gesendet — automatisch gespeichert, jederzeit abrufbar'       },
+    ],
+    // Reviews
+    reviewsLabel: 'Bewertungen',
+    reviewsTitle: 'Das sagen unsere Reinigungskunden in Wien',
+    reviewsNote:  'Bewertungen zur Reinigungsqualität von Reinraum.',
+    // FAQ
+    faqLabel: 'FAQ',
+    faqTitle: 'Häufige Fragen',
+    faqs: [
+      { q: 'Braucht meine Reinigungskraft ein Smartphone?',  a: 'Ja, nur Telegram. Die App ist kostenlos und auf jedem Smartphone verfügbar. Keine Registrierung nötig.'           },
+      { q: 'Funktioniert das auch ohne Airbnb?',             a: 'Ja. Aufgaben können auch manuell erstellt werden — ohne Kalender-Sync. Airbnb macht es vollautomatisch.'            },
+      { q: 'Was passiert wenn die Reinigungskraft ablehnt?', a: 'Sie bekommen sofort eine Benachrichtigung und können die Aufgabe an jemand anderen senden oder Reinraum beauftragen.' },
+      { q: 'Sind meine Daten sicher?',                       a: 'Ja. Alle Daten liegen in einer europäischen Datenbank (Supabase EU), Fotos werden automatisch nach 90 Tagen gelöscht.' },
+    ],
+    // Guide form
+    guideBadgeText: 'Gratis-Leitfaden',
+    guideTitle:     'Der perfekte Gästewechsel in 7 Schritten',
+    guideDesc:      'Inklusive druckbarer Reinigungs-Checkliste, die Sie Ihrer Reinigungskraft direkt mitgeben können. Kein Verkaufsgespräch — nur das System, das den Wechsel reibungslos macht.',
+    guideHint:      '→ E-Mail eintragen und Leitfaden sofort als PDF erhalten.',
+    // Form
+    formNameLabel:          'Ihr Name *',
+    formNamePlaceholder:    'Max Mustermann',
+    formEmailLabel:         'E-Mail *',
+    formEmailPlaceholder:   'max@beispiel.at',
+    formPhoneLabel:         'Telefon *',
+    formPhonePlaceholder:   '+43 664 …',
+    formPropertiesLabel:    'Anzahl der Objekte *',
+    formPropertiesDefault:  'Bitte wählen …',
+    formPropertiesOptions:  [
+      { value: '1',    label: '1 Objekt'     },
+      { value: '2-5',  label: '2–5 Objekte'  },
+      { value: '6-10', label: '6–10 Objekte' },
+      { value: '10+',  label: 'Mehr als 10'  },
+    ],
+    formMessageLabel:       'Ihre aktuelle Situation',
+    formMessageOptional:    '(optional)',
+    formMessagePlaceholder: 'Wie koordinieren Sie Ihre Reinigungen gerade?',
+    formError:              'Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.',
+    formSubmit:             'Leitfaden erhalten →',
+    formSending:            'Wird gesendet …',
+    tgAlt:                  'Oder direkt auf Telegram:',
+    // Success
+    successTitle:    'Ihr Leitfaden ist bereit.',
+    successBodyPre:  'Wir haben Ihnen auch eine E-Mail an',
+    successBodyPost: 'geschickt.',
+    successDownload: '↓ Leitfaden herunterladen (PDF)',
+    successNote:     'Wir melden uns auch persönlich innerhalb von 24 Stunden.',
+    // Free-tier
+    freeBadgeText: 'Kostenlos',
+    freeTagline:   'Kein Abo. Keine Kreditkarte.',
+    freeTitle:     'Ein Objekt. Für immer kostenlos.',
+    freeItems:     ['1 Objekt', 'Telegram-Bot für Ihre Reinigungskraft', 'iCal-Sync mit Airbnb'],
+    freeLater:     'Später hinzufügen',
+    freePaid:      ['Reinraum-Dispatch bei Ausfall', 'PDF-Reinigungsprotokoll'],
+    freeBtn:       'Kostenlos starten →',
+    // Trust strip
+    trustItems: [
+      ['📅', 'iCal-Sync mit Airbnb'],
+      ['📷', 'Foto-Nachweis der Reinigung'],
+      ['💬', 'Telegram-Bot für Reinigungskräfte'],
+      ['🔒', 'Daten in der EU (Supabase)'],
+    ] as [string, string][],
+  },
+
+  en: {
+    headerBadge: 'For Airbnb hosts in Vienna',
+    // Hero
+    heroTitle:   'Turnovers automated.\nPhotos, confirmations, everything.',
+    heroSub:     'CleanSync connects your cleaners to your calendar —\nno WhatsApp chaos, no missed checkouts.',
+    heroCta:     'See it — no commitment →',
+    // Trust-bar
+    trustBar: [
+      '✦ 20+ properties managed in Vienna',
+      '✦ 3+ years of real cleaning operations',
+      '✦ replies usually within minutes',
+      '✦ nearly every request accepted',
+    ],
+    // Telegram demo
+    demoLabel: 'See it in action',
+    demoTitle: 'Your cleaning bot in action',
+    chatMessages: [
+      { side: 'bot',  text: '🏠 New cleaning\n📅 Mon 16.06 · 11:00–15:00\n📍 Bergstraße 12, Vienna\n\n✅ Accept   ❌ Decline', label: '' },
+      { side: 'user', text: '✅ Accepted', label: '' },
+      { side: 'bot',  text: '🏁 Cleaning complete\n📷 3 photos uploaded', label: '' },
+      { side: 'host', text: '✓ Done — Photos saved', label: 'You (Host)' },
+    ],
+    // Compare
+    compareLabel:  'Before & after',
+    compareTitle:  'Before & After',
+    beforeLabel:   '❌ Without CleanSync',
+    afterLabel:    '✅ With CleanSync',
+    beforeItems: [
+      'WhatsApp chaos with multiple group chats',
+      'Cleaner forgets the appointment',
+      'No photo proof for disputes',
+      'Manual coordination — 20 min per day',
+      'Missed checkout → bad review',
+    ],
+    afterItems: [
+      'One dashboard for all jobs',
+      'Automatic Telegram notification',
+      'Photos saved as quality proof',
+      'Fully automated — 0 minutes per day',
+      'Calendar sync, no checkout missed',
+    ],
+    // Calculator
+    calcLabel:        'Calculator',
+    calcTitle:        'How much do you save?',
+    calcNote:         'Avg. 20 min coordination per cleaning · €12/hr',
+    calcObjectsLabel: 'Number of properties',
+    calcSubs:         ['cleanings / month', 'hours saved / mo.', 'costs saved / mo.'] as [string, string, string],
+    calcLocale:       'en-US',
+    calcYearPre:      "→ That's",
+    calcYearPost:     '€ per year',
+    calcRiskTitle:    'What cleaning chaos costs you each month:',
+    calcRisks: [
+      "Guest checks in, the place isn't clean yet → bad review",
+      'A single review under 4.8 ★ costs you visibility and bookings',
+      'Evenings full of messages and calls instead of hosting',
+    ],
+    calcBridge: "That's exactly what CleanSync takes off your plate: one tap — the cleaning is assigned, confirmed and photo-verified. No cleaner of your own free? The Reinraum team steps in — 20+ properties in Vienna, replies usually within minutes.",
+    calcCta:    'See it — no commitment →',
+    // Garantie
+    garantieTitle: 'Cleaning Guarantee',
+    garantieDesc:  'Every cleaning is documented with photos. When disputes come up, you have proof in one click — no argument, clear facts.',
+    // How-it-works
+    howLabel: 'How it works',
+    howTitle: 'How CleanSync works',
+    steps: [
+      { icon: '📅', title: 'Calendar sync',     desc: 'Your Airbnb calendar connects automatically — new bookings appear instantly as tasks'            },
+      { icon: '💬', title: 'Bot sends the job', desc: 'The cleaner gets a Telegram message with date, time and notes'                                  },
+      { icon: '✅', title: 'Confirmation',       desc: 'Cleaner accepts or declines — you see the status live in the dashboard'                        },
+      { icon: '📷', title: 'Photo as proof',    desc: 'After cleaning, photos are sent — automatically saved and accessible any time'                  },
+    ],
+    // Reviews
+    reviewsLabel: 'Reviews',
+    reviewsTitle: 'What our cleaning clients in Vienna say',
+    reviewsNote:  "Reviews of Reinraum's cleaning quality.",
+    // FAQ
+    faqLabel: 'FAQ',
+    faqTitle: 'Common questions',
+    faqs: [
+      { q: 'Does my cleaner need a smartphone?',    a: 'Yes, just Telegram. The app is free and available on any smartphone. No account registration needed.'          },
+      { q: 'Does this work without Airbnb?',         a: 'Yes. Tasks can also be created manually — without calendar sync. Airbnb makes it fully automatic.'            },
+      { q: 'What happens if the cleaner declines?',  a: 'You get a notification immediately and can send the task to someone else or call in the Reinraum team.'      },
+      { q: 'Is my data secure?',                     a: 'Yes. All data is stored in a European database (Supabase EU), and photos are automatically deleted after 90 days.' },
+    ],
+    // Guide form
+    guideBadgeText: 'Free guide',
+    guideTitle:     'The Perfect Guest Turnover in 7 Steps',
+    guideDesc:      "Includes a printable cleaning checklist you can hand straight to your cleaner. No sales pitch — just the system Vienna hosts use to keep turnovers clean.",
+    guideHint:      '→ Enter your email and get the PDF instantly.',
+    // Form
+    formNameLabel:          'Your name *',
+    formNamePlaceholder:    'Jane Smith',
+    formEmailLabel:         'Email *',
+    formEmailPlaceholder:   'jane@example.com',
+    formPhoneLabel:         'Phone *',
+    formPhonePlaceholder:   '+1 234 …',
+    formPropertiesLabel:    'Number of properties *',
+    formPropertiesDefault:  'Please select …',
+    formPropertiesOptions:  [
+      { value: '1',    label: '1 property'    },
+      { value: '2-5',  label: '2–5 properties'},
+      { value: '6-10', label: '6–10 properties'},
+      { value: '10+',  label: 'More than 10'  },
+    ],
+    formMessageLabel:       'Your current situation',
+    formMessageOptional:    '(optional)',
+    formMessagePlaceholder: 'How do you currently coordinate your cleanings?',
+    formError:              'Something went wrong. Please try again.',
+    formSubmit:             'Get the guide →',
+    formSending:            'Sending …',
+    tgAlt:                  'Or reach us on Telegram:',
+    // Success
+    successTitle:    'Check your inbox — your guide is on the way.',
+    successBodyPre:  "We've sent the PDF to",
+    successBodyPost: '. You can also download it directly:',
+    successDownload: '↓ Download the guide (PDF)',
+    successNote:     "We'll also follow up personally within 24 hours.",
+    // Free-tier
+    freeBadgeText: 'Free',
+    freeTagline:   'No subscription. No credit card.',
+    freeTitle:     'One property. Free forever.',
+    freeItems:     ['1 property', 'Telegram bot for your cleaner', 'iCal sync with Airbnb'],
+    freeLater:     'Add later',
+    freePaid:      ['Reinraum dispatch cover', 'PDF cleaning report'],
+    freeBtn:       'Start for free →',
+    // Trust strip
+    trustItems: [
+      ['📅', 'iCal sync with Airbnb'],
+      ['📷', 'Photo proof of every cleaning'],
+      ['💬', 'Telegram bot for cleaners'],
+      ['🔒', 'Data in EU (Supabase)'],
+    ] as [string, string][],
+  },
+}
 
 // ── Animated counter ──────────────────────────────────────────────
 function Counter({ mv, fmt = (v: number) => String(Math.round(v)) }: {
@@ -75,7 +316,8 @@ export default function LeadPage() {
   const reduced = useReducedMotion()
   const formRef = useRef<HTMLDivElement>(null)
 
-  const [form, setForm]       = useState({ name: '', email: '', phone: '', properties: '', message: '' })
+  const [lang, setLang]           = useState<Lang>('de') // SSR-safe default
+  const [form, setForm]           = useState({ name: '', email: '', phone: '', properties: '', message: '' })
   const [formState, setFormState] = useState<FormState>('idle')
   const [turnstileToken, setTurnstileToken] = useState('')
 
@@ -88,6 +330,12 @@ export default function LeadPage() {
   const savingsMV   = useMotionValue(0)
 
   const [openFaq, setOpenFaq] = useState<number | null>(null)
+
+  // Detect browser language after mount to avoid hydration mismatch
+  useEffect(() => {
+    const nav = navigator.language?.toLowerCase().startsWith('de') ? 'de' : 'en'
+    setLang(nav)
+  }, [])
 
   function calcVals(n: number) {
     return {
@@ -128,7 +376,7 @@ export default function LeadPage() {
       const res = await fetch('/api/lead', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ ...form, turnstileToken }),
+        body:    JSON.stringify({ ...form, turnstileToken, lang }),
       })
       if (!res.ok) throw new Error()
       setFormState('success')
@@ -137,7 +385,6 @@ export default function LeadPage() {
     }
   }
 
-  // Fade-up helper — respects reduced motion
   function fy(delay = 0) {
     if (reduced) return { initial: {}, whileInView: {}, viewport: VP, transition: {} }
     return {
@@ -149,6 +396,7 @@ export default function LeadPage() {
   }
 
   const { savings: savingsNow } = calcVals(objects)
+  const tx = T[lang]
 
   // ── Success screen ─────────────────────────────────────────────
   if (formState === 'success') {
@@ -167,22 +415,23 @@ export default function LeadPage() {
             transition={{ ...SPRING, delay: 0.15 }}
           >✓</motion.div>
           <h2 style={{ color: '#e8eaf0', fontSize: 22, fontWeight: 700, marginBottom: 12 }}>
-            Ihr Leitfaden ist bereit.
+            {tx.successTitle}
           </h2>
           <p style={{ color: '#8892a4', fontSize: 14, lineHeight: 1.65, marginBottom: 24 }}>
-            Wir haben Ihnen auch eine E-Mail an{' '}
-            <strong style={{ color: '#e8eaf0' }}>{form.email}</strong> geschickt.
+            {tx.successBodyPre}{' '}
+            <strong style={{ color: '#e8eaf0' }}>{form.email}</strong>
+            {tx.successBodyPost}
           </p>
           <a
-            href="/api/guide/turnover"
+            href={`/api/guide/turnover?lang=${lang}`}
             download
             style={S.guideDownloadBtn}
             className="lead-guide-dl"
           >
-            ↓ Leitfaden herunterladen (PDF)
+            {tx.successDownload}
           </a>
           <p style={{ color: '#4a5568', fontSize: 12, marginTop: 20 }}>
-            Wir melden uns auch persönlich innerhalb von 24 Stunden.
+            {tx.successNote}
           </p>
         </motion.div>
       </main>
@@ -199,17 +448,30 @@ export default function LeadPage() {
           <span style={{ color: '#3b7ef8', fontSize: 22, lineHeight: 1 }}>✦</span>
           <span style={{ fontWeight: 700, fontSize: 17 }}>CleanSync</span>
         </div>
-        <span style={S.badge}>Für Airbnb-Hosts in Wien</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' as const }}>
+          <span style={S.badge}>{tx.headerBadge}</span>
+          <div style={S.langToggle}>
+            <button
+              className="lead-lang-btn"
+              onClick={() => setLang('de')}
+              style={{ ...S.langBtn, ...(lang === 'de' ? S.langBtnActive : {}) }}
+            >DE</button>
+            <button
+              className="lead-lang-btn"
+              onClick={() => setLang('en')}
+              style={{ ...S.langBtn, ...(lang === 'en' ? S.langBtnActive : {}) }}
+            >EN</button>
+          </div>
+        </div>
       </header>
 
       {/* Hero */}
       <section>
-        <motion.h1 style={S.h1} {...fy(0)}>
-          Übergaben automatisch.<br />Fotos, Bestätigungen, alles.
+        <motion.h1 style={{ ...S.h1, whiteSpace: 'pre-line' }} {...fy(0)}>
+          {tx.heroTitle}
         </motion.h1>
-        <motion.p style={S.sub} {...fy(0.06)}>
-          CleanSync verbindet Ihre Reinigungskräfte mit Ihrem Kalender —<br />
-          kein WhatsApp-Chaos, keine verpassten Checkouts.
+        <motion.p style={{ ...S.sub, whiteSpace: 'pre-line' }} {...fy(0.06)}>
+          {tx.heroSub}
         </motion.p>
         <motion.div {...fy(0.12)} style={{ marginTop: 28 }}>
           <button
@@ -217,29 +479,24 @@ export default function LeadPage() {
             style={S.ctaBtn}
             onClick={() => formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
           >
-            Unverbindlich ansehen →
+            {tx.heroCta}
           </button>
         </motion.div>
       </section>
 
-      {/* Trust-bar — 4 Reinraum facts */}
+      {/* Trust-bar */}
       <motion.div className="lead-trust-bar" style={S.trustBarGrid} {...fy(0.04)}>
-        {[
-          '✦ über 20 Wohnungen in Wien betreut',
-          '✦ seit über 3 Jahren im Einsatz',
-          '✦ Antwort meist in Minuten',
-          '✦ fast jeder Auftrag wird angenommen',
-        ].map(text => (
+        {tx.trustBar.map(text => (
           <div key={text} style={S.trustBarItem}>{text}</div>
         ))}
       </motion.div>
 
       {/* Telegram demo */}
       <motion.div style={S.glass} {...fy(0)}>
-        <p style={S.sectionLabel}>So sieht es aus</p>
-        <h2 style={S.sectionH2}>Ihr Reinigungsbot in Aktion</h2>
+        <p style={S.sectionLabel}>{tx.demoLabel}</p>
+        <h2 style={S.sectionH2}>{tx.demoTitle}</h2>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {CHAT.map((msg, i) => (
+          {tx.chatMessages.map((msg, i) => (
             <motion.div
               key={i}
               style={{
@@ -262,18 +519,12 @@ export default function LeadPage() {
 
       {/* Vorher / Nachher */}
       <motion.div style={S.glass} {...fy(0)}>
-        <p style={S.sectionLabel}>Vergleich</p>
-        <h2 style={S.sectionH2}>Vorher &amp; Nachher</h2>
+        <p style={S.sectionLabel}>{tx.compareLabel}</p>
+        <h2 style={S.sectionH2}>{tx.compareTitle}</h2>
         <div className="lead-compare-grid" style={S.compareGrid}>
           <div style={S.compareBefore}>
-            <p style={{ fontWeight: 700, fontSize: 13, color: '#fca5a5', marginBottom: 12 }}>❌ Ohne CleanSync</p>
-            {[
-              'WhatsApp-Chaos mit mehreren Gruppenchats',
-              'Reinigungskraft vergisst den Termin',
-              'Kein Foto-Nachweis bei Reklamationen',
-              'Manuelle Koordination — 20 Min. pro Tag',
-              'Verpasster Checkout → schlechte Bewertung',
-            ].map(t => (
+            <p style={{ fontWeight: 700, fontSize: 13, color: '#fca5a5', marginBottom: 12 }}>{tx.beforeLabel}</p>
+            {tx.beforeItems.map(t => (
               <p key={t} style={S.compareRow}>
                 <span style={{ color: '#ef4444', flexShrink: 0 }}>✗</span>
                 {t}
@@ -281,14 +532,8 @@ export default function LeadPage() {
             ))}
           </div>
           <div style={S.compareAfter}>
-            <p style={{ fontWeight: 700, fontSize: 13, color: '#86efac', marginBottom: 12 }}>✅ Mit CleanSync</p>
-            {[
-              'Ein Dashboard für alle Aufträge',
-              'Automatische Telegram-Benachrichtigung',
-              'Fotos als Qualitätsnachweis gespeichert',
-              'Vollautomatisch — 0 Minuten pro Tag',
-              'Kalender-Sync, kein Checkout vergessen',
-            ].map(t => (
+            <p style={{ fontWeight: 700, fontSize: 13, color: '#86efac', marginBottom: 12 }}>{tx.afterLabel}</p>
+            {tx.afterItems.map(t => (
               <p key={t} style={S.compareRow}>
                 <span style={{ color: '#86efac', flexShrink: 0 }}>✓</span>
                 {t}
@@ -300,14 +545,12 @@ export default function LeadPage() {
 
       {/* Calculator */}
       <motion.div style={S.glass} {...fy(0)} onViewportEnter={handleViewportEnter}>
-        <p style={S.sectionLabel}>Rechner</p>
-        <h2 style={S.sectionH2}>Wie viel sparen Sie?</h2>
-        <p style={{ color: '#8892a4', fontSize: 13, marginBottom: 24 }}>
-          Ø 20 Min. Koordination pro Reinigung · 12 €/Std.
-        </p>
+        <p style={S.sectionLabel}>{tx.calcLabel}</p>
+        <h2 style={S.sectionH2}>{tx.calcTitle}</h2>
+        <p style={{ color: '#8892a4', fontSize: 13, marginBottom: 24 }}>{tx.calcNote}</p>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <span style={{ fontSize: 13, color: '#8892a4' }}>Anzahl der Objekte</span>
+          <span style={{ fontSize: 13, color: '#8892a4' }}>{tx.calcObjectsLabel}</span>
           <span style={{ fontSize: 15, fontWeight: 700, color: '#e8eaf0' }}>{objects}</span>
         </div>
         <input
@@ -324,10 +567,8 @@ export default function LeadPage() {
           transition={{ duration: 0.22 }}
         >
           <div style={S.calcBox}>
-            <span style={S.calcNum}>
-              <Counter mv={cleaningsMV} />
-            </span>
-            <span style={S.calcSub}>Reinigungen / Monat</span>
+            <span style={S.calcNum}><Counter mv={cleaningsMV} /></span>
+            <span style={S.calcSub}>{tx.calcSubs[0]}</span>
           </div>
           <div style={S.calcBox}>
             <span style={S.calcNum}>
@@ -339,53 +580,45 @@ export default function LeadPage() {
                 }}
               />
             </span>
-            <span style={S.calcSub}>Stunden gespart / Mo.</span>
+            <span style={S.calcSub}>{tx.calcSubs[1]}</span>
           </div>
           <div style={S.calcBox}>
             <span style={{ ...S.calcNum, color: '#86efac' }}>
               <Counter mv={savingsMV} fmt={v => Math.round(v) + ' €'} />
             </span>
-            <span style={S.calcSub}>Kosten gespart / Mo.</span>
+            <span style={S.calcSub}>{tx.calcSubs[2]}</span>
           </div>
         </motion.div>
 
         <p style={{ textAlign: 'center', fontSize: 13, color: '#8892a4', marginTop: 16 }}>
-          → Das sind{' '}
+          {tx.calcYearPre}{' '}
           <strong style={{ color: '#e8eaf0' }}>
-            {(savingsNow * 12).toLocaleString('de-AT')} €
+            {(savingsNow * 12).toLocaleString(tx.calcLocale)}
           </strong>{' '}
-          pro Jahr
+          {tx.calcYearPost}
         </p>
 
         {/* Loss-aversion block */}
         <div style={S.chaosBlock}>
-          <p style={S.chaosTitle}>Was Sie das Reinigungs-Chaos im Monat kostet:</p>
-          {[
-            'Gast checkt ein, die Wohnung ist noch nicht sauber → schlechte Bewertung',
-            'Eine Bewertung unter 4,8 ★ kostet Sie Sichtbarkeit und Buchungen',
-            'Abende voller Nachrichten und Anrufe statt Vermietung',
-          ].map(text => (
+          <p style={S.chaosTitle}>{tx.calcRiskTitle}</p>
+          {tx.calcRisks.map(text => (
             <p key={text} style={S.chaosRow}>
               <span style={{ flexShrink: 0, opacity: 0.5 }}>·</span>
               {text}
             </p>
           ))}
-          <p style={S.calcBridge}>
-            Genau das nimmt Ihnen CleanSync ab: Ein Tipp — die Reinigung ist vergeben,
-            bestätigt und mit Foto belegt. Falls keine eigene Kraft frei ist, übernimmt
-            das Reinraum-Team — über 20 Wohnungen in Wien, Antwort meist in Minuten.
-          </p>
+          <p style={S.calcBridge}>{tx.calcBridge}</p>
           <button
             style={S.softCta}
             onClick={() => formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
             className="lead-soft-cta"
           >
-            Unverbindlich ansehen →
+            {tx.calcCta}
           </button>
         </div>
       </motion.div>
 
-      {/* Reinigungs-Garantie */}
+      {/* Garantie */}
       <motion.div style={{ ...S.glass, textAlign: 'center', padding: '36px 28px' }} {...fy(0)}>
         <motion.svg
           width="52" height="52" viewBox="0 0 24 24"
@@ -415,22 +648,21 @@ export default function LeadPage() {
           />
         </motion.svg>
         <h2 style={{ color: '#e8eaf0', fontSize: 19, fontWeight: 700, marginBottom: 10 }}>
-          Reinigungs-Garantie
+          {tx.garantieTitle}
         </h2>
         <p style={{ color: '#8892a4', fontSize: 14, lineHeight: 1.7, maxWidth: 400, margin: '0 auto' }}>
-          Jede Reinigung wird mit Fotos dokumentiert. Bei Reklamationen liefern
-          Sie den Nachweis mit einem Klick — kein Streit, klare Fakten.
+          {tx.garantieDesc}
         </p>
       </motion.div>
 
       {/* How-it-works */}
       <div>
         <motion.div style={{ textAlign: 'center', marginBottom: 20 }} {...fy(0)}>
-          <p style={S.sectionLabel}>Ablauf</p>
-          <h2 style={S.sectionH2}>So funktioniert CleanSync</h2>
+          <p style={S.sectionLabel}>{tx.howLabel}</p>
+          <h2 style={S.sectionH2}>{tx.howTitle}</h2>
         </motion.div>
         <div className="lead-steps-grid" style={S.stepsGrid}>
-          {STEPS.map((step, i) => (
+          {tx.steps.map((step, i) => (
             <motion.div
               key={step.title}
               style={{ ...S.glass, padding: '20px 18px' }}
@@ -447,12 +679,12 @@ export default function LeadPage() {
         </div>
       </div>
 
-      {/* Reviews */}
+      {/* Reviews — real quotes kept as-is, only section labels localized */}
       <div>
         <motion.div style={{ textAlign: 'center', marginBottom: 20 }} {...fy(0)}>
-          <p style={S.sectionLabel}>Bewertungen</p>
-          <h2 style={S.sectionH2}>Das sagen unsere Reinigungskunden in Wien</h2>
-          <p style={S.reviewsNote}>Bewertungen zur Reinigungsqualität von Reinraum.</p>
+          <p style={S.sectionLabel}>{tx.reviewsLabel}</p>
+          <h2 style={S.sectionH2}>{tx.reviewsTitle}</h2>
+          <p style={S.reviewsNote}>{tx.reviewsNote}</p>
         </motion.div>
         <div className="lead-reviews-grid" style={S.reviewsGrid}>
           {REVIEWS.map((review, i) => (
@@ -474,11 +706,11 @@ export default function LeadPage() {
       {/* FAQ */}
       <div>
         <motion.div style={{ textAlign: 'center', marginBottom: 20 }} {...fy(0)}>
-          <p style={S.sectionLabel}>FAQ</p>
-          <h2 style={S.sectionH2}>Häufige Fragen</h2>
+          <p style={S.sectionLabel}>{tx.faqLabel}</p>
+          <h2 style={S.sectionH2}>{tx.faqTitle}</h2>
         </motion.div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {FAQS.map((faq, i) => (
+          {tx.faqs.map((faq, i) => (
             <motion.div
               key={i}
               style={{ ...S.glass, padding: 0, overflow: 'hidden' }}
@@ -523,79 +755,73 @@ export default function LeadPage() {
 
       {/* Guide opt-in form */}
       <motion.div ref={formRef} style={S.glass} {...fy(0)}>
-        {/* Guide offer header */}
         <div style={S.guideOffer}>
-          <p style={S.guideBadge}>Gratis-Leitfaden</p>
+          <p style={S.guideBadge}>{tx.guideBadgeText}</p>
           <h2 style={{ fontSize: 19, fontWeight: 700, color: '#e8eaf0', margin: '6px 0 10px' }}>
-            Der perfekte Gästewechsel in 7 Schritten
+            {tx.guideTitle}
           </h2>
-          <p style={S.guideOfferDesc}>
-            Inklusive druckbarer Reinigungs-Checkliste, die Sie Ihrer Reinigungskraft direkt mitgeben können.
-            Kein Verkaufsgespräch — nur das System, das den Wechsel reibungslos macht.
-          </p>
-          <p style={{ fontSize: 13, color: '#4a5568', marginTop: 10 }}>
-            → E-Mail eintragen und Leitfaden sofort als PDF erhalten.
-          </p>
+          <p style={S.guideOfferDesc}>{tx.guideDesc}</p>
+          <p style={{ fontSize: 13, color: '#4a5568', marginTop: 10 }}>{tx.guideHint}</p>
         </div>
         <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', margin: '20px 0' }} />
         <form onSubmit={handleSubmit} style={S.form} noValidate>
           <div style={S.fieldGroup}>
-            <label style={S.fieldLabel} htmlFor="name">Ihr Name *</label>
+            <label style={S.fieldLabel} htmlFor="name">{tx.formNameLabel}</label>
             <input
               id="name" name="name" type="text"
-              placeholder="Max Mustermann"
+              placeholder={tx.formNamePlaceholder}
               value={form.name} onChange={handleChange} required
               className="lead-input" style={S.input}
             />
           </div>
           <div className="lead-field-row" style={S.fieldRow}>
             <div style={S.fieldGroup}>
-              <label style={S.fieldLabel} htmlFor="email">E-Mail *</label>
+              <label style={S.fieldLabel} htmlFor="email">{tx.formEmailLabel}</label>
               <input
                 id="email" name="email" type="email" autoComplete="email"
-                placeholder="max@beispiel.at"
+                placeholder={tx.formEmailPlaceholder}
                 value={form.email} onChange={handleChange} required
                 className="lead-input" style={S.input}
               />
             </div>
             <div style={S.fieldGroup}>
-              <label style={S.fieldLabel} htmlFor="phone">Telefon *</label>
+              <label style={S.fieldLabel} htmlFor="phone">{tx.formPhoneLabel}</label>
               <input
                 id="phone" name="phone" type="tel"
-                placeholder="+43 664 …"
+                placeholder={tx.formPhonePlaceholder}
                 value={form.phone} onChange={handleChange} required
                 className="lead-input" style={S.input}
               />
             </div>
           </div>
           <div style={S.fieldGroup}>
-            <label style={S.fieldLabel} htmlFor="properties">Anzahl der Objekte *</label>
+            <label style={S.fieldLabel} htmlFor="properties">{tx.formPropertiesLabel}</label>
             <select
               id="properties" name="properties"
               value={form.properties} onChange={handleChange} required
               className="lead-input" style={{ ...S.input, cursor: 'pointer' }}
             >
-              <option value="" disabled>Bitte wählen …</option>
-              {PROPERTIES_OPTIONS.map(o => (
+              <option value="" disabled>{tx.formPropertiesDefault}</option>
+              {tx.formPropertiesOptions.map(o => (
                 <option key={o.value} value={o.value}>{o.label}</option>
               ))}
             </select>
           </div>
           <div style={S.fieldGroup}>
             <label style={S.fieldLabel} htmlFor="message">
-              Ihre aktuelle Situation{' '}
-              <span style={{ color: '#4a5568', fontWeight: 400 }}>(optional)</span>
+              {tx.formMessageLabel}{' '}
+              <span style={{ color: '#4a5568', fontWeight: 400 }}>{tx.formMessageOptional}</span>
             </label>
             <textarea
               id="message" name="message" rows={3}
-              placeholder="Wie koordinieren Sie Ihre Reinigungen gerade?"
+              placeholder={tx.formMessagePlaceholder}
               value={form.message} onChange={handleChange}
               className="lead-input" style={{ ...S.input, resize: 'vertical', minHeight: 72 }}
             />
           </div>
 
           {formState === 'error' && (
-            <p style={S.formError}>Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.</p>
+            <p style={S.formError}>{tx.formError}</p>
           )}
 
           <Turnstile
@@ -615,15 +841,15 @@ export default function LeadPage() {
             }}
           >
             {formState === 'loading'
-              ? <><span style={S.spinner} />Wird gesendet …</>
-              : 'Leitfaden erhalten →'
+              ? <><span style={S.spinner} />{tx.formSending}</>
+              : tx.formSubmit
             }
           </button>
         </form>
 
         {/* Telegram alternative */}
         <div style={S.tgAlt}>
-          <span>Oder direkt auf Telegram:</span>
+          <span>{tx.tgAlt}</span>
           <a
             href="https://t.me/Reinraumat"
             target="_blank" rel="noopener noreferrer"
@@ -641,18 +867,14 @@ export default function LeadPage() {
           Paid: Reinraum dispatch, PDF cleaning reports. */}
       <motion.div style={S.freeTier} {...fy(0)}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-          <span style={S.freeBadge}>Kostenlos</span>
-          <span style={{ fontSize: 13, color: '#4a5568' }}>Kein Abo. Keine Kreditkarte.</span>
+          <span style={S.freeBadge}>{tx.freeBadgeText}</span>
+          <span style={{ fontSize: 13, color: '#4a5568' }}>{tx.freeTagline}</span>
         </div>
         <h2 style={{ fontSize: 19, fontWeight: 700, color: '#e8eaf0', marginBottom: 16 }}>
-          Ein Objekt. Für immer kostenlos.
+          {tx.freeTitle}
         </h2>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 9, marginBottom: 20 }}>
-          {[
-            '1 Objekt',
-            'Telegram-Bot für Ihre Reinigungskraft',
-            'iCal-Sync mit Airbnb',
-          ].map(item => (
+          {tx.freeItems.map(item => (
             <div key={item} style={S.freeItem}>
               <span style={{ color: '#86efac', flexShrink: 0 }}>✓</span>
               <span style={{ fontSize: 13.5, color: '#e8eaf0' }}>{item}</span>
@@ -661,9 +883,9 @@ export default function LeadPage() {
         </div>
         <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 14, marginBottom: 20 }}>
           <p style={{ fontSize: 11, color: '#4a5568', textTransform: 'uppercase' as const, letterSpacing: '0.06em', marginBottom: 8 }}>
-            Später hinzufügen
+            {tx.freeLater}
           </p>
-          {['Reinraum-Dispatch bei Ausfall', 'PDF-Reinigungsprotokoll'].map(item => (
+          {tx.freePaid.map(item => (
             <div key={item} style={{ ...S.freeItem, opacity: 0.45, marginBottom: 7 }}>
               <span style={{ color: '#8892a4', flexShrink: 0, fontSize: 13 }}>+</span>
               <span style={{ fontSize: 13, color: '#8892a4' }}>{item}</span>
@@ -676,18 +898,13 @@ export default function LeadPage() {
           className="lead-free-btn"
           onClick={() => formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
         >
-          Kostenlos starten →
+          {tx.freeBtn}
         </button>
       </motion.div>
 
       {/* Trust strip */}
       <motion.div className="lead-trust-row" style={S.trustRow} {...fy(0)}>
-        {[
-          ['📅', 'iCal-Sync mit Airbnb'],
-          ['📷', 'Foto-Nachweis der Reinigung'],
-          ['💬', 'Telegram-Bot für Reinigungskräfte'],
-          ['🔒', 'Daten in der EU (Supabase)'],
-        ].map(([icon, text]) => (
+        {tx.trustItems.map(([icon, text]) => (
           <div key={text} style={S.trustItem}>
             <span style={{ fontSize: 14 }}>{icon}</span>
             <span style={{ fontSize: 12, color: '#4a5568' }}>{text}</span>
@@ -739,6 +956,29 @@ const S = {
     padding:      '4px 10px',
     borderRadius: 20,
   },
+  langToggle: {
+    display:      'flex',
+    alignItems:   'center',
+    background:   'rgba(255,255,255,0.05)',
+    border:       '1px solid rgba(255,255,255,0.10)',
+    borderRadius: 8,
+    overflow:     'hidden',
+  },
+  langBtn: {
+    padding:    '4px 10px',
+    fontSize:   12,
+    fontWeight: 600,
+    color:      '#4a5568',
+    background: 'none',
+    border:     'none',
+    cursor:     'pointer',
+    fontFamily: 'inherit',
+    transition: 'color 0.12s, background 0.12s',
+  } as React.CSSProperties,
+  langBtnActive: {
+    color:      '#e8eaf0',
+    background: 'rgba(59,126,248,0.22)',
+  } as React.CSSProperties,
   h1: {
     fontSize:      'clamp(26px, 6vw, 38px)',
     fontWeight:    800,
@@ -1002,8 +1242,6 @@ const S = {
     alignItems: 'center',
     gap:        8,
   },
-
-  // Trust-bar (Block 2)
   trustBarGrid: {
     display:             'grid',
     gridTemplateColumns: '1fr 1fr 1fr 1fr',
@@ -1020,8 +1258,6 @@ const S = {
     lineHeight: 1.4,
     textAlign:  'center' as const,
   },
-
-  // Calculator chaos block (Block 1)
   chaosBlock: {
     marginTop:  20,
     paddingTop: 16,
@@ -1064,8 +1300,6 @@ const S = {
     transition:   'opacity 0.15s',
     display:      'block',
   } as React.CSSProperties,
-
-  // Free-tier offer (Block 4)
   freeTier: {
     background:   'rgba(21,128,61,0.06)',
     border:       '1px solid rgba(134,239,172,0.15)',
@@ -1101,8 +1335,6 @@ const S = {
     fontFamily:   'inherit',
     transition:   'opacity 0.15s',
   } as React.CSSProperties,
-
-  // Guide opt-in form (Block 3)
   guideOffer: {
     background:   'rgba(59,126,248,0.05)',
     border:       '1px solid rgba(59,126,248,0.14)',
@@ -1110,17 +1342,17 @@ const S = {
     padding:      '16px 18px',
   },
   guideBadge: {
-    display:      'inline-block',
-    fontSize:     11,
-    fontWeight:   700,
-    color:        '#3b7ef8',
-    background:   'rgba(59,126,248,0.12)',
-    border:       '1px solid rgba(59,126,248,0.22)',
-    padding:      '3px 10px',
-    borderRadius: 20,
+    display:       'inline-block',
+    fontSize:      11,
+    fontWeight:    700,
+    color:         '#3b7ef8',
+    background:    'rgba(59,126,248,0.12)',
+    border:        '1px solid rgba(59,126,248,0.22)',
+    padding:       '3px 10px',
+    borderRadius:  20,
     textTransform: 'uppercase' as const,
     letterSpacing: '0.07em',
-    marginBottom: 0,
+    marginBottom:  0,
   },
   guideOfferDesc: {
     fontSize:   13.5,
@@ -1138,12 +1370,10 @@ const S = {
     textDecoration: 'none',
     transition:     'opacity 0.15s',
   } as React.CSSProperties,
-
-  // Reviews section (Block 2)
   reviewsNote: {
-    fontSize:   12,
-    color:      '#4a5568',
-    marginTop:  -12,
+    fontSize:  12,
+    color:     '#4a5568',
+    marginTop: -12,
   },
   reviewsGrid: {
     display:             'grid',
@@ -1164,7 +1394,6 @@ const S = {
   },
 }
 
-// Interactive + responsive rules (can't be done with inline styles)
 const css = `
   .lead-input:focus {
     border-color: #3b7ef8 !important;
@@ -1179,8 +1408,10 @@ const css = `
   .lead-soft-cta:hover  { opacity: 0.80; }
   .lead-guide-dl:hover  { opacity: 0.85; }
   .lead-free-btn:hover  { opacity: 0.82; }
+  .lead-lang-btn:hover  { color: #8892a4; }
+  @keyframes cs-spin { to { transform: rotate(360deg); } }
   @media (max-width: 600px) {
-    .lead-trust-bar   { grid-template-columns: 1fr 1fr !important; }
+    .lead-trust-bar    { grid-template-columns: 1fr 1fr !important; }
     .lead-reviews-grid { grid-template-columns: 1fr !important; }
   }
   @media (max-width: 480px) {
