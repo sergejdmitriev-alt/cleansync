@@ -636,6 +636,50 @@ export default function LeadPage() {
         </div>
       </motion.div>
 
+      {/* Free-tier offer — UI only; button links to /register once built.
+          Free: 1 property, Telegram bot, iCal sync.
+          Paid: Reinraum dispatch, PDF cleaning reports. */}
+      <motion.div style={S.freeTier} {...fy(0)}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+          <span style={S.freeBadge}>Kostenlos</span>
+          <span style={{ fontSize: 13, color: '#4a5568' }}>Kein Abo. Keine Kreditkarte.</span>
+        </div>
+        <h2 style={{ fontSize: 19, fontWeight: 700, color: '#e8eaf0', marginBottom: 16 }}>
+          Ein Objekt. Für immer kostenlos.
+        </h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 9, marginBottom: 20 }}>
+          {[
+            '1 Objekt',
+            'Telegram-Bot für Ihre Reinigungskraft',
+            'iCal-Sync mit Airbnb',
+          ].map(item => (
+            <div key={item} style={S.freeItem}>
+              <span style={{ color: '#86efac', flexShrink: 0 }}>✓</span>
+              <span style={{ fontSize: 13.5, color: '#e8eaf0' }}>{item}</span>
+            </div>
+          ))}
+        </div>
+        <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 14, marginBottom: 20 }}>
+          <p style={{ fontSize: 11, color: '#4a5568', textTransform: 'uppercase' as const, letterSpacing: '0.06em', marginBottom: 8 }}>
+            Später hinzufügen
+          </p>
+          {['Reinraum-Dispatch bei Ausfall', 'PDF-Reinigungsprotokoll'].map(item => (
+            <div key={item} style={{ ...S.freeItem, opacity: 0.45, marginBottom: 7 }}>
+              <span style={{ color: '#8892a4', flexShrink: 0, fontSize: 13 }}>+</span>
+              <span style={{ fontSize: 13, color: '#8892a4' }}>{item}</span>
+            </div>
+          ))}
+        </div>
+        {/* TODO: href="/register" once registration is built */}
+        <button
+          style={S.freeBtn}
+          className="lead-free-btn"
+          onClick={() => formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+        >
+          Kostenlos starten →
+        </button>
+      </motion.div>
+
       {/* Trust strip */}
       <motion.div className="lead-trust-row" style={S.trustRow} {...fy(0)}>
         {[
@@ -1021,6 +1065,43 @@ const S = {
     display:      'block',
   } as React.CSSProperties,
 
+  // Free-tier offer (Block 4)
+  freeTier: {
+    background:   'rgba(21,128,61,0.06)',
+    border:       '1px solid rgba(134,239,172,0.15)',
+    borderRadius: 16,
+    padding:      24,
+  },
+  freeBadge: {
+    fontSize:      11,
+    fontWeight:    700,
+    color:         '#86efac',
+    background:    'rgba(21,128,61,0.18)',
+    border:        '1px solid rgba(134,239,172,0.25)',
+    padding:       '3px 10px',
+    borderRadius:  20,
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.07em',
+  },
+  freeItem: {
+    display:    'flex',
+    alignItems: 'center' as const,
+    gap:        10,
+  },
+  freeBtn: {
+    width:        '100%',
+    padding:      14,
+    background:   'rgba(21,128,61,0.18)',
+    border:       '1px solid rgba(134,239,172,0.28)',
+    borderRadius: 12,
+    color:        '#86efac',
+    fontSize:     15,
+    fontWeight:   700,
+    cursor:       'pointer',
+    fontFamily:   'inherit',
+    transition:   'opacity 0.15s',
+  } as React.CSSProperties,
+
   // Guide opt-in form (Block 3)
   guideOffer: {
     background:   'rgba(59,126,248,0.05)',
@@ -1097,6 +1178,7 @@ const css = `
   .lead-tglink:hover { text-decoration: underline; }
   .lead-soft-cta:hover  { opacity: 0.80; }
   .lead-guide-dl:hover  { opacity: 0.85; }
+  .lead-free-btn:hover  { opacity: 0.82; }
   @media (max-width: 600px) {
     .lead-trust-bar   { grid-template-columns: 1fr 1fr !important; }
     .lead-reviews-grid { grid-template-columns: 1fr !important; }
