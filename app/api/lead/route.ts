@@ -10,7 +10,8 @@ const BIG_LEAD_VALUES = new Set(['6-10', '10+']);
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, email, phone, properties, message, turnstileToken } = body as Partial<Lead> & { turnstileToken?: string };
+    const { name, email, phone, properties, message, turnstileToken, lang } = body as Partial<Lead> & { turnstileToken?: string; lang?: string };
+    const resolvedLang = lang === 'en' ? 'en' : 'de'
 
     const isHuman = await verifyTurnstile(turnstileToken ?? '');
     if (!isHuman) {
@@ -35,7 +36,7 @@ export async function POST(req: NextRequest) {
     };
 
     await appendLeadToSheet(lead);
-    await sendLeadConfirmation(lead.name, lead.email).catch(err =>
+    await sendLeadConfirmation(lead.name, lead.email, resolvedLang).catch(err =>
       console.error('[lead] email error:', err)
     );
     await sendTelegramNotification(lead);
