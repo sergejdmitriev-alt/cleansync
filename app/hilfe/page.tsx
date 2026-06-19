@@ -133,7 +133,11 @@ const CATEGORIES: Category[] = [
       },
       {
         q: 'Was passiert, wenn eine Reinigungskraft ablehnt?',
-        a: 'Der Auftrag wechselt in den Status „Abgelehnt". Sie können den Auftrag dann einer anderen Reinigungskraft zuweisen und erneut senden, oder den Auftrag archivieren.',
+        a: 'Das System fragt automatisch die nächste Reinigungskraft in der festgelegten Reihenfolge (Reinigungs-Garantie). Sind alle nicht verfügbar, erhalten Sie eine Benachrichtigung mit der Option, den Auftrag an Reinraum zu übergeben — mit einem Klick.',
+      },
+      {
+        q: 'Was ist die Reinigungs-Garantie und wie richte ich sie ein?',
+        a: 'Unter Einstellungen → Objekte → „⬆ Reihenfolge" legen Sie fest, welche Reinigungskraft zuerst gefragt wird. Sagt sie ab, übernimmt automatisch die nächste — und im Notfall Reinraum. So ist jede Reinigung abgesichert.',
       },
     ],
   },
@@ -146,11 +150,11 @@ const CATEGORIES: Category[] = [
         q: 'Wie verbinde ich Telegram für Host-Benachrichtigungen?',
         a: (
           <span>
-            Klicken Sie auf den Button unten oder gehen Sie zu{' '}
-            <Link href="/connect-telegram" style={{ color: 'var(--cs-blue)', textDecoration: 'none' }}>
-              Telegram verbinden
-            </Link>
-            . Öffnen Sie den generierten Link, starten Sie den Bot mit „Start" — fertig. Ab sofort erhalten Sie Benachrichtigungen direkt in Telegram.
+            Option 1: Gehen Sie zu{' '}
+            <Link href="/connect-telegram" style={{ color: 'var(--cs-blue)', textDecoration: 'none' }}>Telegram verbinden</Link>
+            {' '}und öffnen Sie den generierten Link — der Bot verbindet sich automatisch.{' '}
+            Option 2: Öffnen Sie <a href="https://t.me/cleansync_bot" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--cs-blue)', textDecoration: 'none' }}>@cleansync_bot</a>,
+            {' '}senden Sie <code>/start</code> — der Bot zeigt Ihre ID. Tragen Sie diese in Einstellungen → Telegram ein.
           </span>
         ),
       },

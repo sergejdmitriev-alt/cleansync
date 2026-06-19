@@ -23,12 +23,12 @@ const STEPS = [
   },
   {
     title: 'Reinigungskraft hinzufügen',
-    body: 'Laden Sie Ihre Reinigungskraft ein — sie erhält Aufträge direkt in Telegram, in ihrer Sprache.',
-    cta: { label: 'Zu Reinigungskräfte', href: '/settings' },
+    body: 'Laden Sie Ihre Reinigungskraft ein — sie erhält Aufträge direkt in Telegram. Legen Sie unter jedem Objekt eine Reihenfolge fest: sagt Nr. 1 ab, fragt das System automatisch Nr. 2.',
+    cta: { label: 'Zu Einstellungen', href: '/settings' },
   },
   {
     title: 'Telegram verbinden',
-    body: 'Erhalten Sie sofort eine Nachricht, wenn ein Auftrag angenommen oder abgeschlossen wird.',
+    body: 'Verbinden Sie Ihren Telegram-Account, um Benachrichtigungen zu erhalten — per Link oder manuell via ID aus dem Bot.',
     cta: { label: 'Telegram verbinden', href: '/connect-telegram' },
   },
   {
