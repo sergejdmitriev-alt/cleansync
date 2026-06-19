@@ -28,15 +28,15 @@ const T = {
   de: {
     headerBadge: 'Für Airbnb-Hosts in Wien',
     // Hero
-    heroTitle:   'Übergaben automatisch.\nFotos, Bestätigungen, alles.',
-    heroSub:     'CleanSync verbindet Ihre Reinigungskräfte mit Ihrem Kalender —\nkein WhatsApp-Chaos, keine verpassten Checkouts.',
+    heroTitle:   'Die Reinigung, die garantiert stattfindet.',
+    heroSub:     'Sagt eine Reinigungskraft ab, springt automatisch die nächste ein — im Notfall das Reinraum-Team. Ihr Gast zieht nie in eine ungereinigte Wohnung ein.',
     heroCta:     'Unverbindlich ansehen →',
     // Trust-bar
     trustBar: [
       '✦ über 20 Wohnungen in Wien betreut',
       '✦ seit über 3 Jahren im Einsatz',
+      '✦ mehrfach abgesichert — fällt einer aus, übernimmt der nächste',
       '✦ Antwort meist in Minuten',
-      '✦ fast jeder Auftrag wird angenommen',
     ],
     // Telegram demo
     demoLabel: 'So sieht es aus',
@@ -85,14 +85,17 @@ const T = {
     calcCta:    'Unverbindlich ansehen →',
     // Garantie
     garantieTitle: 'Reinigungs-Garantie',
-    garantieDesc:  'Jede Reinigung wird mit Fotos dokumentiert. Bei Reklamationen liefern Sie den Nachweis mit einem Klick — kein Streit, klare Fakten.',
+    garantieDesc:  'Egal ob du eine oder mehrere Reinigungskräfte hast: Sagt jemand ab, übernimmt automatisch die nächste — und wenn niemand frei ist, das Reinraum-Team. Jede Reinigung wird mit Fotos dokumentiert. Die Reinigung findet statt. Punkt.',
+    garantieChainLabel: 'So funktioniert die Garantie:',
+    garantieChain: ['Reinigungskraft 1', 'sagt ab', 'Reinigungskraft 2', 'nicht verfügbar', '🏢 Reinraum'],
+    garantieChainSub: 'Du legst die Reihenfolge fest. Den Rest macht das System.',
     // How-it-works
     howLabel: 'Ablauf',
     howTitle: 'So funktioniert CleanSync',
     steps: [
       { icon: '📅', title: 'Kalender sync',      desc: 'Airbnb-Kalender verbindet sich automatisch — neue Buchungen erscheinen sofort als Aufgaben' },
       { icon: '💬', title: 'Bot sendet Aufgabe', desc: 'Die Reinigungskraft bekommt eine Telegram-Nachricht mit Datum, Uhrzeit und Notizen'          },
-      { icon: '✅', title: 'Bestätigung',         desc: 'Reinigungskraft bestätigt oder lehnt ab — Sie sehen den Status live im Dashboard'             },
+      { icon: '✅', title: 'Bestätigung',         desc: 'Reinigungskraft bestätigt oder lehnt ab. Bei Absage fragt das System automatisch die nächste — und im Notfall Reinraum.'     },
       { icon: '📷', title: 'Foto als Nachweis',  desc: 'Nach der Reinigung werden Fotos gesendet — automatisch gespeichert, jederzeit abrufbar'       },
     ],
     // Reviews
@@ -105,7 +108,7 @@ const T = {
     faqs: [
       { q: 'Braucht meine Reinigungskraft ein Smartphone?',  a: 'Ja, nur Telegram. Die App ist kostenlos und auf jedem Smartphone verfügbar. Keine Registrierung nötig.'           },
       { q: 'Funktioniert das auch ohne Airbnb?',             a: 'Ja. Aufgaben können auch manuell erstellt werden — ohne Kalender-Sync. Airbnb macht es vollautomatisch.'            },
-      { q: 'Was passiert wenn die Reinigungskraft ablehnt?', a: 'Sie bekommen sofort eine Benachrichtigung und können die Aufgabe an jemand anderen senden oder Reinraum beauftragen.' },
+      { q: 'Was passiert wenn die Reinigungskraft ablehnt?', a: 'Das System fragt automatisch die nächste Reinigungskraft in Ihrer festgelegten Reihenfolge. Sind alle nicht verfügbar, schlägt der Bot vor, an Reinraum zu übergeben — mit einem Klick.' },
       { q: 'Sind meine Daten sicher?',                       a: 'Ja. Alle Daten liegen in einer europäischen Datenbank (Supabase EU), Fotos werden automatisch nach 90 Tagen gelöscht.' },
     ],
     // Guide form
@@ -161,15 +164,15 @@ const T = {
   en: {
     headerBadge: 'For Airbnb hosts in Vienna',
     // Hero
-    heroTitle:   'Turnovers automated.\nPhotos, confirmations, everything.',
-    heroSub:     'CleanSync connects your cleaners to your calendar —\nno WhatsApp chaos, no missed checkouts.',
+    heroTitle:   'The cleaning that\'s guaranteed to happen.',
+    heroSub:     'If one cleaner cancels, the next one steps in automatically — and the Reinraum team as backup. Your guest never checks into a dirty apartment.',
     heroCta:     'See it — no commitment →',
     // Trust-bar
     trustBar: [
       '✦ 20+ properties managed in Vienna',
       '✦ 3+ years of real cleaning operations',
+      '✦ multi-layer backup — if one cancels, the next steps in',
       '✦ replies usually within minutes',
-      '✦ nearly every request accepted',
     ],
     // Telegram demo
     demoLabel: 'See it in action',
@@ -218,14 +221,17 @@ const T = {
     calcCta:    'See it — no commitment →',
     // Garantie
     garantieTitle: 'Cleaning Guarantee',
-    garantieDesc:  'Every cleaning is documented with photos. When disputes come up, you have proof in one click — no argument, clear facts.',
+    garantieDesc:  'Multiple cleaners in order, automatic handoff when one cancels, Reinraum as emergency backup — and every cleaning documented with photos. The cleaning happens. Full stop.',
+    garantieChainLabel: 'How the guarantee works:',
+    garantieChain: ['Cleaner 1', 'cancels', 'Cleaner 2', 'unavailable', '🏢 Reinraum'],
+    garantieChainSub: 'You set the order. The system does the rest.',
     // How-it-works
     howLabel: 'How it works',
     howTitle: 'How CleanSync works',
     steps: [
       { icon: '📅', title: 'Calendar sync',     desc: 'Your Airbnb calendar connects automatically — new bookings appear instantly as tasks'            },
       { icon: '💬', title: 'Bot sends the job', desc: 'The cleaner gets a Telegram message with date, time and notes'                                  },
-      { icon: '✅', title: 'Confirmation',       desc: 'Cleaner accepts or declines — you see the status live in the dashboard'                        },
+      { icon: '✅', title: 'Confirmation',       desc: 'Cleaner accepts or declines. If declined, the system automatically asks the next one — Reinraum as final backup.'  },
       { icon: '📷', title: 'Photo as proof',    desc: 'After cleaning, photos are sent — automatically saved and accessible any time'                  },
     ],
     // Reviews
@@ -238,7 +244,7 @@ const T = {
     faqs: [
       { q: 'Does my cleaner need a smartphone?',    a: 'Yes, just Telegram. The app is free and available on any smartphone. No account registration needed.'          },
       { q: 'Does this work without Airbnb?',         a: 'Yes. Tasks can also be created manually — without calendar sync. Airbnb makes it fully automatic.'            },
-      { q: 'What happens if the cleaner declines?',  a: 'You get a notification immediately and can send the task to someone else or call in the Reinraum team.'      },
+      { q: 'What happens if the cleaner declines?',  a: 'The system automatically asks the next cleaner in your configured order. If everyone is unavailable, the bot suggests handing over to Reinraum — with one tap.'  },
       { q: 'Is my data secure?',                     a: 'Yes. All data is stored in a European database (Supabase EU), and photos are automatically deleted after 90 days.' },
     ],
     // Guide form
@@ -650,9 +656,23 @@ export default function LeadPage() {
         <h2 style={{ color: '#e8eaf0', fontSize: 19, fontWeight: 700, marginBottom: 10 }}>
           {tx.garantieTitle}
         </h2>
-        <p style={{ color: '#8892a4', fontSize: 14, lineHeight: 1.7, maxWidth: 400, margin: '0 auto' }}>
+        <p style={{ color: '#8892a4', fontSize: 14, lineHeight: 1.7, maxWidth: 400, margin: '0 auto 20px' }}>
           {tx.garantieDesc}
         </p>
+
+        {/* Cascade chain */}
+        <p style={{ color: '#8892a4', fontSize: 12, marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+          {(tx as any).garantieChainLabel}
+        </p>
+        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', gap: '6px', marginBottom: 12 }}>
+          {((tx as any).garantieChain as string[]).map((item, i) => {
+            const isArrow = i % 2 === 1
+            return isArrow
+              ? <span key={i} style={{ color: '#3b7ef8', fontSize: 16, fontWeight: 700 }}>→</span>
+              : <span key={i} style={{ background: 'rgba(59,126,248,0.12)', border: '1px solid rgba(59,126,248,0.25)', borderRadius: 8, padding: '4px 12px', fontSize: 13, color: '#e8eaf0', fontWeight: 500 }}>{item}</span>
+          })}
+        </div>
+        <p style={{ color: '#8892a4', fontSize: 12, fontStyle: 'italic' }}>{(tx as any).garantieChainSub}</p>
       </motion.div>
 
       {/* How-it-works */}

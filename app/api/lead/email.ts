@@ -1,9 +1,9 @@
 import { Resend } from 'resend'
 
-const resend   = new Resend(process.env.RESEND_API_KEY)
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://cleansync.at'
 
 export async function sendLeadConfirmation(name: string, email: string, lang: 'de' | 'en' = 'de') {
+  const resend = new Resend(process.env.RESEND_API_KEY)
   const guideUrl = `${BASE_URL}/api/guide/turnover?lang=${lang}`
 
   const subject = lang === 'en'
