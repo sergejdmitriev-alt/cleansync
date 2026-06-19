@@ -222,6 +222,16 @@ export default function ConnectTelegramPage() {
             </button>
           </p>
 
+          {/* Alternativ: ID manuell */}
+          <div className="mt-6 rounded-xl bg-white/5 p-4 text-sm">
+            <p className="mb-2 font-medium text-white/60">Alternativ: ID manuell eintragen</p>
+            <ol className="list-decimal pl-4 space-y-1 text-white/40 text-xs leading-relaxed">
+              <li>Öffne <a href="https://t.me/cleansync_bot" target="_blank" rel="noopener noreferrer" className="text-[#229ED9] hover:underline">@cleansync_bot</a> in Telegram</li>
+              <li>Sende <code className="bg-white/10 px-1 rounded">/start</code> — der Bot zeigt dir deine ID</li>
+              <li>Kopiere die ID und trage sie in Einstellungen → Telegram ein</li>
+            </ol>
+          </div>
+
         </div>
       </div>
     </main>

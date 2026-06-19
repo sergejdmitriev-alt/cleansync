@@ -5,8 +5,9 @@ import Header from '@/app/components/Header'
 import { FadeInItem } from '@/components/motion/FadeInItem'
 import { AnimatePresence, motion } from 'framer-motion'
 
-interface Cleaner  { id: string; name: string; telegram_chat_id: number | null }
-interface Property { id: string; name: string; address: string; default_notes?: string | null; ical_url?: string | null }
+interface Cleaner       { id: string; name: string; telegram_chat_id: number | null }
+interface Property      { id: string; name: string; address: string; default_notes?: string | null; ical_url?: string | null }
+interface PriorityEntry { cleaner_id: string; name: string; telegram_chat_id: number | null }
 interface RecurringRule {
   id: string; property_id: string; cleaner_id: string | null
   frequency: 'weekly' | 'biweekly' | 'monthly'; weekday: number
@@ -48,14 +49,19 @@ export default function SettingsPage() {
   const [recurringRules,    setRecurringRules]    = useState<RecurringRule[]>([])
   const [expandedRecurring, setExpandedRecurring] = useState<string | null>(null)
   const [newRuleForms,      setNewRuleForms]      = useState<Record<string, RuleForm>>({})
+  const [expandedPriority,  setExpandedPriority]  = useState<string | null>(null)
+  const [priorityQueues,    setPriorityQueues]    = useState<Record<string, PriorityEntry[]>>({})
+  const [hostTelegramId,    setHostTelegramId]    = useState('')
+  const [hostTgSaving,      setHostTgSaving]      = useState(false)
 
   async function load() {
-    const [c, p, t, b, r] = await Promise.all([
+    const [c, p, t, b, r, tg] = await Promise.all([
       fetch('/api/cleaners').then(r => r.json()),
       fetch('/api/properties').then(r => r.json()),
       fetch('/api/telegram/status').then(r => r.json()),
       fetch('/api/settings/backup').then(r => r.json()),
       fetch('/api/recurring').then(r => r.json()),
+      fetch('/api/settings/telegram').then(r => r.json()),
     ])
     setCleaners(c)
     setProperties(p)
@@ -63,6 +69,75 @@ export default function SettingsPage() {
     setAutoBackup(b.auto_backup_enabled ?? false)
     setEscalationHours(b.escalation_hours ?? 4)
     setRecurringRules(Array.isArray(r) ? r : [])
+    setHostTelegramId(tg.telegramId ?? '')
+  }
+
+  async function loadPriority(propertyId: string) {
+    if (priorityQueues[propertyId] !== undefined) return
+    const res  = await fetch(`/api/properties/${propertyId}/priority`)
+    const data = await res.json()
+    setPriorityQueues(prev => ({
+      ...prev,
+      [propertyId]: (data ?? []).map((row: any) => ({
+        cleaner_id:       row.cleaner_id,
+        name:             row.cleaners?.name ?? '—',
+        telegram_chat_id: row.cleaners?.telegram_chat_id ?? null,
+      })),
+    }))
+  }
+
+  async function savePriority(propertyId: string, queue: PriorityEntry[]) {
+    await fetch(`/api/properties/${propertyId}/priority`, {
+      method:  'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ cleaner_ids: queue.map(e => e.cleaner_id) }),
+    })
+  }
+
+  function movePriority(propertyId: string, idx: number, dir: -1 | 1) {
+    setPriorityQueues(prev => {
+      const q    = [...(prev[propertyId] ?? [])]
+      const swap = idx + dir
+      if (swap < 0 || swap >= q.length) return prev
+      ;[q[idx], q[swap]] = [q[swap], q[idx]]
+      savePriority(propertyId, q)
+      return { ...prev, [propertyId]: q }
+    })
+  }
+
+  function removePriority(propertyId: string, idx: number) {
+    setPriorityQueues(prev => {
+      const q = (prev[propertyId] ?? []).filter((_, i) => i !== idx)
+      savePriority(propertyId, q)
+      return { ...prev, [propertyId]: q }
+    })
+  }
+
+  function addToPriority(propertyId: string, cleanerId: string) {
+    if (!cleanerId) return
+    const cleaner = cleaners.find(c => c.id === cleanerId)
+    if (!cleaner) return
+    setPriorityQueues(prev => {
+      if ((prev[propertyId] ?? []).some(e => e.cleaner_id === cleanerId)) return prev
+      const q = [...(prev[propertyId] ?? []), {
+        cleaner_id:       cleanerId,
+        name:             cleaner.name,
+        telegram_chat_id: cleaner.telegram_chat_id,
+      }]
+      savePriority(propertyId, q)
+      return { ...prev, [propertyId]: q }
+    })
+  }
+
+  async function saveHostTelegram() {
+    setHostTgSaving(true)
+    await fetch('/api/settings/telegram', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ telegramId: hostTelegramId }),
+    })
+    setHostTgSaving(false)
+    load()
   }
 
   async function addRecurringRule(propertyId: string) {
@@ -238,12 +313,26 @@ export default function SettingsPage() {
                       </button>
                     )}
                     <button
-                      onClick={() => setExpandedRecurring(expandedRecurring === p.id ? null : p.id)}
+                      onClick={() => {
+                        setExpandedRecurring(expandedRecurring === p.id ? null : p.id)
+                      }}
                       className="cs-btn-secondary"
                       style={{ fontSize: '12px', padding: '5px 10px' }}
                       title="Wiederkehrende Reinigungen"
                     >
                       ↻ Regeln
+                    </button>
+                    <button
+                      onClick={() => {
+                        const next = expandedPriority === p.id ? null : p.id
+                        setExpandedPriority(next)
+                        if (next) loadPriority(p.id)
+                      }}
+                      className="cs-btn-secondary"
+                      style={{ fontSize: '12px', padding: '5px 10px' }}
+                      title="Reinigungs-Reihenfolge"
+                    >
+                      ⬆ Reihenfolge
                     </button>
                     <button onClick={() => setEditingProperty(p)} className="cs-btn-secondary" style={{ fontSize: '12px', padding: '5px 12px' }}>Bearbeiten</button>
                     <button onClick={() => deleteProperty(p.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--cs-text-3)', fontSize: '16px', padding: '4px' }}>🗑</button>
@@ -355,6 +444,70 @@ export default function SettingsPage() {
                       )
                     })()}
                   </AnimatePresence>
+                  {/* Priority queue accordion */}
+                  <AnimatePresence>
+                    {expandedPriority === p.id && (() => {
+                      const queue = priorityQueues[p.id] ?? []
+                      const available = cleaners.filter(c => !queue.some(e => e.cleaner_id === c.id))
+                      return (
+                        <motion.div
+                          key="priority"
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                          style={{ overflow: 'hidden', borderBottom: '1px solid var(--cs-border)', background: 'var(--cs-surface-2)' }}
+                        >
+                          <div style={{ padding: '14px 20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <p style={{ fontSize: '12px', fontWeight: '600', color: 'var(--cs-text-3)', textTransform: 'uppercase', letterSpacing: '0.04em', margin: 0 }}>
+                              ⬆ Reihenfolge der Reinigungskräfte
+                            </p>
+                            <p style={{ fontSize: '12px', color: 'var(--cs-text-3)', margin: 0, lineHeight: 1.5 }}>
+                              Reagiert Nr. 1 nicht oder sagt ab, geht das Angebot automatisch an Nr. 2 usw. Sind alle nicht verfügbar, fragt der Bot, ob an Reinraum übergeben werden soll.
+                            </p>
+
+                            {queue.length === 0 && (
+                              <p style={{ fontSize: '12px', color: 'var(--cs-text-3)', fontStyle: 'italic', margin: '4px 0 0' }}>
+                                Noch keine Reihenfolge festgelegt — Aufträge gehen direkt an die zugewiesene Reinigungskraft.
+                              </p>
+                            )}
+
+                            {queue.map((entry, idx) => (
+                              <div key={entry.cleaner_id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', background: 'var(--cs-surface)', borderRadius: 'var(--cs-radius-md)', border: '1px solid var(--cs-border)' }}>
+                                <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--cs-text-3)', minWidth: '18px' }}>{idx + 1}.</span>
+                                <span style={{ flex: 1, fontSize: '13px', color: 'var(--cs-text-1)' }}>{entry.name}</span>
+                                {!entry.telegram_chat_id && (
+                                  <span style={{ fontSize: '11px', padding: '2px 7px', borderRadius: 99, background: 'rgba(251,191,36,0.15)', color: '#fbbf24' }}>
+                                    nicht verbunden
+                                  </span>
+                                )}
+                                <button onClick={() => movePriority(p.id, idx, -1)} disabled={idx === 0}
+                                  style={{ background: 'none', border: 'none', cursor: idx === 0 ? 'default' : 'pointer', color: idx === 0 ? 'var(--cs-text-3)' : 'var(--cs-text-1)', fontSize: '14px', padding: '2px 4px', opacity: idx === 0 ? 0.3 : 1 }}>↑</button>
+                                <button onClick={() => movePriority(p.id, idx, 1)} disabled={idx === queue.length - 1}
+                                  style={{ background: 'none', border: 'none', cursor: idx === queue.length - 1 ? 'default' : 'pointer', color: idx === queue.length - 1 ? 'var(--cs-text-3)' : 'var(--cs-text-1)', fontSize: '14px', padding: '2px 4px', opacity: idx === queue.length - 1 ? 0.3 : 1 }}>↓</button>
+                                <button onClick={() => removePriority(p.id, idx)}
+                                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--cs-text-3)', fontSize: '14px', padding: '2px 4px' }}>✕</button>
+                              </div>
+                            ))}
+
+                            {available.length > 0 && (
+                              <select
+                                className="cs-input"
+                                value=""
+                                onChange={e => addToPriority(p.id, e.target.value)}
+                                style={{ marginTop: '4px' }}
+                              >
+                                <option value="">+ Reinigungskraft hinzufügen</option>
+                                {available.map(c => (
+                                  <option key={c.id} value={c.id}>{c.name}{!c.telegram_chat_id ? ' (kein Telegram)' : ''}</option>
+                                ))}
+                              </select>
+                            )}
+                          </div>
+                        </motion.div>
+                      )
+                    })()}
+                  </AnimatePresence>
                   </>
                 )}
               </div>
@@ -399,8 +552,14 @@ export default function SettingsPage() {
                   <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--cs-border)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     <input className="cs-input" value={editingCleaner.name} placeholder="Name"
                       onChange={e => setEditingCleaner({ ...editingCleaner, name: e.target.value })} />
-                    <input className="cs-input" value={String(editingCleaner.telegram_chat_id)} placeholder="Telegram Chat ID"
-                      onChange={e => setEditingCleaner({ ...editingCleaner, telegram_chat_id: Number(e.target.value) })} />
+                    <div>
+                      <input className="cs-input" value={String(editingCleaner.telegram_chat_id ?? '')} placeholder="Telegram Chat ID"
+                        onChange={e => setEditingCleaner({ ...editingCleaner, telegram_chat_id: Number(e.target.value) })} />
+                      <p style={{ fontSize: '11px', color: 'var(--cs-text-3)', margin: '4px 0 0', lineHeight: 1.5 }}>
+                        Die Reinigungskraft öffnet den Bot, sendet <code>/start</code> und schickt dir ihre ID. →{' '}
+                        <a href="https://t.me/cleansync_bot" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--cs-blue)', textDecoration: 'none' }}>@cleansync_bot</a>
+                      </p>
+                    </div>
                     <div style={{ display: 'flex', gap: '8px' }}>
                       <button onClick={saveCleaner} className="cs-btn-primary" style={{ fontSize: '13px', padding: '7px 16px' }}>Speichern</button>
                       <button onClick={() => setEditingCleaner(null)} className="cs-btn-secondary" style={{ fontSize: '13px', padding: '7px 16px' }}>Abbrechen</button>
@@ -495,8 +654,14 @@ export default function SettingsPage() {
               </p>
               <input className="cs-input" placeholder="Name"
                 value={newCleaner.name} onChange={e => setNewCleaner({ ...newCleaner, name: e.target.value })} />
-              <input className="cs-input" placeholder="Telegram Chat ID"
-                value={newCleaner.telegram_chat_id} onChange={e => setNewCleaner({ ...newCleaner, telegram_chat_id: e.target.value })} />
+              <div>
+                <input className="cs-input" placeholder="Telegram Chat ID"
+                  value={newCleaner.telegram_chat_id} onChange={e => setNewCleaner({ ...newCleaner, telegram_chat_id: e.target.value })} />
+                <p style={{ fontSize: '11px', color: 'var(--cs-text-3)', margin: '4px 0 0', lineHeight: 1.5 }}>
+                  Die Reinigungskraft öffnet den Bot, sendet <code>/start</code> und schickt dir ihre ID. →{' '}
+                  <a href="https://t.me/cleansync_bot" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--cs-blue)', textDecoration: 'none' }}>@cleansync_bot</a>
+                </p>
+              </div>
               <button onClick={addCleaner} className="cs-btn-primary" style={{ alignSelf: 'flex-start', fontSize: '13px' }}>
                 + Hinzufügen
               </button>
@@ -623,6 +788,30 @@ export default function SettingsPage() {
                 >
                   {telegramConnected ? 'Erneut verbinden' : 'Verbinden'}
                 </Link>
+              </div>
+
+              {/* Manueller ID-Fallback */}
+              <div style={{ borderTop: '1px solid var(--cs-border)', paddingTop: '12px' }}>
+                <p style={{ fontSize: '12px', color: 'var(--cs-text-3)', margin: '0 0 8px', lineHeight: 1.5 }}>
+                  Falls die Verbindung nicht klappt: Öffne den Bot, sende <code>/start</code>, kopiere deine ID und füge sie hier ein.
+                </p>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <input
+                    className="cs-input"
+                    placeholder="Deine Telegram Chat ID"
+                    value={hostTelegramId}
+                    onChange={e => setHostTelegramId(e.target.value)}
+                    style={{ maxWidth: '200px' }}
+                  />
+                  <button
+                    onClick={saveHostTelegram}
+                    disabled={hostTgSaving}
+                    className="cs-btn-secondary"
+                    style={{ fontSize: '13px', padding: '7px 14px' }}
+                  >
+                    {hostTgSaving ? '…' : 'Speichern'}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
