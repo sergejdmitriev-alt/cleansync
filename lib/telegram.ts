@@ -189,6 +189,42 @@ export function getResponseMessages(lang?: string | null) {
   return RESPONSE_MESSAGES[lang ?? 'de'] ?? RESPONSE_MESSAGES.de
 }
 
+export const REJECT_TOO_LATE: Record<string, string> = {
+  de: '⏰ Eine Absage ist jetzt nicht mehr möglich (weniger als 4 Stunden bis zur Reinigung). Bitte kontaktiere den Auftraggeber direkt.',
+  ru: '⏰ Отказаться уже нельзя (до уборки менее 4 часов). Пожалуйста, свяжись напрямую с хостом.',
+  uk: '⏰ Відмовитись вже не можна (до прибирання менше 4 годин). Будь ласка, зв\'яжись напряму з господарем.',
+  ro: '⏰ Anularea nu mai este posibilă (mai puțin de 4 ore până la curățenie). Te rugăm să contactezi direct proprietarul.',
+  pl: '⏰ Anulowanie nie jest już możliwe (mniej niż 4 godziny do sprzątania). Skontaktuj się bezpośrednio ze zleceniodawcą.',
+}
+
+export const REJECT_BUTTON: Record<string, string> = {
+  de: '↩ Absagen',
+  ru: '↩ Отказаться',
+  uk: '↩ Відмовитись',
+  ro: '↩ Anulează',
+  pl: '↩ Anuluj',
+}
+
+export const REJECT_DONE: Record<string, string> = {
+  de: '↩ Auftrag abgesagt. Der Auftraggeber wurde informiert.',
+  ru: '↩ Заказ отменён. Хост уведомлён.',
+  uk: '↩ Замовлення скасовано. Господаря повідомлено.',
+  ro: '↩ Comandă anulată. Proprietarul a fost informat.',
+  pl: '↩ Zlecenie anulowane. Zleceniodawca został poinformowany.',
+}
+
+export function getStartNoTokenMessage(chatId: string): string {
+  return (
+    `📲 Deine Telegram-ID / Твой ID / Твій ID / ID-ul tău / Twoje ID:\n\n` +
+    `<b>${chatId}</b>\n\n` +
+    `🇩🇪 Sende diese ID an deinen Auftraggeber, um mit der Arbeit zu beginnen.\n` +
+    `🇷🇺 Отправь этот ID своему хосту или менеджеру, чтобы начать работу.\n` +
+    `🇺🇦 Надішли цей ID своєму господарю або менеджеру, щоб почати роботу.\n` +
+    `🇷🇴 Trimite acest ID proprietarului sau managerului tău pentru a începe.\n` +
+    `🇵🇱 Wyślij ten ID swojemu zleceniodawcy lub menedżerowi, aby rozpocząć pracę.`
+  )
+}
+
 const CANCEL_MESSAGES: Record<string, string> = {
   ru: '⚠️ Твоя уборка отменена — бронирование было снято хозяином. Свяжись с заказчиком для уточнений.',
   uk: '⚠️ Твоє прибирання скасовано — бронювання знято господарем. Зв\'яжись із замовником для уточнень.',
@@ -249,13 +285,15 @@ export async function sendTaskNotification(task: TaskForTelegram): Promise<strin
 }
 
 export async function sendErledigtButton(chatId: string, taskId: string, lang?: string | null): Promise<void> {
-  const d  = DONE_MESSAGES[lang ?? 'de']  ?? DONE_MESSAGES.de
-  const pm = PHOTO_MESSAGES[lang ?? 'de'] ?? PHOTO_MESSAGES.de
+  const d      = DONE_MESSAGES[lang ?? 'de']  ?? DONE_MESSAGES.de
+  const pm     = PHOTO_MESSAGES[lang ?? 'de'] ?? PHOTO_MESSAGES.de
+  const reject = REJECT_BUTTON[lang ?? 'de']  ?? REJECT_BUTTON.de
   await bot.sendMessage(chatId, d.prompt, {
     reply_markup: {
       inline_keyboard: [
         [{ text: d.button,         callback_data: `done_${taskId}` }],
         [{ text: pm.problemButton, callback_data: `problem_${taskId}` }],
+        [{ text: reject,           callback_data: `reject_${taskId}` }],
       ],
     },
   })

@@ -3,8 +3,10 @@ import { notifyHost } from '@/lib/notifications/host'
 import {
   removeKeyboard, sendMessage, sendErledigtButton,
   getResponseMessages, sendHostNotification, getPhotoMessages, sendAgencyNotification,
+  REJECT_TOO_LATE, REJECT_DONE, getStartNoTokenMessage,
 } from '@/lib/telegram'
 import { getHostTelegramIdForUser } from '@/lib/profile'
+import { advanceOffer, canReject } from '@/lib/offer-queue'
 import { NextRequest, NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
@@ -126,18 +128,21 @@ export async function POST(req: NextRequest) {
           )
         } else {
           await bot.sendMessage(chatId, '⚠️ Der Link ist abgelaufen oder ungültig.\n\nBitte generieren Sie einen neuen Link unter cleansync.at/connect-telegram.')
+          await bot.sendMessage(chatId, getStartNoTokenMessage(chatId), { parse_mode: 'HTML' })
         }
       }
     }
     return NextResponse.json({ ok: true })
   }
 
-  // ── /start ──────────────────────────────────────────────
+  // ── /start (без токена) — показать chat_id ──────────────
   if (message?.text === '/start') {
     const chatId = String(message.from.id)
     const { bot } = await import('@/lib/telegram')
+    await bot.sendMessage(chatId, getStartNoTokenMessage(chatId), { parse_mode: 'HTML' })
+    // Выбор языка — опционально, для клинеров
     await bot.sendMessage(chatId,
-      '👋 Willkommen bei CleanSync!\n\nBitte wähle deine Sprache / Выбери язык / Вибери мову / Alege limba / Wybierz język:',
+      '🌐 Wähle deine Sprache / Выбери язык / Вибери мову / Alege limba / Wybierz język:',
       {
         reply_markup: {
           inline_keyboard: [
@@ -385,6 +390,64 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true })
   }
 
+  // reject_<taskId> — отказ ПОСЛЕ принятия задачи (≥ 4ч до checkout)
+  if (data.startsWith('reject_')) {
+    const taskId = data.slice(7)
+    const { bot: _bot } = await import('@/lib/telegram')
+
+    const { data: rTask } = await supabase
+      .from('tasks')
+      .select('id, status, user_id, checkout_time, offer_cleaner_ids, cleaners(language, name), properties(name)')
+      .eq('id', taskId)
+      .single()
+
+    if (!rTask) { try { await _bot.answerCallbackQuery(callback.id) } catch (_) {}; return NextResponse.json({ ok: true }) }
+
+    const rLang = (rTask.cleaners as any)?.language ?? 'de'
+
+    if (rTask.checkout_time && !canReject(rTask.checkout_time)) {
+      await sendMessage(chatId, REJECT_TOO_LATE[rLang] ?? REJECT_TOO_LATE.de)
+      try { await _bot.answerCallbackQuery(callback.id) } catch (_) {}
+      return NextResponse.json({ ok: true })
+    }
+
+    const { data: updated } = await supabase
+      .from('tasks')
+      .update({ status: 'declined' })
+      .in('status', ['accepted', 'sent', 'open'])
+      .eq('id', taskId)
+      .select('id')
+
+    if (!updated || updated.length === 0) {
+      try { await _bot.answerCallbackQuery(callback.id) } catch (_) {}
+      return NextResponse.json({ ok: true })
+    }
+
+    try { await _bot.answerCallbackQuery(callback.id) } catch (_) {}
+    await sendMessage(chatId, REJECT_DONE[rLang] ?? REJECT_DONE.de)
+
+    const advance = await advanceOffer(supabase, taskId)
+    if (advance.result === 'exhausted') {
+      const hostChatId = rTask.user_id ? await getHostTelegramIdForUser(rTask.user_id) : null
+      if (hostChatId) {
+        const propName = (rTask.properties as any)?.name ?? 'Wohnung'
+        await _bot.sendMessage(hostChatId,
+          `⚠️ <b>Alle Reinigungskräfte haben abgesagt</b>\n\n🏠 ${propName}\n\nMöchtest du den Auftrag an Reinraum übergeben?`,
+          {
+            parse_mode: 'HTML',
+            reply_markup: { inline_keyboard: [[
+              { text: '🏢 An Reinraum übergeben', callback_data: `escalate_${taskId}` },
+            ]]},
+          }
+        )
+      }
+    } else if (advance.result === 'noqueue') {
+      await notifyHost(taskId, 'declined')
+    }
+
+    return NextResponse.json({ ok: true })
+  }
+
   // accept / decline / done
   const underscoreIndex = data.indexOf('_')
   const action          = data.slice(0, underscoreIndex)
@@ -396,7 +459,7 @@ export async function POST(req: NextRequest) {
 
   const { data: task } = await supabase
     .from('tasks')
-    .select('id, status, user_id, cleaners(telegram_chat_id, language, name), properties(name)')
+    .select('id, status, user_id, checkout_time, offer_cleaner_ids, offer_index, cleaners(telegram_chat_id, language, name), properties(name)')
     .eq('id', taskId)
     .single()
 
@@ -423,8 +486,16 @@ export async function POST(req: NextRequest) {
     await removeKeyboard(chatId, msgId)
     try { await _bot.answerCallbackQuery(callback.id, { text: resp.accepted }) } catch (_) {}
     await notifyHost(taskId, 'accepted')
+    await sendErledigtButton(chatId, taskId, lang)
 
   } else if (action === 'decline') {
+    // Защитное окно: если до checkout < 4ч — блокируем отказ
+    if (task.checkout_time && !canReject(task.checkout_time)) {
+      await sendMessage(chatId, REJECT_TOO_LATE[lang] ?? REJECT_TOO_LATE.de)
+      try { await _bot.answerCallbackQuery(callback.id) } catch (_) {}
+      return NextResponse.json({ ok: true })
+    }
+
     const { data: updated } = await supabase
       .from('tasks')
       .update({ status: 'declined' })
@@ -440,7 +511,26 @@ export async function POST(req: NextRequest) {
     await removeKeyboard(chatId, msgId)
     try { await _bot.answerCallbackQuery(callback.id) } catch (_) {}
     await sendMessage(chatId, resp.declined)
-    await notifyHost(taskId, 'declined')
+
+    // Каскад: следующий клинер или exhausted → кнопка хосту
+    const advance = await advanceOffer(supabase, taskId)
+    if (advance.result === 'exhausted') {
+      const hostChatId = task.user_id ? await getHostTelegramIdForUser(task.user_id) : null
+      if (hostChatId) {
+        const propName = (task.properties as any)?.name ?? 'Wohnung'
+        await _bot.sendMessage(hostChatId,
+          `⚠️ <b>Alle Reinigungskräfte haben abgesagt</b>\n\n🏠 ${propName}\n\nMöchtest du den Auftrag an Reinraum übergeben?`,
+          {
+            parse_mode: 'HTML',
+            reply_markup: { inline_keyboard: [[
+              { text: '🏢 An Reinraum übergeben', callback_data: `escalate_${taskId}` },
+            ]]},
+          }
+        )
+      }
+    } else if (advance.result === 'noqueue') {
+      await notifyHost(taskId, 'declined')
+    }
 
   } else if (action === 'done') {
     const { data: updated } = await supabase
