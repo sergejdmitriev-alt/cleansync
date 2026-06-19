@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServiceSupabaseClient } from '@/lib/supabase/service'
 import { sendTaskNotification, sendAgencyNotification } from '@/lib/telegram'
 import { getHostTelegramIdForUser } from '@/lib/profile'
+import { startOffer } from '@/lib/offer-queue'
 
 export const dynamic = 'force-dynamic'
 
@@ -41,15 +42,29 @@ export async function POST(
       return NextResponse.json({ error: 'Failed to update task' }, { status: 500 })
     }
   } else {
-    await sendTaskNotification(task)
+    const { mode } = await startOffer(supabase, task)
 
-    const { error: updateError } = await supabase
-      .from('tasks')
-      .update({ status: 'sent', sent_at: new Date().toISOString() })
-      .eq('id', id)
-
-    if (updateError) {
-      return NextResponse.json({ error: 'Failed to update task' }, { status: 500 })
+    if (mode === 'cascade') {
+      // startOffer уже обновил DB (cleaner_id, offer_*, status=sent)
+      // перезагружаем для актуального cleaners JOIN
+      const { data: fresh } = await supabase
+        .from('tasks')
+        .select('*, cleaners(*), properties(*)')
+        .eq('id', id)
+        .single()
+      if (fresh) await sendTaskNotification(fresh)
+    } else if (mode === 'none') {
+      return NextResponse.json({ error: 'Keine Reinigungskraft mit Telegram verfügbar' }, { status: 400 })
+    } else {
+      // single: старое поведение
+      await sendTaskNotification(task)
+      const { error: updateError } = await supabase
+        .from('tasks')
+        .update({ status: 'sent', sent_at: new Date().toISOString() })
+        .eq('id', id)
+      if (updateError) {
+        return NextResponse.json({ error: 'Failed to update task' }, { status: 500 })
+      }
     }
   }
 
