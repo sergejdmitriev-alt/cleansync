@@ -18,7 +18,7 @@ const STEPS = [
   },
   {
     title: 'Ihre erste Unterkunft',
-    body: 'Fügen Sie Ihre Unterkunft hinzu und verbinden Sie den Airbnb-Kalender (iCal). Aufträge werden automatisch erstellt.',
+    body: 'Fügen Sie Ihre Unterkunft hinzu und verbinden Sie Ihren Buchungskalender (iCal: Airbnb, Booking.com & Co.). Aufträge werden automatisch erstellt.',
     cta: { label: 'Zu Unterkünfte', href: '/settings' },
   },
   {

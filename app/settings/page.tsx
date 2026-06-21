@@ -282,7 +282,7 @@ export default function SettingsPage() {
                       onChange={e => setEditingProperty({ ...editingProperty, default_notes: e.target.value })} />
                     <input
                       className="cs-input"
-                      placeholder="Airbnb iCal URL (optional)"
+                      placeholder="iCal URL (Airbnb, Booking.com …)"
                       value={editingProperty.ical_url ?? ''}
                       onChange={e => setEditingProperty({ ...editingProperty, ical_url: e.target.value })}
                     />
@@ -528,7 +528,7 @@ export default function SettingsPage() {
                 onChange={e => setNewProperty({ ...newProperty, default_notes: e.target.value })} />
               <input
                 className="cs-input"
-                placeholder="Airbnb iCal URL (optional)"
+                placeholder="iCal URL (Airbnb, Booking.com …)"
                 value={newProperty.ical_url}
                 onChange={e => setNewProperty({ ...newProperty, ical_url: e.target.value })}
               />

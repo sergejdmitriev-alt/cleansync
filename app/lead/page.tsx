@@ -26,10 +26,10 @@ const REVIEWS = [
 
 const T = {
   de: {
-    headerBadge: 'Für Airbnb-Hosts in Wien',
+    headerBadge: 'Für Kurzzeitvermieter in Wien — Airbnb, Booking.com & Co.',
     // Hero
     heroTitle:   'Die Reinigung, die garantiert stattfindet.',
-    heroSub:     'Sagt eine Reinigungskraft ab, springt automatisch die nächste ein — im Notfall das Reinraum-Team. Ihr Gast zieht nie in eine ungereinigte Wohnung ein.',
+    heroSub:     'Ihr Gast zieht nie in eine ungereinigte Wohnung ein. Sagt jemand ab, fragt das System automatisch die nächste — und wenn niemand frei ist, das Reinraum-Team.',
     heroCta:     'Unverbindlich ansehen →',
     // Trust-bar
     trustBar: [
@@ -93,7 +93,7 @@ const T = {
     howLabel: 'Ablauf',
     howTitle: 'So funktioniert CleanSync',
     steps: [
-      { icon: '📅', title: 'Kalender sync',      desc: 'Airbnb-Kalender verbindet sich automatisch — neue Buchungen erscheinen sofort als Aufgaben' },
+      { icon: '📅', title: 'Kalender sync',      desc: 'Ihr Vermietungskalender verbindet sich automatisch — Airbnb, Booking.com, Vrbo und jede Plattform mit iCal-Export. Neue Buchungen erscheinen sofort als Aufgaben.' },
       { icon: '💬', title: 'Bot sendet Aufgabe', desc: 'Die Reinigungskraft bekommt eine Telegram-Nachricht mit Datum, Uhrzeit und Notizen'          },
       { icon: '✅', title: 'Bestätigung',         desc: 'Reinigungskraft bestätigt oder lehnt ab. Bei Absage fragt das System automatisch die nächste — und im Notfall Reinraum.'     },
       { icon: '📷', title: 'Foto als Nachweis',  desc: 'Nach der Reinigung werden Fotos gesendet — automatisch gespeichert, jederzeit abrufbar'       },
@@ -107,7 +107,7 @@ const T = {
     faqTitle: 'Häufige Fragen',
     faqs: [
       { q: 'Braucht meine Reinigungskraft ein Smartphone?',  a: 'Ja, nur Telegram. Die App ist kostenlos und auf jedem Smartphone verfügbar. Keine Registrierung nötig.'           },
-      { q: 'Funktioniert das auch ohne Airbnb?',             a: 'Ja. Aufgaben können auch manuell erstellt werden — ohne Kalender-Sync. Airbnb macht es vollautomatisch.'            },
+      { q: 'Funktioniert das auch mit Booking.com, Vrbo & Co.?', a: 'Ja — mit jeder Plattform, die einen iCal-Export bietet: Airbnb, Booking.com, Vrbo, Expedia und eigene Direktbuchungs-Seiten. Aufträge können auch ganz ohne Kalender-Sync manuell erstellt werden.' },
       { q: 'Was passiert wenn die Reinigungskraft ablehnt?', a: 'Das System fragt automatisch die nächste Reinigungskraft in Ihrer festgelegten Reihenfolge. Sind alle nicht verfügbar, schlägt der Bot vor, an Reinraum zu übergeben — mit einem Klick.' },
       { q: 'Sind meine Daten sicher?',                       a: 'Ja. Alle Daten liegen in einer europäischen Datenbank (Supabase EU), Fotos werden automatisch nach 90 Tagen gelöscht.' },
     ],
@@ -117,13 +117,13 @@ const T = {
     guideDesc:      'Inklusive druckbarer Reinigungs-Checkliste, die Sie Ihrer Reinigungskraft direkt mitgeben können. Kein Verkaufsgespräch — nur das System, das den Wechsel reibungslos macht.',
     guideHint:      '→ E-Mail eintragen und Leitfaden sofort als PDF erhalten.',
     // Form
-    formNameLabel:          'Ihr Name *',
+    formNameLabel:          'Ihr Name',
     formNamePlaceholder:    'Max Mustermann',
     formEmailLabel:         'E-Mail *',
     formEmailPlaceholder:   'max@beispiel.at',
-    formPhoneLabel:         'Telefon *',
+    formPhoneLabel:         'Telefon',
     formPhonePlaceholder:   '+43 664 …',
-    formPropertiesLabel:    'Anzahl der Objekte *',
+    formPropertiesLabel:    'Anzahl der Objekte',
     formPropertiesDefault:  'Bitte wählen …',
     formPropertiesOptions:  [
       { value: '1',    label: '1 Objekt'     },
@@ -135,7 +135,8 @@ const T = {
     formMessageOptional:    '(optional)',
     formMessagePlaceholder: 'Wie koordinieren Sie Ihre Reinigungen gerade?',
     formError:              'Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.',
-    formSubmit:             'Leitfaden erhalten →',
+    riskReversal:           'Sagt jemand ab, übernimmt das Reinraum-Team. Die Reinigung findet statt.',
+    formSubmit:             'Checkliste + Leitfaden gratis sichern →',
     formSending:            'Wird gesendet …',
     tgAlt:                  'Oder direkt auf Telegram:',
     // Success
@@ -148,13 +149,15 @@ const T = {
     freeBadgeText: 'Kostenlos',
     freeTagline:   'Kein Abo. Keine Kreditkarte.',
     freeTitle:     'Ein Objekt. Für immer kostenlos.',
-    freeItems:     ['1 Objekt', 'Telegram-Bot für Ihre Reinigungskraft', 'iCal-Sync mit Airbnb'],
+    freeItems:     ['1 Objekt', 'Telegram-Bot für Ihre Reinigungskraft', 'iCal-Sync mit Airbnb, Booking.com & Co.'],
     freeLater:     'Später hinzufügen',
     freePaid:      ['Reinraum-Dispatch bei Ausfall', 'PDF-Reinigungsprotokoll'],
     freeBtn:       'Kostenlos starten →',
     // Trust strip
+    stickyCta:        'Gratis-Leitfaden sichern →',
+    platformRowLabel: 'Funktioniert mit: Airbnb · Booking.com · Vrbo · Direktbuchung',
     trustItems: [
-      ['📅', 'iCal-Sync mit Airbnb'],
+      ['📅', 'iCal-Sync mit Airbnb, Booking.com & Co.'],
       ['📷', 'Foto-Nachweis der Reinigung'],
       ['💬', 'Telegram-Bot für Reinigungskräfte'],
       ['🔒', 'Daten in der EU (Supabase)'],
@@ -162,10 +165,10 @@ const T = {
   },
 
   en: {
-    headerBadge: 'For Airbnb hosts in Vienna',
+    headerBadge: 'For short-term rental hosts in Vienna — Airbnb, Booking.com & more',
     // Hero
     heroTitle:   'The cleaning that\'s guaranteed to happen.',
-    heroSub:     'If one cleaner cancels, the next one steps in automatically — and the Reinraum team as backup. Your guest never checks into a dirty apartment.',
+    heroSub:     'Your guest will never check into a dirty apartment. If someone cancels, the system automatically asks the next cleaner — and if no one is available, the Reinraum team steps in.',
     heroCta:     'See it — no commitment →',
     // Trust-bar
     trustBar: [
@@ -229,7 +232,7 @@ const T = {
     howLabel: 'How it works',
     howTitle: 'How CleanSync works',
     steps: [
-      { icon: '📅', title: 'Calendar sync',     desc: 'Your Airbnb calendar connects automatically — new bookings appear instantly as tasks'            },
+      { icon: '📅', title: 'Calendar sync',     desc: 'Your booking calendar connects automatically — Airbnb, Booking.com, Vrbo, and any platform with iCal export. New bookings appear instantly as tasks.' },
       { icon: '💬', title: 'Bot sends the job', desc: 'The cleaner gets a Telegram message with date, time and notes'                                  },
       { icon: '✅', title: 'Confirmation',       desc: 'Cleaner accepts or declines. If declined, the system automatically asks the next one — Reinraum as final backup.'  },
       { icon: '📷', title: 'Photo as proof',    desc: 'After cleaning, photos are sent — automatically saved and accessible any time'                  },
@@ -243,7 +246,7 @@ const T = {
     faqTitle: 'Common questions',
     faqs: [
       { q: 'Does my cleaner need a smartphone?',    a: 'Yes, just Telegram. The app is free and available on any smartphone. No account registration needed.'          },
-      { q: 'Does this work without Airbnb?',         a: 'Yes. Tasks can also be created manually — without calendar sync. Airbnb makes it fully automatic.'            },
+      { q: 'Does this work with Booking.com, Vrbo & others?', a: 'Yes — with any platform that offers iCal export: Airbnb, Booking.com, Vrbo, Expedia, and direct booking sites. Tasks can also be created manually without any calendar sync.' },
       { q: 'What happens if the cleaner declines?',  a: 'The system automatically asks the next cleaner in your configured order. If everyone is unavailable, the bot suggests handing over to Reinraum — with one tap.'  },
       { q: 'Is my data secure?',                     a: 'Yes. All data is stored in a European database (Supabase EU), and photos are automatically deleted after 90 days.' },
     ],
@@ -253,13 +256,13 @@ const T = {
     guideDesc:      "Includes a printable cleaning checklist you can hand straight to your cleaner. No sales pitch — just the system Vienna hosts use to keep turnovers clean.",
     guideHint:      '→ Enter your email and get the PDF instantly.',
     // Form
-    formNameLabel:          'Your name *',
+    formNameLabel:          'Your name',
     formNamePlaceholder:    'Jane Smith',
     formEmailLabel:         'Email *',
     formEmailPlaceholder:   'jane@example.com',
-    formPhoneLabel:         'Phone *',
+    formPhoneLabel:         'Phone',
     formPhonePlaceholder:   '+1 234 …',
-    formPropertiesLabel:    'Number of properties *',
+    formPropertiesLabel:    'Number of properties',
     formPropertiesDefault:  'Please select …',
     formPropertiesOptions:  [
       { value: '1',    label: '1 property'    },
@@ -271,7 +274,8 @@ const T = {
     formMessageOptional:    '(optional)',
     formMessagePlaceholder: 'How do you currently coordinate your cleanings?',
     formError:              'Something went wrong. Please try again.',
-    formSubmit:             'Get the guide →',
+    riskReversal:           'If someone cancels, the Reinraum team takes over. The cleaning happens.',
+    formSubmit:             'Get checklist + guide — free →',
     formSending:            'Sending …',
     tgAlt:                  'Or reach us on Telegram:',
     // Success
@@ -284,13 +288,15 @@ const T = {
     freeBadgeText: 'Free',
     freeTagline:   'No subscription. No credit card.',
     freeTitle:     'One property. Free forever.',
-    freeItems:     ['1 property', 'Telegram bot for your cleaner', 'iCal sync with Airbnb'],
+    freeItems:     ['1 property', 'Telegram bot for your cleaner', 'iCal sync with Airbnb, Booking.com & more'],
     freeLater:     'Add later',
     freePaid:      ['Reinraum dispatch cover', 'PDF cleaning report'],
     freeBtn:       'Start for free →',
+    stickyCta:        'Get your free guide →',
+    platformRowLabel: 'Works with: Airbnb · Booking.com · Vrbo · Direct bookings',
     // Trust strip
     trustItems: [
-      ['📅', 'iCal sync with Airbnb'],
+      ['📅', 'iCal sync with Airbnb, Booking.com & more'],
       ['📷', 'Photo proof of every cleaning'],
       ['💬', 'Telegram bot for cleaners'],
       ['🔒', 'Data in EU (Supabase)'],
@@ -446,7 +452,7 @@ export default function LeadPage() {
 
   // ── Main render ────────────────────────────────────────────────
   return (
-    <main style={S.wrap}>
+    <main style={S.wrap} className="lead-main-wrap">
 
       {/* Header */}
       <header style={S.header}>
@@ -479,15 +485,18 @@ export default function LeadPage() {
         <motion.p style={{ ...S.sub, whiteSpace: 'pre-line' }} {...fy(0.06)}>
           {tx.heroSub}
         </motion.p>
-        <motion.div {...fy(0.12)} style={{ marginTop: 28 }}>
+        <motion.div {...fy(0.12)} style={{ marginTop: 20 }}>
           <button
-            className="lead-cta"
-            style={S.ctaBtn}
+            className="lead-cta-secondary"
+            style={S.ctaSecondary}
             onClick={() => formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
           >
             {tx.heroCta}
           </button>
         </motion.div>
+        <motion.p {...fy(0.18)} style={{ margin: '16px 0 0', fontSize: 11, color: '#4b5563', letterSpacing: '0.04em', textAlign: 'center' }}>
+          {tx.platformRowLabel}
+        </motion.p>
       </section>
 
       {/* Trust-bar */}
@@ -773,8 +782,10 @@ export default function LeadPage() {
         </div>
       </div>
 
+      {/* TODO(founder): Add "Wer dahinter steht" block with founder photo + text once asset is ready. Skip until then — no placeholder. */}
+
       {/* Guide opt-in form */}
-      <motion.div ref={formRef} style={S.glass} {...fy(0)}>
+      <motion.div id="guide-form" ref={formRef} style={S.glass} {...fy(0)}>
         <div style={S.guideOffer}>
           <p style={S.guideBadge}>{tx.guideBadgeText}</p>
           <h2 style={{ fontSize: 19, fontWeight: 700, color: '#e8eaf0', margin: '6px 0 10px' }}>
@@ -790,7 +801,7 @@ export default function LeadPage() {
             <input
               id="name" name="name" type="text"
               placeholder={tx.formNamePlaceholder}
-              value={form.name} onChange={handleChange} required
+              value={form.name} onChange={handleChange}
               className="lead-input" style={S.input}
             />
           </div>
@@ -809,7 +820,7 @@ export default function LeadPage() {
               <input
                 id="phone" name="phone" type="tel"
                 placeholder={tx.formPhonePlaceholder}
-                value={form.phone} onChange={handleChange} required
+                value={form.phone} onChange={handleChange}
                 className="lead-input" style={S.input}
               />
             </div>
@@ -818,7 +829,7 @@ export default function LeadPage() {
             <label style={S.fieldLabel} htmlFor="properties">{tx.formPropertiesLabel}</label>
             <select
               id="properties" name="properties"
-              value={form.properties} onChange={handleChange} required
+              value={form.properties} onChange={handleChange}
               className="lead-input" style={{ ...S.input, cursor: 'pointer' }}
             >
               <option value="" disabled>{tx.formPropertiesDefault}</option>
@@ -849,6 +860,8 @@ export default function LeadPage() {
             onSuccess={t => setTurnstileToken(t)}
             options={{ theme: 'dark' }}
           />
+
+          <p style={S.riskReversal}>🛡 {(tx as any).riskReversal}</p>
 
           <button
             type="submit"
@@ -914,8 +927,8 @@ export default function LeadPage() {
         </div>
         {/* TODO: href="/register" once registration is built */}
         <button
-          style={S.freeBtn}
-          className="lead-free-btn"
+          style={S.freeBtnSecondary}
+          className="lead-free-btn-secondary"
           onClick={() => formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
         >
           {tx.freeBtn}
@@ -931,6 +944,11 @@ export default function LeadPage() {
           </div>
         ))}
       </motion.div>
+
+      {/* Sticky mobile CTA — anchor only, no JS, hidden on desktop via CSS */}
+      <a href="#guide-form" className="lead-sticky-cta" style={S.stickyCta}>
+        {tx.stickyCta}
+      </a>
 
       <style>{css}</style>
     </main>
@@ -1023,6 +1041,19 @@ const S = {
     cursor:       'pointer',
     fontFamily:   'inherit',
     transition:   'opacity 0.15s',
+  } as React.CSSProperties,
+  ctaSecondary: {
+    background:          'none',
+    border:              'none',
+    color:               '#3b7ef8',
+    fontSize:            14,
+    fontWeight:          600,
+    cursor:              'pointer',
+    fontFamily:          'inherit',
+    padding:             '6px 2px',
+    textDecoration:      'underline',
+    textDecorationColor: 'rgba(59,126,248,0.4)',
+    textUnderlineOffset: '3px',
   } as React.CSSProperties,
   sectionLabel: {
     fontSize:      11,
@@ -1355,6 +1386,46 @@ const S = {
     fontFamily:   'inherit',
     transition:   'opacity 0.15s',
   } as React.CSSProperties,
+  freeBtnSecondary: {
+    background:          'none',
+    border:              'none',
+    color:               '#86efac',
+    fontSize:            14,
+    fontWeight:          600,
+    cursor:              'pointer',
+    fontFamily:          'inherit',
+    padding:             '6px 2px',
+    textDecoration:      'underline',
+    textDecorationColor: 'rgba(134,239,172,0.4)',
+    textUnderlineOffset: '3px',
+  } as React.CSSProperties,
+  riskReversal: {
+    fontSize:     12,
+    color:        '#8892a4',
+    background:   'rgba(59,126,248,0.06)',
+    border:       '1px solid rgba(59,126,248,0.14)',
+    borderRadius: 8,
+    padding:      '8px 12px',
+    margin:       0,
+    lineHeight:   1.5,
+  },
+  stickyCta: {
+    display:        'block',
+    position:       'fixed' as const,
+    bottom:         0,
+    left:           0,
+    right:          0,
+    zIndex:         50,
+    padding:        '14px 20px',
+    background:     '#3b7ef8',
+    color:          '#fff',
+    fontWeight:     700,
+    fontSize:       15,
+    textAlign:      'center' as const,
+    textDecoration: 'none',
+    fontFamily:     'inherit',
+    letterSpacing:  '-0.01em',
+  } as React.CSSProperties,
   guideOffer: {
     background:   'rgba(59,126,248,0.05)',
     border:       '1px solid rgba(59,126,248,0.14)',
@@ -1422,6 +1493,9 @@ const css = `
   }
   .lead-input::placeholder { color: #4a5568; }
   .lead-input option { background: #161c28; color: #e8eaf0; }
+  .lead-cta-secondary:hover    { opacity: 0.75; }
+  .lead-free-btn-secondary:hover { opacity: 0.75; }
+  .lead-sticky-cta { display: none; }
   .lead-cta:hover    { opacity: 0.85; }
   .lead-submit:hover:not(:disabled) { opacity: 0.88; }
   .lead-tglink:hover { text-decoration: underline; }
@@ -1433,6 +1507,8 @@ const css = `
   @media (max-width: 600px) {
     .lead-trust-bar    { grid-template-columns: 1fr 1fr !important; }
     .lead-reviews-grid { grid-template-columns: 1fr !important; }
+    .lead-sticky-cta   { display: block !important; }
+    .lead-main-wrap    { padding-bottom: 96px !important; }
   }
   @media (max-width: 480px) {
     .lead-field-row    { grid-template-columns: 1fr !important; }

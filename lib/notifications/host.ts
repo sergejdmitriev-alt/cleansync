@@ -146,7 +146,7 @@ export async function notifyHost(
       `🚫 <b>Buchung storniert</b>\n\n` +
       `🏠 <b>Objekt:</b> ${propName}\n` +
       `📅 <b>Datum:</b> ${dateStr}\n\n` +
-      `Die Buchung wurde im iCal-Kalender entfernt. Bitte prüfen Sie Ihren Airbnb-Kalender.`,
+      `Die Buchung wurde im iCal-Kalender entfernt. Bitte prüfen Sie Ihren Buchungskalender.`,
 
     ical_rescheduled:
       `📅 <b>Buchungstermin geändert</b>\n\n` +

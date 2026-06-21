@@ -68,7 +68,7 @@ const CATEGORIES: Category[] = [
     items: [
       {
         q: 'Was ist CleanSync?',
-        a: 'CleanSync ist ein Reinigungsmanagement-Tool für Airbnb-Gastgeber. Sie erstellen Reinigungsaufträge, senden sie an Ihre Reinigungskräfte per Telegram und erhalten automatisch Benachrichtigungen, wenn ein Auftrag angenommen oder abgeschlossen wird.',
+        a: 'CleanSync ist ein Reinigungsmanagement-Tool für Kurzzeitvermieter (Airbnb, Booking.com & Co.). Sie erstellen Reinigungsaufträge, senden sie an Ihre Reinigungskräfte per Telegram und erhalten automatisch Benachrichtigungen, wenn ein Auftrag angenommen oder abgeschlossen wird.',
       },
       {
         q: 'Wie erstelle ich meinen ersten Auftrag?',

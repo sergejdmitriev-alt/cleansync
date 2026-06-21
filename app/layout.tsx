@@ -17,7 +17,7 @@ const jakarta = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title:       'CleanSync',
-  description: 'Reinigungsmanagement für Airbnb',
+  description: 'Reinigungsmanagement für Airbnb, Booking.com & Co.',
 }
 
 export default async function RootLayout({
