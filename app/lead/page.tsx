@@ -162,6 +162,19 @@ const T = {
       ['💬', 'Telegram-Bot für Reinigungskräfte'],
       ['🔒', 'Daten in der EU (Supabase)'],
     ] as [string, string][],
+    // Founder
+    founderLabel: 'Wer dahinter steht',
+    founderTitle: 'Hinter der Garantie steht ein echtes Team',
+    founderP1:    'Ich habe CleanSync gebaut, weil ich das Chaos selbst kenne. Reinigungskräfte suchen, Bezahlung abstimmen, Fotos und Absagen in fünf verschiedenen Chats. Das Handy voll, der Überblick weg. Jede Wohnung ein eigener Nachrichtenverlauf.',
+    founderP2:    'CleanSync bringt das an einen Ort. Ein Dashboard, in dem du auf einen Blick siehst, was bei deinen Wohnungen läuft: welche Reinigung ansteht, wer sie übernimmt, was noch offen ist.',
+    founderP3:    'Hinter der Reinigungs-Garantie steht Reinraum, eine angemeldete und versicherte Reinigungsagentur in Wien. Sagt eine Kraft ab und springt keine andere ein, übernimmt Reinraum. So bleibt die Reinigung kein Versprechen, sondern findet statt.',
+    founderSign:  '— Serhii, Gründer von CleanSync und Reinraum',
+    // Austrian trust
+    austroInsurance:   'Angemeldetes und versichertes Reinigungsunternehmen in Wien',
+    // Footer
+    footerImpressum:   'Impressum',
+    footerDatenschutz: 'Datenschutz',
+    footerReinraum:    'reinraum-team.com',
   },
 
   en: {
@@ -301,6 +314,19 @@ const T = {
       ['💬', 'Telegram bot for cleaners'],
       ['🔒', 'Data in EU (Supabase)'],
     ] as [string, string][],
+    // Founder
+    founderLabel: "Who's behind CleanSync",
+    founderTitle: 'A real team backs the guarantee',
+    founderP1:    'I built CleanSync because I know the chaos firsthand. Finding cleaners, coordinating payments, photos and cancellations spread across five different chats. Phone overloaded, no overview. Every apartment its own message thread.',
+    founderP2:    "CleanSync brings it all into one place. A dashboard where you see at a glance what's happening across your properties: which cleaning is coming up, who's handling it, what's still open.",
+    founderP3:    "Reinraum backs the Reinigungs-Garantie — a registered and insured cleaning agency in Vienna. If one cleaner cancels and no one else steps in, Reinraum takes over. The cleaning doesn't stay a promise. It happens.",
+    founderSign:  '— Serhii, Founder of CleanSync and Reinraum',
+    // Austrian trust
+    austroInsurance:   'Registered and insured cleaning company in Vienna',
+    // Footer
+    footerImpressum:   'Impressum',
+    footerDatenschutz: 'Datenschutz',
+    footerReinraum:    'reinraum-team.com',
   },
 }
 
@@ -319,6 +345,19 @@ function TgIcon() {
   return (
     <svg width="15" height="15" viewBox="0 0 24 24" fill="#3b7ef8" aria-hidden="true">
       <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
+    </svg>
+  )
+}
+
+// ── Shield SVG icon ───────────────────────────────────────────────
+function ShieldCheckIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+      stroke="#3b7ef8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+      aria-hidden="true" style={{ flexShrink: 0, marginTop: 1 }}
+    >
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      <polyline points="9 12 11 14 15 10" />
     </svg>
   )
 }
@@ -782,7 +821,21 @@ export default function LeadPage() {
         </div>
       </div>
 
-      {/* TODO(founder): Add "Wer dahinter steht" block with founder photo + text once asset is ready. Skip until then — no placeholder. */}
+      {/* Founder block */}
+      <motion.div style={S.glass} {...fy(0)}>
+        <p style={S.sectionLabel}>{(tx as any).founderLabel}</p>
+        <h2 style={S.sectionH2}>{(tx as any).founderTitle}</h2>
+        <div className="lead-founder-block" style={S.founderBlock}>
+          {/* TODO: replace div with <img> once real founder photo is available */}
+          <div style={S.founderAvatar} aria-hidden="true">S</div>
+          <div style={S.founderContent}>
+            <p style={S.founderPara}>{(tx as any).founderP1}</p>
+            <p style={S.founderPara}>{(tx as any).founderP2}</p>
+            <p style={S.founderPara}>{(tx as any).founderP3}</p>
+            <p style={S.founderSign}>{(tx as any).founderSign}</p>
+          </div>
+        </div>
+      </motion.div>
 
       {/* Guide opt-in form */}
       <motion.div id="guide-form" ref={formRef} style={S.glass} {...fy(0)}>
@@ -944,6 +997,30 @@ export default function LeadPage() {
           </div>
         ))}
       </motion.div>
+
+      {/* Austrian trust */}
+      <motion.div style={{ ...S.glass, display: 'flex', gap: 12, alignItems: 'flex-start' }} {...fy(0)}>
+        <ShieldCheckIcon />
+        <div>
+          <p style={{ fontSize: 13.5, fontWeight: 600, color: '#e8eaf0', margin: 0 }}>
+            {(tx as any).austroInsurance}
+          </p>
+          {/* TODO: Firmenbuchnummer, UID, Wiener Adresse */}
+        </div>
+      </motion.div>
+
+      {/* Footer */}
+      <footer style={S.footer}>
+        {/* TODO: href="/impressum" once page is built */}
+        <a href="#" className="lead-footer-link" style={S.footerLink}>{(tx as any).footerImpressum}</a>
+        <span style={{ color: '#2a3142', userSelect: 'none' as const }}>·</span>
+        {/* TODO: href="/datenschutz" once page is built */}
+        <a href="#" className="lead-footer-link" style={S.footerLink}>{(tx as any).footerDatenschutz}</a>
+        <span style={{ color: '#2a3142', userSelect: 'none' as const }}>·</span>
+        <a href="https://reinraum-team.com" target="_blank" rel="noopener noreferrer" className="lead-footer-link" style={S.footerLink}>
+          {(tx as any).footerReinraum}
+        </a>
+      </footer>
 
       {/* Sticky mobile CTA — anchor only, no JS, hidden on desktop via CSS */}
       <a href="#guide-form" className="lead-sticky-cta" style={S.stickyCta}>
@@ -1483,6 +1560,55 @@ const S = {
     color:      '#4a5568',
     fontWeight: 500,
   },
+  founderBlock: {
+    display:    'flex',
+    gap:        20,
+    alignItems: 'flex-start' as const,
+  },
+  founderAvatar: {
+    width:          56,
+    height:         56,
+    borderRadius:   '50%',
+    background:     '#3b7ef8',
+    color:          '#fff',
+    fontSize:       22,
+    fontWeight:     700,
+    display:        'flex',
+    alignItems:     'center',
+    justifyContent: 'center',
+    flexShrink:     0,
+  } as React.CSSProperties,
+  founderContent: {
+    display:       'flex',
+    flexDirection: 'column' as const,
+    gap:           12,
+  },
+  founderPara: {
+    fontSize:   14,
+    color:      '#8892a4',
+    lineHeight: 1.7,
+    margin:     0,
+  },
+  founderSign: {
+    fontSize:   13,
+    color:      '#4a5568',
+    fontStyle:  'italic' as const,
+    margin:     0,
+    marginTop:  2,
+  } as React.CSSProperties,
+  footer: {
+    display:        'flex',
+    alignItems:     'center',
+    justifyContent: 'center',
+    gap:            16,
+    paddingBottom:  8,
+    flexWrap:       'wrap' as const,
+  },
+  footerLink: {
+    fontSize:       12,
+    color:          '#4a5568',
+    textDecoration: 'none',
+  } as React.CSSProperties,
 }
 
 const css = `
@@ -1510,13 +1636,15 @@ const css = `
     .lead-sticky-cta   { display: block !important; }
     .lead-main-wrap    { padding-bottom: 96px !important; }
   }
+  .lead-footer-link:hover { color: #8892a4; text-decoration: underline; }
   @media (max-width: 480px) {
-    .lead-field-row    { grid-template-columns: 1fr !important; }
-    .lead-compare-grid { grid-template-columns: 1fr !important; }
-    .lead-steps-grid   { grid-template-columns: 1fr !important; }
-    .lead-trust-row    { grid-template-columns: 1fr !important; }
-    .lead-calc-grid    { grid-template-columns: 1fr !important; }
-    .lead-trust-bar    { grid-template-columns: 1fr 1fr !important; }
-    .lead-reviews-grid { grid-template-columns: 1fr !important; }
+    .lead-field-row     { grid-template-columns: 1fr !important; }
+    .lead-compare-grid  { grid-template-columns: 1fr !important; }
+    .lead-steps-grid    { grid-template-columns: 1fr !important; }
+    .lead-trust-row     { grid-template-columns: 1fr !important; }
+    .lead-calc-grid     { grid-template-columns: 1fr !important; }
+    .lead-trust-bar     { grid-template-columns: 1fr 1fr !important; }
+    .lead-reviews-grid  { grid-template-columns: 1fr !important; }
+    .lead-founder-block { flex-direction: column !important; }
   }
 `
