@@ -17,6 +17,9 @@ const FERTIG_BUTTON: Record<string, string> = {
   uk: '✅ Завершити прибирання',
   ro: '✅ Finalizează curățenia',
   pl: '✅ Zakończ sprzątanie',
+  bs: '✅ Čišćenje završeno',
+  sr: '✅ Čišćenje završeno',
+  hr: '✅ Čišćenje završeno',
 }
 
 const WELCOME: Record<string, string> = {
@@ -24,6 +27,9 @@ const WELCOME: Record<string, string> = {
   uk: '👋 Привіт! Ти підключений до CleanSync.\n\nТут ти будеш отримувати завдання на прибирання. Чекай сповіщень! 🧹',
   ro: '👋 Bună! Ești conectat la CleanSync.\n\nAici vei primi sarcini de curățenie. Așteaptă notificările! 🧹',
   pl: '👋 Cześć! Jesteś połączony z CleanSync.\n\nTutaj będziesz otrzymywać zlecenia sprzątania. Czekaj na powiadomienia! 🧹',
+  bs: '👋 Zdravo! Konektovan si na CleanSync.\n\nOvdje ćeš dobivati zadatke čišćenja. Čekaj obavještenja! 🧹',
+  sr: '👋 Zdravo! Konektovan si na CleanSync.\n\nOvde ćeš dobijati zadatke čišćenja. Čekaj obaveštenja! 🧹',
+  hr: '👋 Zdravo! Spojen si na CleanSync.\n\nOvdje ćeš dobivati zadatke čišćenja. Čekaj obavijesti! 🧹',
 }
 
 async function getCleanerLang(supabase: any, chatId: string) {
@@ -116,12 +122,14 @@ export async function POST(req: NextRequest) {
             invite_token_exp: null,
           }).eq('id', cleaner.id)
           await bot.sendMessage(chatId,
-            '👋 Willkommen bei CleanSync!\n\nBitte wähle deine Sprache / Выбери язык / Вибери мову / Alege limba / Wybierz język:',
+            '👋 Willkommen bei CleanSync!\n\nBitte wähle deine Sprache / Выбери язык / Вибери мову / Alege limba / Wybierz język / Izaberite / Odaberite jezik:',
             {
               reply_markup: {
                 inline_keyboard: [
-                  [{ text: '🇷🇺 Русский', callback_data: 'lang_ru' }, { text: '🇺🇦 Українська', callback_data: 'lang_uk' }],
-                  [{ text: '🇷🇴 Română',  callback_data: 'lang_ro' }, { text: '🇵🇱 Polski',     callback_data: 'lang_pl' }],
+                  [{ text: '🇷🇺 Русский',  callback_data: 'lang_ru' }, { text: '🇺🇦 Українська', callback_data: 'lang_uk' }],
+                  [{ text: '🇷🇴 Română',   callback_data: 'lang_ro' }, { text: '🇵🇱 Polski',      callback_data: 'lang_pl' }],
+                  [{ text: '🇧🇦 Bosanski', callback_data: 'lang_bs' }, { text: '🇷🇸 Srpski',      callback_data: 'lang_sr' }],
+                  [{ text: '🇭🇷 Hrvatski', callback_data: 'lang_hr' }],
                 ],
               },
             }
@@ -142,12 +150,14 @@ export async function POST(req: NextRequest) {
     await bot.sendMessage(chatId, getStartNoTokenMessage(chatId), { parse_mode: 'HTML' })
     // Выбор языка — опционально, для клинеров
     await bot.sendMessage(chatId,
-      '🌐 Wähle deine Sprache / Выбери язык / Вибери мову / Alege limba / Wybierz język:',
+      '🌐 Wähle deine Sprache / Выбери язык / Вибери мову / Alege limba / Wybierz język / Izaberite / Odaberite jezik:',
       {
         reply_markup: {
           inline_keyboard: [
-            [{ text: '🇷🇺 Русский', callback_data: 'lang_ru' }, { text: '🇺🇦 Українська', callback_data: 'lang_uk' }],
-            [{ text: '🇷🇴 Română',  callback_data: 'lang_ro' }, { text: '🇵🇱 Polski',     callback_data: 'lang_pl' }],
+            [{ text: '🇷🇺 Русский',  callback_data: 'lang_ru' }, { text: '🇺🇦 Українська', callback_data: 'lang_uk' }],
+            [{ text: '🇷🇴 Română',   callback_data: 'lang_ro' }, { text: '🇵🇱 Polski',      callback_data: 'lang_pl' }],
+            [{ text: '🇧🇦 Bosanski', callback_data: 'lang_bs' }, { text: '🇷🇸 Srpski',      callback_data: 'lang_sr' }],
+            [{ text: '🇭🇷 Hrvatski', callback_data: 'lang_hr' }],
           ],
         },
       }

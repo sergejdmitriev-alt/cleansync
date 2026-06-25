@@ -71,6 +71,36 @@ const MESSAGES: Record<string, {
     accept:   '✅ Przyjmuję',
     decline:  '❌ Nie mogę',
   },
+  bs: {
+    title:    '🧹 *Nova narudžba čišćenja!*',
+    hello:    'Zdravo,',
+    address:  '📍 *Adresa:*',
+    checkout: '🟥 *Odjava gostiju:*',
+    checkin:  '🔑 *Dolazak sljedećih:*',
+    notes:    '📝 *Napomene:*',
+    accept:   '✅ Prihvati',
+    decline:  '❌ Odbij',
+  },
+  sr: {
+    title:    '🧹 *Novi nalog za čišćenje!*',
+    hello:    'Zdravo,',
+    address:  '📍 *Adresa:*',
+    checkout: '🟥 *Odjava gostiju:*',
+    checkin:  '🔑 *Dolazak sledećih:*',
+    notes:    '📝 *Napomene:*',
+    accept:   '✅ Prihvati',
+    decline:  '❌ Odbij',
+  },
+  hr: {
+    title:    '🧹 *Novi nalog za čišćenje!*',
+    hello:    'Zdravo,',
+    address:  '📍 *Adresa:*',
+    checkout: '🟥 *Odjava gostiju:*',
+    checkin:  '🔑 *Dolazak sljedećih:*',
+    notes:    '📝 *Napomene:*',
+    accept:   '✅ Prihvati',
+    decline:  '❌ Odbij',
+  },
   de: {
     title:    '🧹 *Neuer Reinigungsauftrag!*',
     hello:    'Hallo,',
@@ -88,6 +118,9 @@ const DONE_MESSAGES: Record<string, { prompt: string; button: string }> = {
   uk: { prompt: '🧹 Прибирання розпочато. Натисни коли завершиш:', button: '✅ Готово' },
   ro: { prompt: '🧹 Curățenia a început. Apasă când termini:', button: '✅ Gata' },
   pl: { prompt: '🧹 Sprzątanie rozpoczęte. Naciśnij gdy skończysz:', button: '✅ Gotowe' },
+  bs: { prompt: '🧹 Čišćenje je počelo. Pritisni kad završiš:', button: '✅ Završeno' },
+  sr: { prompt: '🧹 Čišćenje je počelo. Pritisni kad završiš:', button: '✅ Završeno' },
+  hr: { prompt: '🧹 Čišćenje je počelo. Pritisni kad završiš:', button: '✅ Završeno' },
   de: { prompt: '🧹 Reinigung gestartet. Bitte bestätige wenn fertig:', button: '✅ Erledigt' },
 }
 
@@ -141,6 +174,36 @@ const PHOTO_MESSAGES: Record<string, {
     limitReached:     '⚠️ Maksimum 10 zdjęć. Napisz /fertig aby zakończyć.',
     fertigHint:       'Napisz /fertig aby zakończyć.',
   },
+  bs: {
+    problemButton:    '⚠️ Problem',
+    problemPrompt:    '📸 Pošalji sliku problema. Možeš dodati opis.',
+    problemSaved:     '✅ Problem je zabilježen. Vlasnik je obaviješten.',
+    completionPrompt: '📸 Pošalji do 10 slika. Napiši /fertig kad završiš.',
+    photoSaved:       '✅ Slika sačuvana',
+    completionDone:   '🎉 Sve slike su sačuvane. Hvala!',
+    limitReached:     '⚠️ Maksimum 10 slika. Napiši /fertig da završiš.',
+    fertigHint:       'Napiši /fertig kad završiš.',
+  },
+  sr: {
+    problemButton:    '⚠️ Problem',
+    problemPrompt:    '📸 Pošalji sliku problema. Možeš dodati opis.',
+    problemSaved:     '✅ Problem je zabeležen. Vlasnik je obavešten.',
+    completionPrompt: '📸 Pošalji do 10 slika. Napiši /fertig kad završiš.',
+    photoSaved:       '✅ Slika sačuvana',
+    completionDone:   '🎉 Sve slike su sačuvane. Hvala!',
+    limitReached:     '⚠️ Maksimum 10 slika. Napiši /fertig da završiš.',
+    fertigHint:       'Napiši /fertig kad završiš.',
+  },
+  hr: {
+    problemButton:    '⚠️ Problem',
+    problemPrompt:    '📸 Pošalji sliku problema. Možeš dodati opis.',
+    problemSaved:     '✅ Problem je zabilježen. Vlasnik je obaviješten.',
+    completionPrompt: '📸 Pošalji do 10 slika. Napiši /fertig kad završiš.',
+    photoSaved:       '✅ Slika sačuvana',
+    completionDone:   '🎉 Sve slike su sačuvane. Hvala!',
+    limitReached:     '⚠️ Maksimum 10 slika. Napiši /fertig da završiš.',
+    fertigHint:       'Napiši /fertig kad završiš.',
+  },
   de: {
     problemButton:    '⚠️ Problem melden',
     problemPrompt:    '📸 Sende ein Foto des Problems. Du kannst eine Beschreibung hinzufügen.',
@@ -178,6 +241,21 @@ const RESPONSE_MESSAGES: Record<string, { accepted: string; declined: string; do
     declined: '👌 Rozumiem. Zleceniodawca został powiadomiony.',
     done:     '🎉 Super! Sprzątanie zakończone. Dziękuję!',
   },
+  bs: {
+    accepted: '✅ Preuzeli ste zadatak. Hvala! 🧹',
+    declined: '👌 Zadatak je proslijeđen dalje.',
+    done:     '🎉 Odlično! Čišćenje završeno. Hvala!',
+  },
+  sr: {
+    accepted: '✅ Preuzeli ste zadatak. Hvala! 🧹',
+    declined: '👌 Zadatak je prosleđen dalje.',
+    done:     '🎉 Odlično! Čišćenje završeno. Hvala!',
+  },
+  hr: {
+    accepted: '✅ Preuzeli ste zadatak. Hvala! 🧹',
+    declined: '👌 Zadatak je proslijeđen dalje.',
+    done:     '🎉 Odlično! Čišćenje završeno. Hvala!',
+  },
   de: {
     accepted: '✅ Auftrag angenommen! Viel Erfolg bei der Reinigung! 🧹',
     declined: '👌 Verstanden. Der Auftraggeber wurde benachrichtigt.',
@@ -195,6 +273,9 @@ export const REJECT_TOO_LATE: Record<string, string> = {
   uk: '⏰ Відмовитись вже не можна (до прибирання менше 4 годин). Будь ласка, зв\'яжись напряму з господарем.',
   ro: '⏰ Anularea nu mai este posibilă (mai puțin de 4 ore până la curățenie). Te rugăm să contactezi direct proprietarul.',
   pl: '⏰ Anulowanie nie jest już możliwe (mniej niż 4 godziny do sprzątania). Skontaktuj się bezpośrednio ze zleceniodawcą.',
+  bs: '⏰ Otkazivanje više nije moguće (manje od 4 sata do čišćenja). Molimo kontaktirajte direktno vlasnika.',
+  sr: '⏰ Otkazivanje više nije moguće (manje od 4 sata do čišćenja). Molimo kontaktirajte direktno vlasnika.',
+  hr: '⏰ Otkazivanje više nije moguće (manje od 4 sata do čišćenja). Molimo kontaktirajte direktno vlasnika.',
 }
 
 export const REJECT_BUTTON: Record<string, string> = {
@@ -203,6 +284,9 @@ export const REJECT_BUTTON: Record<string, string> = {
   uk: '↩ Відмовитись',
   ro: '↩ Anulează',
   pl: '↩ Anuluj',
+  bs: '↩ Otkazati',
+  sr: '↩ Otkazati',
+  hr: '↩ Otkazati',
 }
 
 export const REJECT_DONE: Record<string, string> = {
@@ -211,6 +295,9 @@ export const REJECT_DONE: Record<string, string> = {
   uk: '↩ Замовлення скасовано. Господаря повідомлено.',
   ro: '↩ Comandă anulată. Proprietarul a fost informat.',
   pl: '↩ Zlecenie anulowane. Zleceniodawca został poinformowany.',
+  bs: '↩ Zadatak otkazan. Vlasnik je obaviješten.',
+  sr: '↩ Zadatak otkazan. Vlasnik je obavešten.',
+  hr: '↩ Zadatak otkazan. Vlasnik je obaviješten.',
 }
 
 export function getStartNoTokenMessage(chatId: string): string {
@@ -221,7 +308,10 @@ export function getStartNoTokenMessage(chatId: string): string {
     `🇷🇺 Отправь этот ID своему хосту или менеджеру, чтобы начать работу.\n` +
     `🇺🇦 Надішли цей ID своєму господарю або менеджеру, щоб почати роботу.\n` +
     `🇷🇴 Trimite acest ID proprietarului sau managerului tău pentru a începe.\n` +
-    `🇵🇱 Wyślij ten ID swojemu zleceniodawcy lub menedżerowi, aby rozpocząć pracę.`
+    `🇵🇱 Wyślij ten ID swojemu zleceniodawcy lub menedżerowi, aby rozpocząć pracę.\n` +
+  `🇧🇦 Pošalji ovaj ID svom poslodavcu ili menadžeru kako bi počeo/la s radom.\n` +
+  `🇷🇸 Pošalji ovaj ID svom poslodavcu ili menadžeru da počneš sa radom.\n` +
+  `🇭🇷 Pošalji ovaj ID svom poslodavcu ili menadžeru kako bi počeo/la s radom.`
   )
 }
 
@@ -230,6 +320,9 @@ const CANCEL_MESSAGES: Record<string, string> = {
   uk: '⚠️ Твоє прибирання скасовано — бронювання знято господарем. Зв\'яжись із замовником для уточнень.',
   ro: '⚠️ Curățenia ta a fost anulată — rezervarea a fost retrasă de proprietar. Contactează clientul pentru detalii.',
   pl: '⚠️ Twoje sprzątanie zostało anulowane — rezerwacja została odwołana przez właściciela. Skontaktuj się ze zleceniodawcą.',
+  bs: '⚠️ Vaše čišćenje je otkazano — rezervacija je povučena od strane vlasnika. Kontaktirajte naručitelja za detalje.',
+  sr: '⚠️ Vaše čišćenje je otkazano — rezervacija je povučena od strane vlasnika. Kontaktirajte naručitelja za detalje.',
+  hr: '⚠️ Vaše čišćenje je otkazano — rezervacija je povučena od strane vlasnika. Kontaktirajte naručitelja za detalje.',
   de: '⚠️ Dein Reinigungsauftrag wurde storniert — die Buchung wurde vom Auftraggeber zurückgezogen. Bitte wende dich an den Auftraggeber.',
 }
 
@@ -238,6 +331,9 @@ const RESCHEDULE_MESSAGES: Record<string, string> = {
   uk: '📅 Дати твого прибирання змінились. Уточни новий час у господаря.',
   ro: '📅 Datele curățeniei tale s-au schimbat. Verifică noul program cu proprietarul.',
   pl: '📅 Terminy twojego sprzątania zostały zmienione. Sprawdź nowy termin u zleceniodawcy.',
+  bs: '📅 Termini vašeg čišćenja su se promijenili. Provjerite novi raspored s vlasnikom.',
+  sr: '📅 Termini vašeg čišćenja su se promenili. Proverite novi raspored s vlasnikom.',
+  hr: '📅 Termini vašeg čišćenja su se promijenili. Provjerite novi raspored s vlasnikom.',
   de: '📅 Der Termin deines Reinigungsauftrags hat sich geändert. Bitte prüfe die neuen Zeiten beim Auftraggeber.',
 }
 
