@@ -162,6 +162,9 @@ const T = {
       ['💬', 'Telegram-Bot für Reinigungskräfte'],
       ['🔒', 'Daten in der EU (Supabase)'],
     ] as [string, string][],
+    // Languages
+    telegramLanguages: 'Deine Kräfte erhalten Aufträge in ihrer Sprache: Deutsch, Russisch, Ukrainisch, Rumänisch, Polnisch, Bosnisch, Serbisch, Kroatisch.',
+    languageCount:     '8 Sprachen',
     // Founder
     founderLabel: 'Wer dahinter steht',
     founderTitle: 'Hinter der Garantie steht ein echtes Team',
@@ -314,6 +317,9 @@ const T = {
       ['💬', 'Telegram bot for cleaners'],
       ['🔒', 'Data in EU (Supabase)'],
     ] as [string, string][],
+    // Languages
+    telegramLanguages: 'Your cleaners receive tasks in their language: German, Russian, Ukrainian, Romanian, Polish, Bosnian, Serbian, Croatian.',
+    languageCount:     '8 languages',
     // Founder
     founderLabel: "Who's behind CleanSync",
     founderTitle: 'A real team backs the guarantee',
@@ -742,6 +748,11 @@ export default function LeadPage() {
               <div style={{ fontSize: 26, marginBottom: 10 }}>{step.icon}</div>
               <p style={{ fontWeight: 600, color: '#e8eaf0', fontSize: 14, marginBottom: 6 }}>{step.title}</p>
               <p style={{ color: '#8892a4', fontSize: 12.5, lineHeight: 1.6 }}>{step.desc}</p>
+              {i === 1 && (
+                <p style={{ color: '#4a5568', fontSize: 11, lineHeight: 1.5, marginTop: 6 }}>
+                  {(tx as any).telegramLanguages}
+                </p>
+              )}
             </motion.div>
           ))}
         </div>
