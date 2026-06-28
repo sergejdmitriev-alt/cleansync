@@ -139,6 +139,13 @@ const T = {
     formSubmit:             'Checkliste + Leitfaden gratis sichern →',
     formSending:            'Wird gesendet …',
     tgAlt:                  'Oder direkt auf Telegram:',
+    // DSGVO consent
+    consentPre:      'Ich stimme der Verarbeitung meiner Daten gemäß der',
+    consentLink:     'Datenschutzerklärung',
+    consentPost:     'zu.',
+    consentError:    'Bitte stimmen Sie der Datenschutzerklärung zu, um fortzufahren.',
+    noSpam:          'Nur wichtige Informationen. Kein Spam. Jederzeit abbestellbar.',
+    serverLocation:  'Daten in der EU gespeichert (Serverstandort Irland) · DSGVO-konform',
     // Success
     successTitle:    'Ihr Leitfaden ist bereit.',
     successBodyPre:  'Wir haben Ihnen auch eine E-Mail an',
@@ -294,6 +301,13 @@ const T = {
     formSubmit:             'Get checklist + guide — free →',
     formSending:            'Sending …',
     tgAlt:                  'Or reach us on Telegram:',
+    // GDPR consent
+    consentPre:      'I agree to the processing of my data in accordance with the',
+    consentLink:     'Privacy Policy',
+    consentPost:     '.',
+    consentError:    'Please agree to the privacy policy to continue.',
+    noSpam:          'Only important information. No spam. Unsubscribe anytime.',
+    serverLocation:  'Data stored in the EU (server location Ireland) · GDPR-compliant',
     // Success
     successTitle:    'Check your inbox — your guide is on the way.',
     successBodyPre:  "We've sent the PDF to",
@@ -368,6 +382,38 @@ function ShieldCheckIcon() {
   )
 }
 
+// ── Trust badge icons ─────────────────────────────────────────────
+function IconLock() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+      stroke="#3b7ef8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+      aria-hidden="true">
+      <rect x="3" y="11" width="18" height="11" rx="2" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
+  )
+}
+function IconNoSale() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+      stroke="#3b7ef8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+      aria-hidden="true">
+      <circle cx="12" cy="12" r="9" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  )
+}
+function IconNoSpam() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+      stroke="#3b7ef8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+      aria-hidden="true">
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <path d="M3 7l9 6 9-6" />
+    </svg>
+  )
+}
+
 // ── Main component ────────────────────────────────────────────────
 export default function LeadPage() {
   const reduced = useReducedMotion()
@@ -377,6 +423,7 @@ export default function LeadPage() {
   const [form, setForm]           = useState({ name: '', email: '', phone: '', properties: '', message: '' })
   const [formState, setFormState] = useState<FormState>('idle')
   const [turnstileToken, setTurnstileToken] = useState('')
+  const [consent, setConsent] = useState(false)
 
   const [objects, setObjects]       = useState(5)
   const [didCountUp, setDidCountUp] = useState(false)
@@ -428,6 +475,10 @@ export default function LeadPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (!consent) {
+      setFormState('error')
+      return
+    }
     setFormState('loading')
     try {
       const res = await fetch('/api/lead', {
@@ -916,7 +967,7 @@ export default function LeadPage() {
           </div>
 
           {formState === 'error' && (
-            <p style={S.formError}>{tx.formError}</p>
+            <p style={S.formError}>{consent ? tx.formError : (tx as any).consentError}</p>
           )}
 
           <Turnstile
@@ -925,16 +976,39 @@ export default function LeadPage() {
             options={{ theme: 'dark' }}
           />
 
+          <label style={S.consentRow}>
+            <input
+              type="checkbox"
+              checked={consent}
+              onChange={e => setConsent(e.target.checked)}
+              className="lead-consent-cb"
+              style={S.consentCheckbox}
+            />
+            <span style={S.consentText}>
+              {(tx as any).consentPre}{' '}
+              <a href="/datenschutz" target="_blank" rel="noopener noreferrer" style={S.consentLink}>
+                {(tx as any).consentLink}
+              </a>{' '}
+              {(tx as any).consentPost}
+            </span>
+          </label>
+
+          <p style={S.serverNote}>
+            <span aria-hidden="true">🔒</span> {(tx as any).serverLocation}
+          </p>
+
+          <p style={S.noSpam}>{(tx as any).noSpam}</p>
+
           <p style={S.riskReversal}>🛡 {(tx as any).riskReversal}</p>
 
           <button
             type="submit"
-            disabled={formState === 'loading' || !turnstileToken}
+            disabled={formState === 'loading' || !turnstileToken || !consent}
             className="lead-submit"
             style={{
               ...S.submitBtn,
-              opacity: formState === 'loading' || !turnstileToken ? 0.6 : 1,
-              cursor:  formState === 'loading' || !turnstileToken ? 'not-allowed' : 'pointer',
+              opacity: formState === 'loading' || !turnstileToken || !consent ? 0.6 : 1,
+              cursor:  formState === 'loading' || !turnstileToken || !consent ? 'not-allowed' : 'pointer',
             }}
           >
             {formState === 'loading'
@@ -1025,8 +1099,7 @@ export default function LeadPage() {
         {/* TODO: href="/impressum" once page is built */}
         <a href="#" className="lead-footer-link" style={S.footerLink}>{(tx as any).footerImpressum}</a>
         <span style={{ color: '#2a3142', userSelect: 'none' as const }}>·</span>
-        {/* TODO: href="/datenschutz" once page is built */}
-        <a href="#" className="lead-footer-link" style={S.footerLink}>{(tx as any).footerDatenschutz}</a>
+        <a href="/datenschutz" className="lead-footer-link" style={S.footerLink}>{(tx as any).footerDatenschutz}</a>
         <span style={{ color: '#2a3142', userSelect: 'none' as const }}>·</span>
         <a href="https://reinraum-team.com" target="_blank" rel="noopener noreferrer" className="lead-footer-link" style={S.footerLink}>
           {(tx as any).footerReinraum}
@@ -1487,6 +1560,42 @@ const S = {
     textDecorationColor: 'rgba(134,239,172,0.4)',
     textUnderlineOffset: '3px',
   } as React.CSSProperties,
+  consentRow: {
+    display:    'flex',
+    alignItems: 'flex-start' as const,
+    gap:        10,
+    cursor:     'pointer',
+  },
+  consentCheckbox: {
+    width:       16,
+    height:      16,
+    marginTop:   2,
+    flexShrink:  0,
+    accentColor: '#3b7ef8',
+    cursor:      'pointer',
+  } as React.CSSProperties,
+  consentText: {
+    fontSize:   12.5,
+    color:      '#8892a4',
+    lineHeight: 1.55,
+  },
+  consentLink: {
+    color:          '#3b7ef8',
+    textDecoration: 'underline',
+  } as React.CSSProperties,
+  serverNote: {
+    display:    'flex',
+    alignItems: 'center',
+    gap:        7,
+    fontSize:   12,
+    color:      '#8892a4',
+    margin:     0,
+  },
+  noSpam: {
+    fontSize: 11.5,
+    color:    '#4a5568',
+    margin:   0,
+  },
   riskReversal: {
     fontSize:     12,
     color:        '#8892a4',
